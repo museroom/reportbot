@@ -46,6 +46,7 @@ class DailyReportItemInline( admin.StackedInline ):
 						 ( 'reportRowID', 'reportOrder', ), #'photoCol',),
 						 ( 'statusCK', 'planCK' ),
 						 ( 'status_TOC_CK', 'plan_TOC_CK' ),
+#						 ( 'photos' ),
 						 )
 #	fields = ( ( 'report_daily', 'report_daily_item' ),
 #						 ( 'report_date', 'time_start', 'time_stop' ),
@@ -63,12 +64,14 @@ class DailyReportItemInline( admin.StackedInline ):
 
 class DailyReportAdmin( admin.ModelAdmin):
 
+	list_per_page = 10
 	inlines = [DailyReportItemInline]
 	actions = [
 		'clone_report'
 	]
 
 	def clone_report(modeladmin, request, queryset):
+		print( "DEBUG: clone_report {}".format(queryset) )
 		for q in queryset:
 			# find yesterday report
 			qset_report_daily_item = DailyReportItem.objects.filter( report_daily = q )
@@ -89,7 +92,7 @@ class DailyReportAdmin( admin.ModelAdmin):
 
 class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 
-	list_per_page = 10
+	list_per_page = 50
 
 	list_display = ( "__str__",
 									"report_daily", "report_daily_item",

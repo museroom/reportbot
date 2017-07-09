@@ -971,12 +971,12 @@ class DailyReportItem(models.Model):
 	report_daily_item = models.ForeignKey( ReportItem,
 											on_delete=models.CASCADE,
 											default=48, blank = True)
-#	photos = SortedManyToManyField('photologue.Photo',
-#											related_name='DailyReportItem',
-#											verbose_name=_('photos'),
-#											blank=True)
-	photos = models.ManyToManyField( Photo, 
+	photos = SortedManyToManyField('photologue.Photo',
+											related_name='DailyReportItem',
+											verbose_name=_('daily report photos'),
 											blank=True)
+#	photos = models.ManyToManyField( Photo, 
+#											blank=True)
 	report_date = models.DateTimeField(_('report date'),
 									default=now, 
 								)
