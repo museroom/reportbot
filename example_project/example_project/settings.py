@@ -5,15 +5,18 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+#PHOTOLOGUE_MULTISITE = True
+
 
 SECRET_KEY = '=_v6sfp8u2uuhdncdz9t1_nu8(#8q4=40$f$4rorj4q3)f-nlc'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['meitim.ddns.net',]
 
 
 INSTALLED_APPS = (
+		'flat_responsive', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -26,6 +29,8 @@ INSTALLED_APPS = (
     'django.contrib.sitemaps',
     'photologue',
     'sortedm2m',
+		#'tinymce',
+		'ckeditor',
     'example_project',
 )
 
@@ -79,8 +84,9 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGE_CODE = 'en-gb'
+#LANGUAGE_CODE = 'pt'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Macau'
 
 USE_I18N = True
 
@@ -162,3 +168,23 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 
 # Uncomment this for Amazon S3 file storage
 # from example_storages.settings_s3boto import *
+
+# tinymce sessions
+#TINYMCE_DEFAULT_CONFIG = {
+#	"width" : "100%",
+#	"height" : "300",
+#}
+
+# CKEditor
+CKEDITOR_CONFIGS = {
+	'default' : {
+		'toolbar': 'Custom',
+		'toolbar_Custom': [
+			['Bold', 'Italic', 'Underline', 'Strike'],
+			['TextColor','Smiley'], 
+			['RemoveFormat', 'Source']
+		],
+		'width':'340',
+		'height':100,
+	}
+}

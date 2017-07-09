@@ -10,15 +10,15 @@ included all the publicly-viewable Photologue pages:
 
 .. code-block:: python
 
-    ...
-    from photologue.sitemaps import GallerySitemap, PhotoSitemap
+	...
+	from photologue.sitemaps import GallerySitemap, PhotoSitemap
 
-    sitemaps = {...
-                'photologue_galleries': GallerySitemap,
-                'photologue_photos': PhotoSitemap,
-                ...
-                }
-    etc...
+	sitemaps = {...
+				'photologue_galleries': GallerySitemap,
+				'photologue_photos': PhotoSitemap,
+				...
+				}
+	etc...
 
 There are 2 sitemap classes, as in some cases you may want to have gallery pages,
 but no photo detail page (e.g. if all photos are displayed via a javascript
@@ -34,21 +34,21 @@ from .models import Gallery, Photo
 
 class GallerySitemap(Sitemap):
 
-    def items(self):
-        # The following code is very basic and will probably cause problems with
-        # large querysets.
-        return Gallery.objects.on_site().is_public()
+	def items(self):
+		# The following code is very basic and will probably cause problems with
+		# large querysets.
+		return Gallery.objects.on_site().is_public()
 
-    def lastmod(self, obj):
-        return obj.date_added
+	def lastmod(self, obj):
+		return obj.date_added
 
 
 class PhotoSitemap(Sitemap):
 
-    def items(self):
-        # The following code is very basic and will probably cause problems with
-        # large querysets.
-        return Photo.objects.on_site().is_public()
+	def items(self):
+		# The following code is very basic and will probably cause problems with
+		# large querysets.
+		return Photo.objects.on_site().is_public()
 
-    def lastmod(self, obj):
-        return obj.date_added
+	def lastmod(self, obj):
+		return obj.date_added
