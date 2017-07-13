@@ -1,4 +1,5 @@
 .DS_Store
+*.swp
 *.pyc
 django_photologue.egg-info
 build
@@ -6,3 +7,9 @@ build
 example_project/db.sqlite3
 example_project/coverage_html_report
 example_project/.coverage
+photologue/migrations
+photologue/.*swp
+example_project/db*back*
+example_project/public
+example_project/tmp
+

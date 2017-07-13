@@ -10,6 +10,7 @@ import unicodedata
 #from pytz import timezone
 from django.utils import timezone
 from PIL import Image, ImageFile, ImageFilter, ImageEnhance
+from django.utils.safestring import mark_safe
 
 from django.utils.timezone import now
 from django.db import models
@@ -18,7 +19,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.template.defaultfilters import slugify
 from django.utils.encoding import force_text, smart_str, filepath_to_uri
 from django.utils.functional import curry
@@ -169,7 +170,7 @@ class TestingClass( models.Model):
 @python_2_unicode_compatible
 class ReportItem(models.Model):
 	department = models.ForeignKey( Department,
-								on_delete=models.CASCADE)
+								on_delete=models.SET_NULL, null=True)
 	name = models.CharField(_('report item'),
 							max_length=250,
 							unique=False) 
@@ -182,7 +183,12 @@ class ReportItem(models.Model):
 	class Meta:
 		ordering = ['department','name']
 	def __str__(self):
-		return "{1} ({0})".format(self.department.name,self.name)
+		if( self.department != None ):
+			return "{1}_{2} ({0})".format(
+				self.department.name[3:],self.name,self.location)
+		else:
+			return "{0}_{1}".format(
+				self.name, self.location)
 
 # photlogue default 
 class TagField(models.CharField):
@@ -317,6 +323,17 @@ class ImageModel(models.Model):
 		except:
 			return {}
 
+	def thumbnail_admin(self):
+		if self.image:
+			return mark_safe(
+				'<a href="{}"><img src="{}" /></a>'.format (
+					self.get_absolute_url(), self.get_admin_thumbnail_url() 
+					)
+				)
+		else:
+			return '(no image)'
+		thumbnail_admin.short_description = 'ThumbADMIN'
+		
 	def admin_thumbnail(self):
 		func = getattr(self, 'get_admin_thumbnail_url', None)
 		if func is None:
@@ -585,16 +602,20 @@ class Photo(ImageModel):
 	sites = models.ManyToManyField(Site, verbose_name=_(u'sites'),
 								   blank=True)
 	department = models.ForeignKey( Department,
-									on_delete = models.CASCADE,
+									on_delete = models.SET_NULL,
 									null=True,
 									blank=True)
 	report_item = models.ForeignKey( ReportItem,
-									on_delete = models.CASCADE,
+									on_delete = models.SET_NULL,
 									null=True,
 									blank=True, )
 									#limit_choices_to = {'department':'1'})
+	follow_up_date_begin = models.DateTimeField(_('follow-up begin'),
+													null=True, blank=True )
+	follow_up_date_end = models.DateTimeField(_('follow-up end'),
+													null=True, blank=True )
 
-	objects = PhotoQuerySet.as_manager()
+	objects = PhotoQuerySet.as_manager() 
 
 	class Meta:
 		ordering = ['-date_added']
@@ -609,15 +630,22 @@ class Photo(ImageModel):
 		if self.slug is None:
 			self.slug = slugify(self.title)
 #		if self.report_item != None:
-#			qset_report_daily_item = DailyReportItem.objects.filter(
-#				report_date__date = self.date_added.date() ).filter(
-#				report_daily_item = self.report_item)
-#			print( "DEBUG: qset_report_daily_item = {}".format( qset_report_daily_item ) )
-#			for q_report_daily_item in qset_report_daily_item:
-#				print( "DEBUG: adding: {}".format( q_report_daily_item) )
-#				self.daily_report_item.add( q_report_daily_item )
-
+#			latest_daily_report_item = DailyReportItem.objects.filter(
+#				report_daily_item = self.report_item).latest()
+#			print( "DEBUG: latest_report_daily_item = {}".format( latest_daily_report_item ) )
+#			self.daily_report_item.add( latest_daily_report_item )
 		super(Photo, self).save(*args, **kwargs)
+
+	def get_related_daily_report_item( self, date_time_begin = None, date_time_end = None ):
+		try:
+			if self.report_item != None:
+				q_daily_report_item = DailyReportItem.objects.filter( 
+					report_daily_item  = self.report_item ).latest()
+		except ObjectDoesNotExist:
+			print( "ERROR: {} does not have related report_item".format( self) )
+			q_daily_report_item = None
+
+		return q_daily_report_item
 
 	def get_absolute_url(self):
 		return reverse('photologue:pl-photo', args=[self.slug])
@@ -959,18 +987,29 @@ class DailyReport(models.Model):
 							 unique=True, blank=True)
 	class Meta:
 		ordering = ['-report_date']
+		get_latest_by = "report_date"
+
+	def get_formatted_date(self):
+		return self.report_date.astimezone( 
+						timezone.get_default_timezone()
+						).strftime( "%y%m%d-%H%M" )
 
 	def __str__(self):
-		return self.title+'_report'
+		date_formatted = self.get_formatted_date()
+		return date_formatted + "_report"
+#		return self.title+'_report'
 
 @python_2_unicode_compatible
 class DailyReportItem(models.Model):
 	report_daily = models.ForeignKey( DailyReport,
-											on_delete=models.CASCADE,
+											on_delete=models.SET_DEFAULT,
 											default=48, blank = True)
 	report_daily_item = models.ForeignKey( ReportItem,
-											on_delete=models.CASCADE,
+											on_delete=models.SET_DEFAULT,
 											default=48, blank = True)
+	name = models.CharField( max_length = 64,
+											default="", blank=True,
+											unique=False)
 	photos = SortedManyToManyField('photologue.Photo',
 											related_name='DailyReportItem',
 											verbose_name=_('daily report photos'),
@@ -1002,7 +1041,7 @@ class DailyReportItem(models.Model):
 #	reportRowNum = models.CharField(_('reportRow'), 
 #								max_length=10, unique=True, null=True, blank=True)
 	tableTemplate = models.PositiveSmallIntegerField(_('Table Template ID'),
-								default=4, unique=False)
+								default=8, unique=False)
 	reportRowID = models.CharField(_('report table id'),
 								max_length=10, unique=False)
 	photoCol = models.PositiveSmallIntegerField(_('photo at table col'),
@@ -1012,7 +1051,7 @@ class DailyReportItem(models.Model):
 	rowTableId = models.PositiveSmallIntegerField(_('Table ID Row'),
 									default=1, unique=False )
 	colTableId = models.PositiveSmallIntegerField(_('Table ID Col'),
-									default=3, unique=False )
+									default=0, unique=False )
 	rowItemName = models.PositiveSmallIntegerField(_('Name Row'),
 									default=1, unique=False )
 	colItemName = models.PositiveSmallIntegerField(_('Name Col'),
@@ -1036,13 +1075,16 @@ class DailyReportItem(models.Model):
 	
 
 	class Meta:
-		ordering = ['reportOrder']
+		ordering = ['report_daily', 'reportOrder']
+		get_latest_by = 'report_date'
 
 	def get_report_date_str(self):
 		dateReport = self.report_date
 		#dateReport = self.report_date.astimezone( 
 		#							timezone(settings.TIME_ZONE) )
-		return dateReport.strftime("%y%m%d")
+		return dateReport.astimezone( 
+							timezone.get_default_timezone()
+							).strftime("%y%m%d-%H%M")
 		
 	def report_date_str(self):
 		return self.get_report_date_str()
@@ -1054,8 +1096,18 @@ class DailyReportItem(models.Model):
 		#							timezone(settings.TIME_ZONE) )
 		#return dateReport.strftime("%y%m%d") + "_" + \
 	  #					self.report_daily_item.name
-		return self.get_report_date_str()+"_" + \
-	  					self.report_daily_item.name
+		if( self.name != "" ):
+#			return self.get_report_date_str()+"_" + \
+#	  					self.report_daily_item.name + "_" + \
+#							self.name
+			return self.report_daily.get_formatted_date() + "_" +\
+						 self.report_daily_item.name + "_" + \
+						 self.name
+		else:
+			return self.report_daily.get_formatted_date() + "_" +\
+						 self.report_daily_item.name + "_" 
+#			return self.get_report_date_str()+"_" + \
+#`	  					self.report_daily_item.name
 
 
 # Extra unknown
@@ -1087,5 +1139,7 @@ def add_default_site(instance, created, **kwargs):
 	if instance.sites.exists():
 		return
 	instance.sites.add(Site.objects.get_current())
+
 post_save.connect(add_default_site, sender=Gallery)
 post_save.connect(add_default_site, sender=Photo)
+

@@ -77,14 +77,16 @@ class DailyReportAdmin( admin.ModelAdmin):
 			qset_report_daily_item = DailyReportItem.objects.filter( report_daily = q )
 			report_daily_latest = q #DailyReport.objects.order_by('-report_date')[0]
 			# update report_date
-			report_daily_latest.report_date = timezone.make_aware( datetime.now() ) 
+			#report_daily_latest.report_date = timezone.make_aware( datetime.now() ) 
+			report_daily_latest.report_date = q.report_date
 			# pk=None
-			report_daily_latest.title = report_daily_latest.title + "_latest"
+			report_daily_latest.title = report_daily_latest.title + "_clone"
 			report_daily_latest.pk = None
 			# save()
 			report_daily_latest.save()
 			for q_report_daily_item in qset_report_daily_item:
-				q_report_daily_item.report_date  = timezone.make_aware( datetime.now() )
+				#q_report_daily_item.report_date  = timezone.make_aware( datetime.now() )
+				q_report_daily_item.report_date = timezone.localtime()
 				q_report_daily_item.report_daily = report_daily_latest
 				q_report_daily_item.pk = None
 				q_report_daily_item.save()
@@ -240,8 +242,10 @@ class PhotoAdminForm(forms.ModelForm):
 
 
 class PhotoAdmin(admin.ModelAdmin):
-	list_display = ( 'title', 'admin_thumbnail',
-									'report_item',  'date_added'
+	list_display = ( 'title', 
+#									'admin_thumbnail',
+									'thumbnail_admin',
+									'report_item',  'date_added',
 									)
 	list_editable = ( 'report_item',
 									)
@@ -267,6 +271,7 @@ class PhotoAdmin(admin.ModelAdmin):
 #				)
 
 #	readonly_fields = ('admin_thumbnail',)
+	readonly_fields = ('thumbnail_admin',)
 
 	form = PhotoAdminForm
 	
@@ -346,6 +351,7 @@ class PhotoAdmin(admin.ModelAdmin):
 		return custom_urls + urls
 
 	def response_change(self, request, obj):
+		print( "DEBUG: response_change {}:{}".format( request.POST, self ) )
 		"""
 		Determines the HttpResponse for the change_view stage.
 		"""

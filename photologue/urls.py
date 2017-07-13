@@ -1,6 +1,8 @@
 from django.conf.urls import url, include
 from django.views.generic import RedirectView
 from django.core.urlresolvers import reverse_lazy
+from django.utils.translation import ugettext as _
+from django.contrib import admin
 
 from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GalleryDetailView, PhotoArchiveIndexView, PhotoDateDetailView, PhotoDayArchiveView, \
@@ -100,3 +102,7 @@ urlpatterns = [
 		PhotoMonthArchiveOldView.as_view(),
 		name='pl-photo-archive-month')
 ]
+
+# Administration Page Customization
+admin.site.site_header = _("MeiTim Reporting System")
+admin.site.site_title = _("Reporting System")

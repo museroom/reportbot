@@ -25,8 +25,7 @@ def JsonPhotoQuery( request, report_item, date_and_time ):
 	print( "[JsonPhotoQuery] report_item = {}/ date_and_time = {}".format(
 				report_item, date_and_time ) )
 	qset = Photo.objects.filter( 
-						report_item__name = report_item ).filter(
-						title__contains = date_and_time)
+		daily_report_item__pk = int(date_and_time))
 	rsp = []
 	for thumbSet in qset:
 		rsp.append( {"image":thumbSet.get_report_url()} ) 
@@ -113,8 +112,10 @@ def JsonReportItemQuery( request, report_pk ):
 	if len(HTMLplan_toc) == 0:
 		HTMLplan_toc = HTMLplan
 
-	rspGroup.append ({"time_start":str(qset.time_start)[0:5],
+	rspGroup.append ({
+										"time_start":str(qset.time_start)[0:5],
 									  "time_stop" :str(qset.time_stop)[0:5],
+										"name":qset.__str__(),
 										"statusCK" : HTMLstatus, #,set[0].statusCK,
 										"planCK" : HTMLplan, #qset.planCK
 										"status_toc_CK": HTMLstatus_toc,
