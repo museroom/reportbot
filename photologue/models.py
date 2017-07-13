@@ -631,8 +631,8 @@ class Photo(ImageModel):
 			self.slug = slugify(self.title)
 #		if self.report_item != None:
 #			latest_daily_report_item = DailyReportItem.objects.filter(
-#				report_daily_item = self.report_item).latest()
-#			print( "DEBUG: latest_report_daily_item = {}".format( latest_daily_report_item ) )
+#				daily_report_item = self.report_item).latest()
+#			print( "DEBUG: latest_daily_report_item = {}".format( latest_daily_report_item ) )
 #			self.daily_report_item.add( latest_daily_report_item )
 		super(Photo, self).save(*args, **kwargs)
 
@@ -640,7 +640,7 @@ class Photo(ImageModel):
 		try:
 			if self.report_item != None:
 				q_daily_report_item = DailyReportItem.objects.filter( 
-					report_daily_item  = self.report_item ).latest()
+					daily_report_item  = self.report_item ).latest()
 		except ObjectDoesNotExist:
 			print( "ERROR: {} does not have related report_item".format( self) )
 			q_daily_report_item = None
@@ -996,15 +996,20 @@ class DailyReport(models.Model):
 
 	def __str__(self):
 		date_formatted = self.get_formatted_date()
-		return date_formatted + "_report"
+		pos_title_trim_date = self.title.find('_')
+		if pos_title_trim_date != -1:
+			suffix = self.title[pos_title_trim_date:]
+		else:
+			suffix = ""
+		return date_formatted + suffix + "_report"
 #		return self.title+'_report'
 
 @python_2_unicode_compatible
 class DailyReportItem(models.Model):
-	report_daily = models.ForeignKey( DailyReport,
+	daily_report = models.ForeignKey( DailyReport,
 											on_delete=models.SET_DEFAULT,
 											default=48, blank = True)
-	report_daily_item = models.ForeignKey( ReportItem,
+	daily_report_item = models.ForeignKey( ReportItem,
 											on_delete=models.SET_DEFAULT,
 											default=48, blank = True)
 	name = models.CharField( max_length = 64,
@@ -1075,7 +1080,7 @@ class DailyReportItem(models.Model):
 	
 
 	class Meta:
-		ordering = ['report_daily', 'reportOrder']
+		ordering = ['daily_report', 'reportOrder']
 		get_latest_by = 'report_date'
 
 	def get_report_date_str(self):
@@ -1095,19 +1100,19 @@ class DailyReportItem(models.Model):
 		#dateReport = self.report_date.astimezone( 
 		#							timezone(settings.TIME_ZONE) )
 		#return dateReport.strftime("%y%m%d") + "_" + \
-	  #					self.report_daily_item.name
+	  #					self.daily_report_item.name
 		if( self.name != "" ):
 #			return self.get_report_date_str()+"_" + \
-#	  					self.report_daily_item.name + "_" + \
+#	  					self.daily_report_item.name + "_" + \
 #							self.name
-			return self.report_daily.get_formatted_date() + "_" +\
-						 self.report_daily_item.name + "_" + \
+			return self.daily_report.get_formatted_date() + "_" +\
+						 self.daily_report_item.name + "_" + \
 						 self.name
 		else:
-			return self.report_daily.get_formatted_date() + "_" +\
-						 self.report_daily_item.name + "_" 
+			return self.daily_report.get_formatted_date() + "_" +\
+						 self.daily_report_item.name + "_" 
 #			return self.get_report_date_str()+"_" + \
-#`	  					self.report_daily_item.name
+#`	  					self.daily_report_item.name
 
 
 # Extra unknown

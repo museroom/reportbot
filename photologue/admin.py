@@ -10,6 +10,7 @@ from django.shortcuts import render
 from django.contrib.admin import helpers
 from django.http import HttpResponseRedirect
 from django.utils import timezone
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from datetime import datetime, timedelta
 
@@ -38,17 +39,17 @@ class DailyReportItemInline( admin.StackedInline ):
 
 	model = DailyReportItem
 
-#	fields= ( 'report_daily_item', ('reportRowID', 'photoCol'),
+#	fields= ( 'daily_report_item', ('reportRowID', 'photoCol'),
 #						('time_start', 'time_stop'),
 #					'statusCK', 'planCK', )
-	fields = ( ( 'report_daily', 'report_daily_item' ),
+	fields = ( ( 'daily_report', 'daily_report_item' ),
 						 #( 'time_start', 'time_stop' ),
 						 ( 'reportRowID', 'reportOrder', ), #'photoCol',),
 						 ( 'statusCK', 'planCK' ),
 						 ( 'status_TOC_CK', 'plan_TOC_CK' ),
 #						 ( 'photos' ),
 						 )
-#	fields = ( ( 'report_daily', 'report_daily_item' ),
+#	fields = ( ( 'daily_report', 'daily_report_item' ),
 #						 ( 'report_date', 'time_start', 'time_stop' ),
 #						 ( 'reportRowID', 'reportOrder', 'photoCol',
 #						   'rowTableId', 'colTableId', 
@@ -71,25 +72,36 @@ class DailyReportAdmin( admin.ModelAdmin):
 	]
 
 	def clone_report(modeladmin, request, queryset):
-		print( "DEBUG: clone_report {}".format(queryset) )
 		for q in queryset:
+			print( "DEBUG: clone_report {}".format(q) )
 			# find yesterday report
-			qset_report_daily_item = DailyReportItem.objects.filter( report_daily = q )
-			report_daily_latest = q #DailyReport.objects.order_by('-report_date')[0]
+			qset_daily_report_item = DailyReportItem.objects.filter( daily_report = q )
+			daily_report_latest = q #DailyReport.objects.order_by('-report_date')[0]
 			# update report_date
-			#report_daily_latest.report_date = timezone.make_aware( datetime.now() ) 
-			report_daily_latest.report_date = q.report_date
+			#daily_report_latest.report_date = timezone.make_aware( datetime.now() ) 
+			daily_report_latest.report_date = q.report_date
 			# pk=None
-			report_daily_latest.title = report_daily_latest.title + "_clone"
-			report_daily_latest.pk = None
+			daily_report_latest.title = daily_report_latest.title + "_clone"
+			daily_report_latest.pk = None
 			# save()
-			report_daily_latest.save()
-			for q_report_daily_item in qset_report_daily_item:
-				#q_report_daily_item.report_date  = timezone.make_aware( datetime.now() )
-				q_report_daily_item.report_date = timezone.localtime()
-				q_report_daily_item.report_daily = report_daily_latest
-				q_report_daily_item.pk = None
-				q_report_daily_item.save()
+			daily_report_latest.save()
+			for q_daily_report_item in qset_daily_report_item:
+				#q_daily_report_item.report_date  = timezone.make_aware( datetime.now() )
+				q_daily_report_item.report_date = timezone.localtime()
+				q_daily_report_item.daily_report = daily_report_latest
+				q_daily_report_item.pk = None
+				q_daily_report_item.save()
+			# find Photos that require followup
+			#photo_admin = PhotoAdmin(request,queryset)
+			#photo_admin.autofill_related_daily_report_item()
+			today = timezone.localtime()
+			qset_photo = Photo.objects.filter( follow_up_date_end__gt = today )
+			print( "DEBUG: clone_report qset_photo len={}".format( len(qset_photo) ) )
+			for q_photo in qset_photo:
+				q_daily_report_item =	q_photo.get_related_daily_report_item()
+				if q_daily_report_item != None:
+					q_photo.daily_report_item.add( q_daily_report_item )
+					q_photo.save()
 
 
 class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
@@ -97,17 +109,17 @@ class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 	list_per_page = 50
 
 	list_display = ( "__str__",
-									"report_daily", "report_daily_item",
+									"daily_report", "daily_report_item",
 									"time_start", "time_stop", 
 #									"tableTemplate", "rowDirection", "colDirection",
-#									"report_daily",
+#									"daily_report",
 									)
 	list_editable = (
 #									"tableTemplate", "rowDirection", "colDirection",
 									"time_start", "time_stop", 
-									#"report_daily", "report_daily_item", #"tableTemplate",
+									#"daily_report", "daily_report_item", #"tableTemplate",
 									)
-	search_fields = ["report_date","report_daily_item__name"]
+	search_fields = ["report_date","daily_report_item__name"]
 	
 #	raw_id_fields = ('slug','title',) 
 #admin.site.register(DailyReport)
@@ -245,9 +257,12 @@ class PhotoAdmin(admin.ModelAdmin):
 	list_display = ( 'title', 
 #									'admin_thumbnail',
 									'thumbnail_admin',
-									'report_item',  'date_added',
+									'report_item',  
+									'follow_up_date_begin', 'follow_up_date_end',
+									'date_added',
 									)
 	list_editable = ( 'report_item',
+									'follow_up_date_begin', 'follow_up_date_end',
 									)
 	list_filter = ['date_added', 'is_public']
 	if MULTISITE:
@@ -275,7 +290,8 @@ class PhotoAdmin(admin.ModelAdmin):
 
 	form = PhotoAdminForm
 	
-	actions = ['reset_photo_department']
+	actions = ['reset_photo_department',
+	           'fill_related_daily_report_item',]
 
 	if MULTISITE:
 		filter_horizontal = ['sites']
@@ -300,7 +316,7 @@ class PhotoAdmin(admin.ModelAdmin):
 #				department = Department.objects.get( name=instance.report_item.department )
 #				kwargs["queryset"] = DailyReportItem.objects.filter(
 #                     report_date__gt = timezone.make_aware(yesterday)  ).filter(
-#										 report_daily_item__department = department  ).order_by(
+#										 daily_report_item__department = department  ).order_by(
 #										 "-report_date" )
 #			else:
 #				#print( "ERROR: Department not set" )
@@ -314,6 +330,29 @@ class PhotoAdmin(admin.ModelAdmin):
 	def reset_photo_department( modeladmin, request, queryset ):
 		queryset.update( department = Department.objects.get( name = "Other" ) )
 
+	def fill_related_daily_report_item( modeldmin, request, queryset ):
+		for q_photo in queryset:
+			q_daily_report_item = q_photo.get_related_daily_report_item()
+			if q_daily_report_item != None:
+				q_photo.daily_report_item.add( q_daily_report_item )
+				q_photo.save()
+		msg = ungettext(
+			'The photo has been successfully updated related daily report item',
+			'The photos have been successfully updated related daily report items',
+			len(queryset)
+		)
+		messages.success( request, msg )
+			
+	def autofill_related_daily_report_item():
+		# Find all photo with follow up end > today
+		today = timezone.localtime()
+		qset_photo = Photo.objects.filter( follow_up_date_end__gt = today )
+		for q_photo in qset_photo:
+			q_daily_report_item =	q_photo.get_related_daily_report_item()
+			if q_daily_report_item != None:
+				q_photo.daily_report_item.add( q_daily_report_item )
+				q_photo.save()
+			
 
 	def add_photos_to_current_site(modeladmin, request, queryset):
 		current_site = Site.objects.get_current()

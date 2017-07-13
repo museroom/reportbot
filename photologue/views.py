@@ -36,19 +36,19 @@ def JsonTableMapQuery( request, date_and_time ):
 	print( "DEBUG: JsonTableMapQuery {}".format( 
 		date_and_time )  )
 	qset = DailyReportItem.objects.filter( 
-							report_daily__title = date_and_time
+							daily_report__title = date_and_time
 							).order_by('reportOrder')
 	rspGroup = []
 	rsp=[]
 	for item in qset:
 		#rsp = []
 		rsp.append( {"order":str(item.reportOrder),
-								 "name":item.report_daily_item.name,
+								 "name":item.daily_report_item.name,
 								 "pk":str(item.pk),
 								 "template":item.tableTemplate,
 								 "row_photo":item.photoCol,
 								 })
-		#rsp.append( { "name":item.report_daily_item.name, 
+		#rsp.append( { "name":item.daily_report_item.name, 
 		#rspGroup.append( rsp )
 	return JsonResponse(dict(tableMap=rsp)) #, safe= False )
 		
@@ -72,15 +72,15 @@ def JsonReportItemQuery( request, report_pk ):
 			HTMLrsp.append( {"data":data} )
 
 #	qset = DailyReportItem.objects.filter(
-#							report_daily__title = date_and_time
+#							daily_report__title = date_and_time
 #							).filter( 
-#								report_daily_item__name = report_item )
+#								daily_report_item__name = report_item )
 	qset = DailyReportItem.objects.get( pk = report_pk )
 
 	#today = time.strftime( "%y%m%d", time.localtime() ) 
 	#today = "170703"
 	#qset = DailyReportItem.objects.filter( 
-	#										report_daily_item__name = report_item )\
+	#										daily_report_item__name = report_item )\
 	#			 							.filter( title__contains = today )
 	# parse CKHtml into json
 
@@ -138,10 +138,10 @@ def JsonReportItemQuery( request, report_pk ):
 										"rowDirection":qset.rowDirection,
 										"colDirection":qset.colDirection,
 										"pk":qset.pk,
-										"department":qset.report_daily_item.department.name,
-										"report_daily_item":qset.report_daily_item.name,
-										"direction":qset.report_daily_item.location,
-										"name_long":qset.report_daily_item.name_long, 
+										"department":qset.daily_report_item.department.name,
+										"daily_report_item":qset.daily_report_item.name,
+										"direction":qset.daily_report_item.location,
+										"name_long":qset.daily_report_item.name_long, 
 										});
 	#return JsonResponse(list(qset.values('image')), safe=False)
 #	return JsonResponse(HTMLrsp, safe=False)

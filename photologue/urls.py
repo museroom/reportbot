@@ -104,5 +104,5 @@ urlpatterns = [
 ]
 
 # Administration Page Customization
-admin.site.site_header = _("MeiTim Reporting System")
-admin.site.site_title = _("Reporting System")
+admin.site.site_header = _("MeiTim ReportBot Administration System")
+admin.site.site_title = _("ReportBot")
