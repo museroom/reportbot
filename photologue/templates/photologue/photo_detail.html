@@ -12,10 +12,13 @@
 
     <div class="row">
         <div class="col-md-6">
-		    {% if object.caption %}<p>{{ object.caption|safe }}</p>{% endif %}
-		    <a href="{{ object.image.url }}">
-		        <img src="{{ object.get_display_url }}" class="thumbnail" alt="{{ object.title }}">
-		    </a>
+					<div>
+						<a href="{% url 'admin:photologue_photo_change' object.pk %}"> Admin Photo </a>
+					</div>
+			    {% if object.caption %}<p>{{ object.caption|safe }}</p>{% endif %}
+			    <a href="{{ object.image.url }}">
+			        <img src="{{ object.get_display_url }}" class="thumbnail" alt="{{ object.title }}">
+			    </a>
         </div>
         <div class="col-md-6">
             {% if object.public_galleries %}
@@ -23,9 +26,9 @@
                 <table>
                     {% for gallery in object.public_galleries %}
                         <tr>
-                            <td>{% previous_in_gallery object gallery %}</td>
+                            <td>{% previous_in_gallery object gallery %}<span>previous</span></td>
 	                        <td class="text-center"><a href="{{ gallery.get_absolute_url }}">{{ gallery.title }}</a></td>
-	                        <td>{% next_in_gallery object gallery %}</td>
+	                        <td>{% next_in_gallery object gallery %}<span>next</span></td>
                         </tr>
 					{% endfor %}
 				</table>

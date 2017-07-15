@@ -10,7 +10,8 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GalleryDateDetailView, GalleryDayArchiveView, GalleryMonthArchiveView, GalleryDateDetailOldView, \
 	GalleryDayArchiveOldView, GalleryMonthArchiveOldView, PhotoDateDetailOldView, \
 	PhotoDayArchiveOldView, PhotoMonthArchiveOldView, \
-	JsonReportItemQuery, JsonPhotoQuery, JsonTableMapQuery
+	JsonReportItemQuery, JsonPhotoQuery, JsonTableMapQuery, \
+	ReportItemListView
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -81,6 +82,10 @@ urlpatterns = [
 		JsonReportItemQuery),
 	url(r'^json/Photo/(?P<report_item>[\-\d\w|\W]+)/(?P<date_and_time>[\-\d\w|\W]+)/$',
 		JsonPhotoQuery),
+
+	# Report Item Views
+	url(r'^reportitemlist/$', ReportItemListView, name="report_item_list_view"),
+
 
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from datetime import datetime, timedelta
+from utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 	Watermark, Department, ReportItem, DailyReportItem, DailyReport, \
@@ -73,9 +74,9 @@ class DailyReportAdmin( admin.ModelAdmin):
 
 	def clone_report(modeladmin, request, queryset):
 		for q in queryset:
-			print( "DEBUG: clone_report {}".format(q) )
+			logger( "clone_report {}".format(q) )
 			# find yesterday report
-			qset_daily_report_item = DailyReportItem.objects.filter( daily_report = q )
+			qset_daily_report_item = DailyReportItem.objects.filter( daily_report=q )
 			daily_report_latest = q #DailyReport.objects.order_by('-report_date')[0]
 			# update report_date
 			#daily_report_latest.report_date = timezone.make_aware( datetime.now() ) 
@@ -96,12 +97,26 @@ class DailyReportAdmin( admin.ModelAdmin):
 			#photo_admin.autofill_related_daily_report_item()
 			today = timezone.localtime()
 			qset_photo = Photo.objects.filter( follow_up_date_end__gt = today )
-			print( "DEBUG: clone_report qset_photo len={}".format( len(qset_photo) ) )
+			logger( "clone_report qset_photo len={}".format( len(qset_photo) ) )
 			for q_photo in qset_photo:
 				q_daily_report_item =	q_photo.get_related_daily_report_item()
 				if q_daily_report_item != None:
 					q_photo.daily_report_item.add( q_daily_report_item )
 					q_photo.save()
+			# Extent follow up by +1 date
+			qset_photo_followup = Photo.objects.filter(
+				follow_up_date_end__gt = timezone.localtime() )
+			logger( '{} photos to followup, +1 date'.format( 
+				len( qset_photo_followup) ) )
+			qset_photo_followup.update( follow_up_date_end = \
+				timezone.localtime() + timezone.timedelta(1,0,0) )
+		msg = ungettext(
+				"Successfully cloned report",
+				"Successfully cloned reports",
+				len( queryset )
+			)
+		messages.success( request, msg )
+
 
 
 class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
@@ -119,7 +134,8 @@ class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 									"time_start", "time_stop", 
 									#"daily_report", "daily_report_item", #"tableTemplate",
 									)
-	search_fields = ["report_date","daily_report_item__name"]
+	search_fields = ["daily_report_item__name", 
+						  ]
 	
 #	raw_id_fields = ('slug','title',) 
 #admin.site.register(DailyReport)
@@ -267,7 +283,8 @@ class PhotoAdmin(admin.ModelAdmin):
 	list_filter = ['date_added', 'is_public']
 	if MULTISITE:
 		list_filter.append('sites')
-	search_fields = ['title', 'slug', 'caption']
+	search_fields = ['title', 'slug', 'caption', 
+						  'report_item__name', ]
 	list_per_page = 10
 	prepopulated_fields = {'slug': ('title',)}
 #	save_on_top = True

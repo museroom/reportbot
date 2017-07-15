@@ -173,7 +173,8 @@ class ReportItem(models.Model):
 								on_delete=models.SET_NULL, null=True)
 	name = models.CharField(_('report item'),
 							max_length=250,
-							unique=False) 
+							unique=False,
+							) 
 	name_long = models.CharField(_('report item description'),
 							max_length=250,
 							unique=False, blank=True)
@@ -182,6 +183,17 @@ class ReportItem(models.Model):
 							unique=False, blank=True)
 	class Meta:
 		ordering = ['department','name']
+
+	def get_absolute_url(self):
+		return reverse('admin:photologue_reportitem_change', args=(self.id,) )
+
+	def sample( self, count=2 ):
+		date_before = timezone.localtime().date() - \
+						  timezone.timedelta(count,0,0)
+		qset_photo = Photo.objects.filter( report_item = self ).filter(
+		             	date_added__date__gt = date_before )
+		return qset_photo
+
 	def __str__(self):
 		if( self.department != None ):
 			return "{1}_{2} ({0})".format(
@@ -580,11 +592,17 @@ class Photo(ImageModel):
 #							'photologue.DailyReportItem',
 #							blank=True
 #							)
+	def limit_dt_today():
+		return { 'report_date__gt': (
+					timezone.localtime()-timezone.timedelta(1,0,0)) }
+
 	daily_report_item = SortedManyToManyField(
 												'photologue.DailyReportItem',
 												related_name = 'photoz',
 												verbose_name=_('Daily Report Items'), 
-												blank=True)
+												blank=True,
+												limit_choices_to = limit_dt_today
+												)
 
 	captionCK = RichTextField(blank=True)
 	caption = models.TextField(_('caption'),
@@ -637,10 +655,13 @@ class Photo(ImageModel):
 		super(Photo, self).save(*args, **kwargs)
 
 	def get_related_daily_report_item( self, date_time_begin = None, date_time_end = None ):
+		print( "get related daily report item {}".format(self) )
 		try:
 			if self.report_item != None:
 				q_daily_report_item = DailyReportItem.objects.filter( 
-					daily_report_item  = self.report_item ).latest()
+					daily_report_item  = self.report_item )[0]
+			#q_daily_report_item = DailyReportItem.objects.filter( 
+			#		daily_report_item  = self.report_item ).latest()
 		except ObjectDoesNotExist:
 			print( "ERROR: {} does not have related report_item".format( self) )
 			q_daily_report_item = None

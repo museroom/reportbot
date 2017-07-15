@@ -77,6 +77,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+#	'default': {
+#		'ENGINE': 'django.db.backends.mysql',
+#		'NAME': 'reportbotdb',
+#		'USER': 'kenken',
+#		'PASSWORD': 'getai1fe',
+#		'HOST': '127.0.0.1',
+#		'PORT': '3307',
+#	}
 }
 
 

@@ -1,0 +1,31 @@
+{% extends "photologue/root.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "All Report Items" %}{% endblock %}
+
+{% block content %}
+
+    <div class="row col-lg-12">
+        <h1 class="page-header">{% trans "All Report Items" %}</h1>
+    </div>
+	 <code> count= {{ request.GET }} </code>
+    {% if qset_report_item %}
+        {% for report_item in qset_report_item %}
+            <div class="row col-lg-12">
+                <h2>{{ report_item.name_long }}</h2>
+                <p class="muted"><small>{% trans "Location:" %} {{ report_item.location }}</small></p>
+                {% if report_item.name %}<p><a href="{{ report_item.get_absolute_url }}">edit {{ report_item.name|safe }}</a></p>{% endif %}
+                {% for photo in report_item.sample %}
+                    <a href="{{ photo.get_absolute_url }}">
+                         <img src="{{ photo.get_thumbnail_url }}" class="thumbnail" alt="{{ photo.title }}">
+                    </a>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="row col-lg-12">{% trans "No Report Item were found" %}.</div>
+    {% endif %}
+
+    {% include "photologue/includes/paginator.html" %}
+    
+{% endblock %}

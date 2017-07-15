@@ -31,6 +31,14 @@
 		  <div class="collapse navbar-collapse navbar-ex1-collapse">
 		    <ul class="nav navbar-nav">
 			    <li class="home"><a href="/">Home</a></li>
+			    <li class="reportitem dropdown">
+					<a data-target="#" href="" class="dropdown-toggle" data-toggle="dropdown">
+			            Department Item views<b class="caret"></b>
+			        </a>
+					<ul class="dropdown-menu">
+						<li class="sub-page"><a href="{% url 'photologue:report_item_list_view' %}">List views</a></li>
+					</ul>
+				</li>
 			    <li class="galleries dropdown">
 					<a data-target="#" href="" class="dropdown-toggle" data-toggle="dropdown">
 			            Gallery views<b class="caret"></b>
