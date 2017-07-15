@@ -159,15 +159,17 @@ def JsonReportItemQuery( request, report_pk ):
 
 # ReportItem Views
 #@login_required
-#class ReportItemListView(ListView):
+class ReportItemListView(ListView):
+	qset_report_item = ReportItem.objects.all()
+	queryset = qset_report_item
+	paginate_by = 20
+
+#def ReportItemListView( request):
+#	print( "reportitemlistview called" )
 #	queryset = ReportItem.objects.all()
-#	paginate_by = 20
-def ReportItemListView( request):
-	print( "reportitemlistview called" )
-	queryset = ReportItem.objects.all()
-#	paginate_by = 20
-	context = {'qset_report_item': queryset}
-	return render( request, 'photologue/reportitem_list.html',context )
+##	paginate_by = 20
+#	context = {'qset_report_item': queryset}
+#	return render( request, 'photologue/reportitem_list.html',context )
 
 	
 

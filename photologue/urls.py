@@ -66,7 +66,7 @@ urlpatterns = [
 		PhotoArchiveIndexView.as_view(),
 		name='pl-photo-archive'),
 	
-	url(r'^photo/(?P<slug>[\-\d\w]+)/$',
+	url(r'^photo/(?P<dateandtime>[\-\d\w]+)/$',
 		PhotoDetailView.as_view(), name='pl-photo'), 
 	url(r'^photolist/$',
 		PhotoListView.as_view(),
@@ -85,7 +85,8 @@ urlpatterns = [
 	
 	# Report Item Views
 	url(r'^reportitemlist/$', ReportItemListView, name="report_item_list_view"),
-	
+	url(r'^reportitemlist/$',
+		ReportItemListView.as_view(), name="report_item_list_view"), 
 	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',
@@ -111,3 +112,4 @@ urlpatterns = [
 # Administration Page Customization
 admin.site.site_header = _("MeiTim ReportBot Administration System")
 admin.site.site_title = _("ReportBot")
+
