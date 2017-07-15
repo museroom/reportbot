@@ -33,7 +33,7 @@ urlpatterns = [
 		name='gallery-archive-day'),
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[0-9]{2})/$',
 		GalleryMonthArchiveView.as_view(month_format='%m'),
-		name='gallery-archive-month'),
+	name='gallery-archive-month'),
 	url(r'^gallery/(?P<year>\d{4})/$',
 		GalleryYearArchiveView.as_view(),
 		name='pl-gallery-archive-year'),
@@ -49,7 +49,7 @@ urlpatterns = [
 	url(r'^gallerylist/$',
 		GalleryListView.as_view(),
 		name='gallery-list'),
-
+	
 	url(r'^photo/(?P<year>\d{4})/(?P<month>[0-9]{2})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',
 		PhotoDateDetailView.as_view(month_format='%m'),
 		name='photo-detail'),
@@ -65,28 +65,28 @@ urlpatterns = [
 	url(r'^photo/$',
 		PhotoArchiveIndexView.as_view(),
 		name='pl-photo-archive'),
-
+	
 	url(r'^photo/(?P<slug>[\-\d\w]+)/$',
 		PhotoDetailView.as_view(), name='pl-photo'), 
 	url(r'^photolist/$',
 		PhotoListView.as_view(),
 		name='photo-list'),
-
+	
 	# TinyMCE interace
 	url(r'^tinymce/', include('tinymce.urls')),
-
+	
 	# Report Bot Json interface
 	url(r'^json/TableMap/(?P<date_and_time>[\-\d\w|\W]+)/$',
-		JsonTableMapQuery),
+		JsonTableMapQuery, name='jsontable'),
 	url(r'^json/ReportItem/(?P<report_pk>[\d]+)/$',
 		JsonReportItemQuery),
 	url(r'^json/Photo/(?P<report_item>[\-\d\w|\W]+)/(?P<date_and_time>[\-\d\w|\W]+)/$',
 		JsonPhotoQuery),
-
+	
 	# Report Item Views
 	url(r'^reportitemlist/$', ReportItemListView, name="report_item_list_view"),
-
-
+	
+	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',
 		GalleryDateDetailOldView.as_view(),
