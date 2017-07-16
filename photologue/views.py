@@ -6,7 +6,9 @@ from django.views.generic.dates import ArchiveIndexView, DateDetailView,  \
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.base import RedirectView
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
 
 from django.views.generic import View
 from django.http import JsonResponse
@@ -61,8 +63,12 @@ def JsonTableMapQuery( request, date_and_time ):
 	return JsonResponse(dict(tableMap=rsp)) #, safe= False )
 		
 def JsonReportItemQuery( request, report_pk ):
-	logger( "JsonReportItemQuery {}".format( 
-		report_pk ) , 'DEBUG' )
+	logger( "JsonReportItemQuery {}:{}".format( 
+		report_pk, 
+		DailyReportItem.objects.get( pk=report_pk )
+		),
+		'DEBUG' 
+	)
 
 	HTMLrsp = []
 	
@@ -71,7 +77,7 @@ def JsonReportItemQuery( request, report_pk ):
 			#print( "start tag:", tag )
 			#print( "start attrs", attrs )
 			HTMLrsp.append( {"startTag":tag} )
-			HTMLrsp.append( {"startAttrs":attrs} )
+			HTMLrsp.append( {"startAttrs":mark_safe(attrs)} )
 		def handle_endtag( self, tag ):
 			#print( "end tag:", tag )
 			HTMLrsp.append( {"endTag":tag} )
@@ -120,49 +126,73 @@ def JsonReportItemQuery( request, report_pk ):
 	if len(HTMLplan_toc) == 0:
 		HTMLplan_toc = HTMLplan
 
-	rspGroup.append ({
-						"time_start":str(qset.time_start)[0:5],
-					   "time_stop" :str(qset.time_stop)[0:5],
-						"name":qset.__str__(),
-						"statusCK" : HTMLstatus, #,set[0].statusCK,
-						"planCK" : HTMLplan, #qset.planCK
-						"status_toc_CK": HTMLstatus_toc,
-						"plan_toc_CK": HTMLplan_toc,
-						"photoCol":qset.photoCol,
-						"reportRowID":qset.reportRowID,
-						"reportRowID":qset.reportRowID,
-						"photoCol":qset.photoCol,
-						"reportOrder":qset.reportOrder,
-						"rowTableId":qset.rowTableId,
-						"colTableId":qset.colTableId,
-						"rowItemName":qset.rowItemName,
-						"colItemName":qset.colItemName,
-						"rowStatus":qset.rowStatus,
-						"colStatus":qset.colStatus,
-						"rowPlan":qset.rowPlan,
-						"colPlan":qset.colPlan,
-						"rowTime":qset.rowTime,
-						"colTime":qset.colTime,
-						"rowDirection":qset.rowDirection,
-						"colDirection":qset.colDirection,
-						"pk":qset.pk,
-						"department":qset.daily_report_item.department.name,
-						"daily_report_item":qset.daily_report_item.name,
-						"direction":qset.daily_report_item.location,
-						"name_long":qset.daily_report_item.name_long, 
-						});
+	#rspGroup.append ({
+	rspGroup={
+		"time_start":str(qset.time_start)[0:5],
+		"time_stop" :str(qset.time_stop)[0:5],
+		"name":qset.__str__(),
+		"statusCK" : HTMLstatus, #,set[0].statusCK,
+		"planCK" : HTMLplan, #qset.planCK
+		"status_toc_CK": HTMLstatus_toc,
+		"plan_toc_CK": HTMLplan_toc,
+		"photoCol":qset.photoCol,
+		"reportRowID":qset.reportRowID,
+		"reportRowID":qset.reportRowID,
+		"photoCol":qset.photoCol,
+		"reportOrder":qset.reportOrder,
+		"rowTableId":qset.rowTableId,
+		"colTableId":qset.colTableId,
+		"rowItemName":qset.rowItemName,
+		"colItemName":qset.colItemName,
+		"rowStatus":qset.rowStatus,
+		"colStatus":qset.colStatus,
+		"rowPlan":qset.rowPlan,
+		"colPlan":qset.colPlan,
+		"rowTime":qset.rowTime,
+		"colTime":qset.colTime,
+		"rowDirection":qset.rowDirection,
+		"colDirection":qset.colDirection,
+		"pk":qset.pk,
+		"department":qset.daily_report_item.department.name,
+		"daily_report_item":qset.daily_report_item.name,
+		"direction":qset.daily_report_item.location,
+		"name_long":qset.daily_report_item.name_long, 
+		#});
+		}
+	logRspGroup = rspGroup
+#	for field in ('statusCK', 'planCK', 'status_toc_CK',  'plan_toc_CK' ):
+		#logRspGroup[field] = mark_safe( rspGroup[field] )
+#		logRspGroup[0][field] = mark_safe( rspGroup[0][field] )
+#	logRspGroup['statusCK'] = mark_safe( rspGroup['statusCK'] )
+#	logRspGroup['planCK'] = mark_safe( rspGroup['planCK'] )
+#	logRspGroup['status_toc_CK'] = mark_safe( rspGroup['status_toc_CK'] )
+#	logRspGroup['plan_toc_CK'] = mark_safe( rspGroup['plan_toc_CK'] )
 	#return JsonResponse(list(qset.values('image')), safe=False)
 	#return JsonResponse(HTMLrsp, safe=False)
-	logger( rspGroup, is_json=True )
+	logger( logRspGroup, is_json=True )
 	return JsonResponse(dict(reportItems=rspGroup) ) #, safe=False)
 
 
 # ReportItem Views
 #@login_required
-class ReportItemListView(ListView):
-	qset_report_item = ReportItem.objects.all()
-	queryset = qset_report_item
-	paginate_by = 20
+class ReportItemListView(ListView ):
+	#date_and_time = timezone.localtime().strftime("%y%m%d-%H%M")
+	#paginate_by = 5
+
+	def get_queryset(self):
+		print( 'reportitemlistview queryset={0}'.format( self.kwargs ) )
+		return ReportItem.objects.all()
+
+def Update_DailyReportItem( request, daily_report_pk ):
+	print( "DEBUG: daily_report_pk = {} // request.POST= {}".format (
+			 daily_report_pk, request.POST.getlist('report_photo'))) 
+	for q_photo_pk in request.POST.getlist('report_photo'):
+		print( "updating pk:{} related daily_report_item".format(q_photo_pk) )
+		q_photo = Photo.objects.get( pk = int(q_photo_pk) )
+		q_photo.get_related_daily_report_item()
+		#q_photo.save()
+
+	return HttpResponseRedirect( reverse( 'photologue:report_item_list_view' ))
 
 #def ReportItemListView( request):
 #	print( "reportitemlistview called" )

@@ -188,10 +188,13 @@ class ReportItem(models.Model):
 		return reverse('admin:photologue_reportitem_change', args=(self.id,) )
 
 	def sample( self, count=2 ):
+		print( "sample self={}//count={}".format( self, count ) )
 		date_before = timezone.localtime().date() - \
 						  timezone.timedelta(count,0,0)
+		date_before = timezone.datetime.strptime( 
+						 "2017-07-14-0000",	"%Y-%m-%d-%H%M")
 		qset_photo = Photo.objects.filter( report_item = self ).filter(
-		             	date_added__date__gt = date_before )
+							date_added__gt = date_before )
 		return qset_photo
 
 	def __str__(self):
@@ -662,6 +665,7 @@ class Photo(ImageModel):
 					daily_report_item  = self.report_item )[0]
 			#q_daily_report_item = DailyReportItem.objects.filter( 
 			#		daily_report_item  = self.report_item ).latest()
+			print( q_daily_report_item )
 		except ObjectDoesNotExist:
 			print( "ERROR: {} does not have related report_item".format( self) )
 			q_daily_report_item = None
