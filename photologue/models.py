@@ -168,7 +168,7 @@ class TestingClass( models.Model):
 		return title
 
 @python_2_unicode_compatible
-class ReportItem(models.Model):
+class DepartmentItem(models.Model):
 	department = models.ForeignKey( Department,
 								on_delete=models.SET_NULL, null=True)
 	name = models.CharField(_('report item'),
@@ -185,15 +185,15 @@ class ReportItem(models.Model):
 		ordering = ['department','name']
 
 	def get_absolute_url(self):
-		return reverse('admin:photologue_reportitem_change', args=(self.id,) )
+		return reverse('admin:photologue_departmentitem_change', args=(self.id,) )
 
 	def sample( self, count=2 ):
-		print( "sample self={}//count={}".format( self, count ) )
+		#print( "sample self={}//count={}".format( self, count ) )
 		date_before = timezone.localtime().date() - \
 						  timezone.timedelta(count,0,0)
 		date_before = timezone.datetime.strptime( 
 						 "2017-07-14-0000",	"%Y-%m-%d-%H%M")
-		qset_photo = Photo.objects.filter( report_item = self ).filter(
+		qset_photo = Photo.objects.filter( department_item = self ).filter(
 							date_added__gt = date_before )
 		return qset_photo
 
@@ -626,7 +626,7 @@ class Photo(ImageModel):
 									on_delete = models.SET_NULL,
 									null=True,
 									blank=True)
-	report_item = models.ForeignKey( ReportItem,
+	department_item = models.ForeignKey( DepartmentItem,
 									on_delete = models.SET_NULL,
 									null=True,
 									blank=True, )
@@ -645,7 +645,7 @@ class Photo(ImageModel):
 		verbose_name_plural = _("photos")
 
 	def __str__(self):
-		return "{}.{}".format(self.title, self.report_item.__str__())
+		return "{}.{}".format(self.title, self.department_item.__str__())
 
 	def save(self, *args, **kwargs):
 		if self.slug is None:
@@ -660,11 +660,11 @@ class Photo(ImageModel):
 	def get_related_daily_report_item( self, date_time_begin = None, date_time_end = None ):
 		print( "get related daily report item {}".format(self) )
 		try:
-			if self.report_item != None:
+			if self.department_item != None:
+			#	q_daily_report_item = DailyReportItem.objects.filter( 
+			#		daily_report_item  = self.report_item )[0]
 				q_daily_report_item = DailyReportItem.objects.filter( 
-					daily_report_item  = self.report_item )[0]
-			#q_daily_report_item = DailyReportItem.objects.filter( 
-			#		daily_report_item  = self.report_item ).latest()
+					department_item  = self.department_item ).latest()
 			print( q_daily_report_item )
 		except ObjectDoesNotExist:
 			print( "ERROR: {} does not have related report_item".format( self) )
@@ -1034,7 +1034,7 @@ class DailyReportItem(models.Model):
 	daily_report = models.ForeignKey( DailyReport,
 											on_delete=models.SET_DEFAULT,
 											default=48, blank = True)
-	daily_report_item = models.ForeignKey( ReportItem,
+	department_item = models.ForeignKey( DepartmentItem,
 											on_delete=models.SET_DEFAULT,
 											default=48, blank = True)
 	name = models.CharField( max_length = 64,
@@ -1131,11 +1131,11 @@ class DailyReportItem(models.Model):
 #	  					self.daily_report_item.name + "_" + \
 #							self.name
 			return self.daily_report.get_formatted_date() + "_" +\
-						 self.daily_report_item.name + "_" + \
+						 self.department_item.name + "_" + \
 						 self.name
 		else:
 			return self.daily_report.get_formatted_date() + "_" +\
-						 self.daily_report_item.name + "_" 
+						 self.department_item.name + "_" 
 #			return self.get_report_date_str()+"_" + \
 #`	  					self.daily_report_item.name
 

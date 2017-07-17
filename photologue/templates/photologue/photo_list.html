@@ -1,26 +1,64 @@
-{% extends "photologue/root.html" %}
-{% load i18n %}
+	{% extends "photologue/root.html" %}
+	{% load i18n %}
 
-{% block title %}{% trans "All photos" %}{% endblock %}
+	{% block title %}{% trans "All photos" %}{% endblock %}
 
-{% block content %}
+	{% block content %}
 
-    <div class="row col-lg-12">
-        <h1 class="page-header">{% trans "All photos" %}</h1>
-    </div>
+	<div class="row col-lg-12">
+		<h1 class="page-header"> {% trans "All photos" %}</h1>
+	</div>
 
 	{% if object_list %}
-		<div class="row col-lg-12">
-		    {% for photo in object_list %}
-		        <a href="{{ photo.get_absolute_url }}">
-		             <img src="{{ photo.get_thumbnail_url }}" class="thumbnail" alt="{{ photo.title }}">
-		        </a>
-		    {% endfor %}
-		</div>
+		<form action="{% url 'photologue:update_dailyreportitem' '2017-07-15-1930' %}" method="post">
+			{% csrf_token %}
+			<div class="row col-lg-12">
+				{% for photo in object_list %}
+
+				<div class="col-xs-6 col-sm-3 col-md-2 col-lg-1" style=" min-width:165px;" >
+					<a href="{{ photo.get_absolute_url }}">
+						<img src="{{ photo.get_thumbnail_url }}" class="thumbnail" alt="{{ photo.title }}">
+					</a>
+					{%comment%}
+					<div>{{ photo.department_item }}</div>
+					{%endcomment%}
+					<div>
+						<label class="btn btn-primary btn-sm" >
+							<input type="checkbox" autocomplete="off" value="{{ photo.pk }}"  
+									name="report_photo"> Clone
+						</label>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+			<div class="row col-lg-12" >
+				<div class="col-lg-3" ></div>
+				<div class="col-lg-6" >
+					<button class="btn btn-danger" style="width:100%" type="submit">
+						Submit Clone to Active Report
+					</button>
+				</div>
+				<div class="col-lg-3"></div> 
+			</div>
+			</p>
+		</form>
 	{% else %}
 		<div class="row">{% trans "No photos were found" %}.</div>
 	{% endif %}
-
+	{% comment %}
 	{% include "photologue/includes/paginator.html" %}
+	{% endcomment %}
+	<div style="float:right">
+		<p > Tags:
+			<a href="#"><span class="label label-info">Home</span></a>
+			<a href="#"><span class="label label-info">ListView</span></a>
+			<a href="#"><span class="label label-info">Submit</span></a>
+			<a href="#"><span class="label label-info">Clone</span></a>
+			| <i class="icon-user"></i> <a href="#">Admin</a>
+			| <i class="icon-user"></i> <a href="#">Date and TIme</a>
+			| <i class="icon-user"></i> <a href="#">User</a>
+			| <i class="icon-user"></i> <a href="#">239 photos</a>
+		</p>
+	</div>
 
-{% endblock %}
+	{% endblock %}

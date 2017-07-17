@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
-	Watermark, Department, ReportItem, DailyReportItem, DailyReport, \
+	Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
 	TestingClass
 from .forms import UploadZipForm
 
@@ -24,15 +24,18 @@ MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
 
 # Daily Report Admin Items
 
-class ReportItemInline(admin.StackedInline):
+class DepartmentItemInline(admin.StackedInline):
 	extra = 0
-	model = ReportItem
+	model = DepartmentItem
 
 class DepartmentAdmin(admin.ModelAdmin):
-	inlines = [ReportItemInline]
+	inlines = [DepartmentItemInline]
+
+class DepartmentItemAdmin(admin.ModelAdmin):
+	extra = 0
 	
 admin.site.register(Department, DepartmentAdmin)
-admin.site.register(ReportItem)
+admin.site.register(DepartmentItem, DepartmentItemAdmin)
 
 class DailyReportItemInline( admin.StackedInline ):
 
@@ -43,7 +46,7 @@ class DailyReportItemInline( admin.StackedInline ):
 #	fields= ( 'daily_report_item', ('reportRowID', 'photoCol'),
 #						('time_start', 'time_stop'),
 #					'statusCK', 'planCK', )
-	fields = ( ( 'daily_report', 'daily_report_item' ),
+	fields = ( ( 'daily_report', 'department_item' ),
 						 #( 'time_start', 'time_stop' ),
 						 ( 'reportRowID', 'reportOrder', ), #'photoCol',),
 						 ( 'statusCK', 'planCK' ),
@@ -124,11 +127,11 @@ class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 	list_per_page = 50
 
 	list_display = ( "__str__",
-									"daily_report", "daily_report_item",
-									"time_start", "time_stop", 
+						"daily_report", "department_item",
+						"time_start", "time_stop", 
 #									"tableTemplate", "rowDirection", "colDirection",
 #									"daily_report",
-									)
+						)
 	list_editable = (
 #									"tableTemplate", "rowDirection", "colDirection",
 									"time_start", "time_stop", 
@@ -272,19 +275,19 @@ class PhotoAdminForm(forms.ModelForm):
 class PhotoAdmin(admin.ModelAdmin):
 	list_display = ( 'title', 
 #									'admin_thumbnail',
-									'thumbnail_admin',
-									'report_item',  
-									'follow_up_date_begin', 'follow_up_date_end',
-									'date_added',
+							'thumbnail_admin',
+							'department_item',  
+							'follow_up_date_begin', 'follow_up_date_end',
+							'date_added',
 									)
-	list_editable = ( 'report_item',
-									'follow_up_date_begin', 'follow_up_date_end',
-									)
+	list_editable = ( 'department_item',
+							'follow_up_date_begin', 'follow_up_date_end',
+						)
 	list_filter = ['date_added', 'is_public']
 	if MULTISITE:
 		list_filter.append('sites')
 	search_fields = ['title', 'slug', 'caption', 
-						  'report_item__name', ]
+						  'department_item__name', ]
 	list_per_page = 10
 	prepopulated_fields = {'slug': ('title',)}
 #	save_on_top = True

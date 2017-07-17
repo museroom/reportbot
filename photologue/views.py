@@ -15,7 +15,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
-from .models import Photo, Gallery, DailyReportItem, ReportItem, \
+from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
 						  Department, DailyReport
 
 import time, datetime
@@ -51,7 +51,7 @@ def JsonTableMapQuery( request, date_and_time ):
 	for item in qset:
 		#rsp = []
 		rsp.append( {"order":str(item.reportOrder),
-								 "name":item.daily_report_item.name,
+								 "name":item.department_item.name,
 								 "pk":str(item.pk),
 								 "template":item.tableTemplate,
 								 "row_photo":item.photoCol,
@@ -153,10 +153,10 @@ def JsonReportItemQuery( request, report_pk ):
 		"rowDirection":qset.rowDirection,
 		"colDirection":qset.colDirection,
 		"pk":qset.pk,
-		"department":qset.daily_report_item.department.name,
-		"daily_report_item":qset.daily_report_item.name,
-		"direction":qset.daily_report_item.location,
-		"name_long":qset.daily_report_item.name_long, 
+		"department":qset.department_item.department.name,
+		"daily_report_item":qset.department_item.name,
+		"direction":qset.department_item.location,
+		"name_long":qset.department_item.name_long, 
 		#});
 		}
 	logRspGroup = rspGroup
@@ -178,10 +178,21 @@ def JsonReportItemQuery( request, report_pk ):
 class ReportItemListView(ListView ):
 	#date_and_time = timezone.localtime().strftime("%y%m%d-%H%M")
 	#paginate_by = 5
+	model = DepartmentItem
+	context_object_name = "some_photos"
 
 	def get_queryset(self):
 		print( 'reportitemlistview queryset={0}'.format( self.kwargs ) )
-		return ReportItem.objects.all()
+		if self.kwargs.has_key( 'date_and_time' ):
+			print( 'reportitemlistview dateandtime={0}'.format( self.kwargs['date_and_time'] ) )
+			date_and_time = self.kwargs['date_and_time']
+		else:
+			print( 'dateandtime set to today' )
+			date_and_time = '2017-07-17-1930'
+			
+		#return Department.objects.all()
+		d = Photo
+		return d.objects.filter( daily_report_item__daily_report__title = date_and_time ).order_by( 'daily_report_item__reportOrder' ) 
 
 def Update_DailyReportItem( request, daily_report_pk ):
 	print( "DEBUG: daily_report_pk = {} // request.POST= {}".format (
