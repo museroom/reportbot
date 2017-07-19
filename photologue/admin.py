@@ -18,15 +18,17 @@ from utils.logger import logger
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 	Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
 	TestingClass
-from .forms import UploadZipForm, DepartmentItemForm
+from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
+
 
 MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
 
 # Daily Report Admin Items
 
-class DepartmentItemInline(admin.StackedInline):
+class DepartmentItemInline(admin.TabularInline):
 	extra = 0
 	model = DepartmentItem
+	form = DepartmentItemForm
 
 class DepartmentAdmin(admin.ModelAdmin):
 	inlines = [DepartmentItemInline]
@@ -126,6 +128,7 @@ class DailyReportAdmin( admin.ModelAdmin):
 
 class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 
+	form = DailyReportItemForm
 	list_per_page = 50
 
 	fieldsets = (  ('', {
@@ -139,7 +142,7 @@ class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 						( '', {
 							'fields': (
 								("time_start", "time_stop"),
-								("reportRowID", "reportOrder"),
+								("color","reportRowID", "reportOrder"),
 							)
 						}), 
 					)

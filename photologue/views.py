@@ -36,9 +36,6 @@ from utils.logger import logger
 
 # Json Query.
 def JsonPhotoQuery( request, report_item, date_and_time ):
-	log_text = "JsonPhotoQueue {}{}".format( 
-		report_item, date_and_time ) 
-	logger(  log_text, 'DEBUG' )
 	today = time.strftime( "%y%m%d", time.localtime() ) 
 	today = "170706"
 	logger( "[JsonPhotoQuery] report_item = {}/ date_and_time = {}".format(
@@ -95,6 +92,7 @@ def JsonReportItemQuery( request, report_pk ):
 		def handle_data( self, data ):
 			#logger( "data:{}".format(data))
 			HTMLrsp.append( {"data":data} )
+			
 
 #	qset = DailyReportItem.objects.filter(
 #							daily_report__title = date_and_time

@@ -193,10 +193,19 @@ class DepartmentItemForm(ModelForm):
 			'color' : TextInput(attrs={'type': 'color'}),
 		}
 
-class PhotoUploadForm(forms.Form):
-    date = forms.CharField(max_length=50)
-    time = forms.CharField(max_length=50)
-    from_name = forms.CharField(max_length=50)
+class DailyReportItemForm(ModelForm):
+	class Meta:
+		model = DepartmentItem
+		fields = '__all__'
+		widgets = {
+			'color' : TextInput(attrs={'type': 'color'}),
+		}
 
-    my_file = forms.FileField()
+class PhotoUploadForm(forms.Form):
+	date = forms.CharField(max_length=50)
+	time = forms.CharField(max_length=50)
+	from_name = forms.CharField(max_length=50)
+
+	my_file = forms.FileField()
+
 

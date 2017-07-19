@@ -25,6 +25,7 @@ from django.utils.encoding import force_text, smart_str, filepath_to_uri
 from django.utils.functional import curry
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.html import format_html
 from django.core.validators import RegexValidator
 from django.contrib.sites.models import Site
 
@@ -40,6 +41,7 @@ from sortedm2m.fields import SortedManyToManyField
 from .utils.reflection import add_reflection
 from .utils.watermark import apply_watermark
 from .managers import GalleryQuerySet, PhotoQuerySet
+
 
 logger = logging.getLogger('photologue.models')
 
@@ -181,7 +183,7 @@ class DepartmentItem(models.Model):
 	location = models.CharField(_('item location'),
 							max_length=250,
 							unique=False, blank=True)
-	color = models.CharField(max_length=7)
+	color = models.CharField(max_length=7, default="#ffffff")
 
 	class Meta:
 		ordering = ['department','name']
@@ -202,7 +204,7 @@ class DepartmentItem(models.Model):
 	def __str__(self):
 		if( self.department != None ):
 			return "{1}_{2} ({0})".format(
-				self.department.name[3:],self.name,self.location)
+				self.department.name[3:],self.name,self.location,self.color)
 		else:
 			return "{0}_{1}".format(
 				self.name, self.location)
@@ -1042,6 +1044,8 @@ class DailyReportItem(models.Model):
 	name = models.CharField( max_length = 64,
 											default="", blank=True,
 											unique=False)
+	color = models.CharField(max_length=7, default="#ffffff")
+
 	def limit_dt_today():
 		return { 'date_added__gt': (
 					timezone.localtime()-timezone.timedelta(2,0,0)) }

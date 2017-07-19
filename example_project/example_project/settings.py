@@ -29,9 +29,9 @@ INSTALLED_APPS = (
 	'django.contrib.sitemaps',
 	'photologue',
 	'sortedm2m',
-		#'tinymce',
-		'ckeditor',
+	'ckeditor',
 	'example_project',
+	'fontawesome',
 )
 
 MIDDLEWARE_CLASSES = (
