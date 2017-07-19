@@ -1,4 +1,11 @@
-import warnings
+import warnings 
+import os
+from io import BytesIO
+
+try:
+	import Image
+except ImportError:
+	from PIL import Image
 
 from django.views.generic.dates import ArchiveIndexView, DateDetailView,  \
 													DayArchiveView, MonthArchiveView, \
@@ -6,18 +13,22 @@ from django.views.generic.dates import ArchiveIndexView, DateDetailView,  \
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.base import RedirectView
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
+from django.utils.text import slugify
+from django.core.files.base import ContentFile
 
 from django.views.generic import View
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
 						  Department, DailyReport
 
+from .forms import PhotoUploadForm
 import time, datetime
 from HTMLParser import HTMLParser
 
@@ -74,15 +85,15 @@ def JsonReportItemQuery( request, report_pk ):
 	
 	class PrettyHTML( HTMLParser ):
 		def handle_starttag( self, tag, attrs ):
-			#print( "start tag:", tag )
-			#print( "start attrs", attrs )
+			#logger( "start tag:{}".format(tag))
+			#logger( "start attrs{}".format(attrs))
 			HTMLrsp.append( {"startTag":tag} )
 			HTMLrsp.append( {"startAttrs":mark_safe(attrs)} )
 		def handle_endtag( self, tag ):
-			#print( "end tag:", tag )
+			#logger( "end tag:{}".format(tag))
 			HTMLrsp.append( {"endTag":tag} )
 		def handle_data( self, data ):
-			#print( "data:", data )
+			#logger( "data:{}".format(data))
 			HTMLrsp.append( {"data":data} )
 
 #	qset = DailyReportItem.objects.filter(
@@ -108,15 +119,20 @@ def JsonReportItemQuery( request, report_pk ):
 	rspGroup = []
 
 	HTMLrsp = []
+	#logger( "statusCKtext:{}".format(qset.statusCK) )
+	qset.statusCK = qset.statusCK.replace("&nbsp;"," ")
 	parser.feed( qset.statusCK )
 	HTMLstatus = HTMLrsp
 	HTMLrsp = []
+	qset.planCK = qset.planCK.replace("&nbsp;"," ")
 	parser.feed( qset.planCK )
 	HTMLplan = HTMLrsp
 	HTMLrsp = []
+	qset.status_TOC_CK = qset.status_TOC_CK.replace("&nbsp;"," ")
 	parser.feed( qset.status_TOC_CK )
 	HTMLstatus_toc = HTMLrsp
 	HTMLrsp = []
+	qset.plan_TOC_CK = qset.plan_TOC_CK.replace("&nbsp;"," ")
 	parser.feed( qset.plan_TOC_CK )
 	HTMLplan_toc = HTMLrsp
 
@@ -178,8 +194,8 @@ def JsonReportItemQuery( request, report_pk ):
 class ReportItemListView(ListView ):
 	#date_and_time = timezone.localtime().strftime("%y%m%d-%H%M")
 	#paginate_by = 5
-	model = DepartmentItem
-	context_object_name = "some_photos"
+
+	template_name = "photologue/photo_list.html"
 
 	def get_queryset(self):
 		print( 'reportitemlistview queryset={0}'.format( self.kwargs ) )
@@ -188,11 +204,14 @@ class ReportItemListView(ListView ):
 			date_and_time = self.kwargs['date_and_time']
 		else:
 			print( 'dateandtime set to today' )
-			date_and_time = '2017-07-17-1930'
+			date_and_time = '2017-07-19-1930'
 			
 		#return Department.objects.all()
 		d = Photo
-		return d.objects.filter( daily_report_item__daily_report__title = date_and_time ).order_by( 'daily_report_item__reportOrder' ) 
+		qset = d.objects.filter( daily_report_item__daily_report__title = date_and_time ).order_by( 'daily_report_item__reportOrder' ) 
+#		return { 'object_list' : qset } #, 'date_and_time':date_and_time }
+		return qset
+
 
 def Update_DailyReportItem( request, daily_report_pk ):
 	print( "DEBUG: daily_report_pk = {} // request.POST= {}".format (
@@ -200,9 +219,16 @@ def Update_DailyReportItem( request, daily_report_pk ):
 	for q_photo_pk in request.POST.getlist('report_photo'):
 		print( "updating pk:{} related daily_report_item".format(q_photo_pk) )
 		q_photo = Photo.objects.get( pk = int(q_photo_pk) )
-		q_photo.get_related_daily_report_item()
+		q_related_daily_report_item = q_photo.get_related_daily_report_item()
+		q_photo.daily_report_item.add( q_related_daily_report_item )
+		q_photo.save()
+	for q_photo_pk in request.POST.getlist('delete_photo'):
+		print( "removing pk:{} related daily_report_item".format(q_photo_pk) )
+		q_photo = Photo.objects.get( pk = int(q_photo_pk) )
+		q_related_daily_report_item = q_photo.get_related_daily_report_item()
+		q_photo.daily_report_item.remove(
+								q_related_daily_report_item)
 		#q_photo.save()
-
 	return HttpResponseRedirect( reverse( 'photologue:report_item_list_view' ))
 
 #def ReportItemListView( request):
@@ -211,7 +237,69 @@ def Update_DailyReportItem( request, daily_report_pk ):
 ##	paginate_by = 20
 #	context = {'qset_report_item': queryset}
 #	return render( request, 'photologue/reportitem_list.html',context )
+def handle_photo_upload(f):
+	filepath = os.path.join('/tmp/',f.name )
+	with open( filepath, 'wb+' ) as destination:
+		for chunk in f.chunks():
+			destination.write(chunk)
+		destination.close()
 
+def photosave( filename, content ):
+	print("photosave: photo begin")
+	p = Photo( title=filename, 
+				slug=slugify(filename) )
+	print("photosave: photo image save")
+
+@csrf_exempt
+def PhotoUploadView( request ):
+
+	logger( "TestFormView request={}".format( request.POST ) ) 
+	logger( "TestFormView request={}".format( request.FILES ) ) 
+	#return HttpResponseRedirect( reverse( 'admin:login' ))
+	if request.method == 'POST':
+		form = PhotoUploadForm(request.POST, request.FILES)
+		if form.is_valid():
+			print( "photouploadview: form.is_valid() true" )
+			handle_photo_upload( request.FILES['my_file'] ) 
+			filepath = os.path.join('/tmp',request.FILES['my_file'].name)
+			try:
+				photo_file_handle = open( filepath, "rb" )
+				photo_data = photo_file_handle.read() 
+				photo_file_handle.close()
+			except:
+				print( "handle_photo_upload Exception {}".format( filepath ) )
+			print( "photo_data len({})".format( len(photo_data) ) ) 
+
+			try:
+				file = BytesIO(photo_data)
+				opened = Image.open(file)
+				opened.verify()
+			except Exception:
+				print( "photo uplaod {} is not valid".format(filepath) )
+
+			titlefilename = request.FILES['my_file'].name
+			print( "photo begin {}".format(titlefilename) )
+			try:
+				ph = Photo( title=titlefilename, slug=slugify(titlefilename) )
+			except:
+				print( 'photo begin error' )
+			print( "photo contentfile" )
+			contentfile = ContentFile(photo_data)
+			print( "photo photo image save" )
+			ph.image.save(titlefilename, contentfile)
+			print( "photo  save" )
+			ph.save()
+			print( "photo  site" )
+			ph.sites.add(Site.objects.get(id=settings.SITE_ID))
+			
+			print( "photo finish" )
+		else:
+			logger( "photouploadview: form.is_valid() false" )
+	return render( request, 'photologue/photo_upload.html', {
+			'title': 'Photo Upload View',
+			'name2': 'test_form2',
+		})
+	#return HttpResponse( "Success" )
 	
 
 # Gallery views.

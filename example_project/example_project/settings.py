@@ -189,7 +189,7 @@ CKEDITOR_CONFIGS = {
 		'toolbar': 'Custom',
 		'toolbar_Custom': [
 			['Bold', 'Italic', 'Underline', 'Strike'],
-			['TextColor','Smiley'], 
+			['TextColor',], 
 			['RemoveFormat', 'Source']
 		],
 		'width':'340',

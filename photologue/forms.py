@@ -5,6 +5,10 @@ except ImportError:
 	# Python 2.
 	from zipfile import BadZipfile as BadZipFile
 
+from django.forms import ModelForm
+from django.forms.widgets import TextInput
+from .models import DepartmentItem
+
 import logging
 import os
 from io import BytesIO
@@ -180,3 +184,19 @@ class UploadZipForm(forms.Form):
 							 _('The photos have been added to gallery "{0}".').format(
 								 gallery.title),
 							 fail_silently=True)
+
+class DepartmentItemForm(ModelForm):
+	class Meta:
+		model = DepartmentItem
+		fields = '__all__'
+		widgets = {
+			'color' : TextInput(attrs={'type': 'color'}),
+		}
+
+class PhotoUploadForm(forms.Form):
+    date = forms.CharField(max_length=50)
+    time = forms.CharField(max_length=50)
+    from_name = forms.CharField(max_length=50)
+
+    my_file = forms.FileField()
+

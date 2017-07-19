@@ -181,6 +181,8 @@ class DepartmentItem(models.Model):
 	location = models.CharField(_('item location'),
 							max_length=250,
 							unique=False, blank=True)
+	color = models.CharField(max_length=7)
+
 	class Meta:
 		ordering = ['department','name']
 
@@ -597,7 +599,7 @@ class Photo(ImageModel):
 #							)
 	def limit_dt_today():
 		return { 'report_date__gt': (
-					timezone.localtime()-timezone.timedelta(1,0,0)) }
+					timezone.localtime()-timezone.timedelta(2,0,0)) }
 
 	daily_report_item = SortedManyToManyField(
 												'photologue.DailyReportItem',
@@ -1040,10 +1042,16 @@ class DailyReportItem(models.Model):
 	name = models.CharField( max_length = 64,
 											default="", blank=True,
 											unique=False)
+	def limit_dt_today():
+		return { 'date_added__gt': (
+					timezone.localtime()-timezone.timedelta(2,0,0)) }
+
 	photos = SortedManyToManyField('photologue.Photo',
 											related_name='DailyReportItem',
 											verbose_name=_('daily report photos'),
-											blank=True)
+											blank=True,
+											limit_choices_to = limit_dt_today
+									)
 #	photos = models.ManyToManyField( Photo, 
 #											blank=True)
 	report_date = models.DateTimeField(_('report date'),

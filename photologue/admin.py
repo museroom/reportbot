@@ -18,7 +18,7 @@ from utils.logger import logger
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 	Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
 	TestingClass
-from .forms import UploadZipForm
+from .forms import UploadZipForm, DepartmentItemForm
 
 MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
 
@@ -33,6 +33,8 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 class DepartmentItemAdmin(admin.ModelAdmin):
 	extra = 0
+	form = DepartmentItemForm
+
 	
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(DepartmentItem, DepartmentItemAdmin)
@@ -126,6 +128,21 @@ class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 
 	list_per_page = 50
 
+	fieldsets = (  ('', {
+							'fields': (
+								( "daily_report", "department_item", ),
+								("statusCK", "planCK"),
+								("status_TOC_CK", "plan_TOC_CK"),
+								"report_date", 
+										 )
+						}),
+						( '', {
+							'fields': (
+								("time_start", "time_stop"),
+								("reportRowID", "reportOrder"),
+							)
+						}), 
+					)
 	list_display = ( "__str__",
 						"daily_report", "department_item",
 						"time_start", "time_stop", 
@@ -137,7 +154,7 @@ class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 									"time_start", "time_stop", 
 									#"daily_report", "daily_report_item", #"tableTemplate",
 									)
-	search_fields = ["daily_report_item__name", 
+	search_fields = ["department_item__name", 
 						  ]
 	
 #	raw_id_fields = ('slug','title',) 
@@ -277,11 +294,11 @@ class PhotoAdmin(admin.ModelAdmin):
 #									'admin_thumbnail',
 							'thumbnail_admin',
 							'department_item',  
-							'follow_up_date_begin', 'follow_up_date_end',
+							'follow_up_date_end',
 							'date_added',
 									)
 	list_editable = ( 'department_item',
-							'follow_up_date_begin', 'follow_up_date_end',
+							 'follow_up_date_end',
 						)
 	list_filter = ['date_added', 'is_public']
 	if MULTISITE:
@@ -291,19 +308,21 @@ class PhotoAdmin(admin.ModelAdmin):
 	list_per_page = 10
 	prepopulated_fields = {'slug': ('title',)}
 #	save_on_top = True
-#	fieldsets = (
-#				( 'Information', {
-#					'fields': ('admin_thumbnail', 'title', 
-#								'department', 'report_item',
-#								'date_taken', 'date_added', 'slug',
-#								 )
-#				}),
-#				(	'Information2', {
-#					'fields': ( 'caption', 'is_public',
-#								 )
-#				}),
-#
-#				)
+	fieldsets = (
+				( '', {
+					'fields': ('image', 'thumbnail_admin', 'title', 
+								( 'department_item','department',),
+								('date_taken', 'date_added',), 'slug',
+								'effect',
+								 )
+				}),
+				(	'', {
+					'fields': ( 'caption', 'is_public',
+									'daily_report_item'
+								 )
+				}),
+
+				)
 
 #	readonly_fields = ('admin_thumbnail',)
 	readonly_fields = ('thumbnail_admin',)
