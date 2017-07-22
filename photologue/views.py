@@ -17,6 +17,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
+from django.utils import timezone
 from django.core.files.base import ContentFile
 
 from django.views.generic import View
@@ -202,7 +203,7 @@ class ReportItemListView(ListView ):
 			date_and_time = self.kwargs['date_and_time']
 		else:
 			print( 'dateandtime set to today' )
-			date_and_time = '2017-07-19-1930'
+			date_and_time = '2017-07-22-1930'
 			
 		#return Department.objects.all()
 		d = Photo
@@ -214,6 +215,8 @@ class ReportItemListView(ListView ):
 def Update_DailyReportItem( request, daily_report_pk ):
 	print( "DEBUG: daily_report_pk = {} // request.POST= {}".format (
 			 daily_report_pk, request.POST.getlist('report_photo'))) 
+	print( "DEBUG: submit department_item_pk = {}".format(
+			 request.POST.getlist('department_pk')))
 	for q_photo_pk in request.POST.getlist('report_photo'):
 		print( "updating pk:{} related daily_report_item".format(q_photo_pk) )
 		q_photo = Photo.objects.get( pk = int(q_photo_pk) )
@@ -228,6 +231,34 @@ def Update_DailyReportItem( request, daily_report_pk ):
 								q_related_daily_report_item)
 		#q_photo.save()
 	return HttpResponseRedirect( reverse( 'photologue:report_item_list_view' ))
+
+class PhotoCatagorize(ListView):
+	template_name = "photologue/photo_catagorize.html"
+
+	def get_queryset(self):
+		print( "photo_catagorize queryset={0}".format( self.kwargs )  )
+		#date_and_time = timezone.datetime.strptime( "20170721", "%Y%m%d" )
+		date_and_time = timezone.localtime()#datetime.strptime( "20170722", "%Y%m%d" )
+		qset = Photo.objects.filter( date_added__date = date_and_time )
+		return qset
+	
+def SetPhotoDepartmentItem( request ):
+	try:
+		department_pk = request.POST.getlist('department_pk')[0]
+	except:
+		return HttpResponseRedirect( reverse( 'photologue:photo_catagorize' ) )
+	q_department_item = DepartmentItem.objects.get( pk = department_pk )
+	print( "set_dailyreportitem:department={}".format( department_pk ) )
+	try:
+		list_set_photo = request.POST.getlist('set_photo')
+	except:
+		return HttpResponseRedirect( reverse( 'photologue:photo_catagorize' ) )
+	for set_photo in list_set_photo:
+		print( "set_dailyreportitem:{}".format( set_photo))
+		q_photo = Photo.objects.get( pk = set_photo )
+		q_photo.department_item = q_department_item
+		q_photo.save()
+	return HttpResponseRedirect( reverse( 'photologue:photo_catagorize' ) )
 
 #def ReportItemListView( request):
 #	print( "reportitemlistview called" )

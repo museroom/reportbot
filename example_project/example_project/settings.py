@@ -12,11 +12,12 @@ SECRET_KEY = '=_v6sfp8u2uuhdncdz9t1_nu8(#8q4=40$f$4rorj4q3)f-nlc'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['meitim.ddns.net',]
-
+ALLOWED_HOSTS = ['meitim.ddns.net','report.5tring.com']
+CSRF_TRUSTED_ORIGINS = ['www.5tring.com','.5tring.com','5tring.com']
 
 INSTALLED_APPS = (
 	'flat_responsive', 
+	#'flat', 
 	'django.contrib.admin',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
@@ -31,7 +32,6 @@ INSTALLED_APPS = (
 	'sortedm2m',
 	'ckeditor',
 	'example_project',
-	'fontawesome',
 )
 
 MIDDLEWARE_CLASSES = (

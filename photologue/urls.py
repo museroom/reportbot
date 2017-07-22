@@ -12,7 +12,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	PhotoDayArchiveOldView, PhotoMonthArchiveOldView, \
 	JsonReportItemQuery, JsonPhotoQuery, JsonTableMapQuery, \
 	ReportItemListView, Update_DailyReportItem, \
-	PhotoUploadView
+	PhotoUploadView, PhotoCatagorize, SetPhotoDepartmentItem
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -93,6 +93,12 @@ urlpatterns = [
 		Update_DailyReportItem, name="update_dailyreportitem"),
 	url(r'^testform/$',
 		PhotoUploadView, name="upload_photo"),
+	url(r'^catagorize/(?P<date_and_time>[\-\d\w|\W]+)/$',
+		PhotoCatagorize.as_view(), name="photo_catagorize"),
+	url(r'^catagorize/$',
+		PhotoCatagorize.as_view(), name="photo_catagorize"),
+	url(r'^set_dailyreportitem/$',
+		SetPhotoDepartmentItem, name="set_dailyreportitem"),
 	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

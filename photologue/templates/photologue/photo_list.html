@@ -1,17 +1,22 @@
 	{% extends "photologue/root.html" %}
 	{% load i18n %}
+	{% load photologue_tags %}
 
 	{% block title %}{% trans "Photos in Daily Report" %}{% endblock %}
 
 	{% block content %}
+	<code>debug: {{ title|my_random }}</code>
+	
 
 	<div class="row col-lg-12">
 		<h1 class="page-header"> {% trans "Photos in Daily Report" %}{{request.url}}</h1>
 	</div>
 
 	{% if object_list %}
-		<form action="{% url 'photologue:update_dailyreportitem' '2017-07-19-1930' %}" method="post">
-			{% csrf_token %}
+		<form action="{% url 'photologue:update_dailyreportitem' '2017-07-22-1930' %}"
+				method="post"> {% csrf_token %}
+
+			<!-- Photo List -->
 			<div class="row col-lg-12">
 				{% for photo in object_list %}
 
@@ -21,16 +26,6 @@
 					</a>
 					<p class="small" style="background-color:{{ photo.department_item.color }}">{{ photo.department_item.name }}</p>
 					<div class="checkbox">
-						{%comment%}
-						<label class="btn  btn-sm" >
-							<input type="checkbox" autocomplete="off" value="{{ photo.pk }}"  
-									name="report_photo"> Clone 
-						</label>
-						<label class="btn  btn-sm" >
-							<input type="checkbox" autocomplete="off" value="{{ photo.pk }}"  
-									name="delete_photo"> Delete
-						</label>
-						{%endcomment%}
 						<input  type="checkbox" data-toggle="toggle"
 						 	 	 data-on="Clone" data-off="Clone"
 								 data-onstyle="warning" data-size="mini"
@@ -43,6 +38,8 @@
 				</div>
 				{% endfor %}
 			</div>
+
+			<!-- footer -->
 			<p><hr></p>
 			<div class="row col-lg-12" >
 				<div class="col-lg-6" >

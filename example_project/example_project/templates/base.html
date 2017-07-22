@@ -12,10 +12,11 @@
 	      <script src="{{ STATIC_URL }}js/html5shiv.min.js"></script>
 	      <script src="{{ STATIC_URL }}js/respond.min.js"></script>
 	    <![endif]-->
-		{%comment%}
-	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"  media="screen"/>
-{%endcomment%}
-
+		 <style>
+		 .button-wrapper .btn {
+		 	margin-bottom:5px;
+		}
+		</style> 
 	<script src="http://code.jquery.com/jquery-1.9.1.js" media="screen"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" media="screen"></script>
 
@@ -44,10 +45,11 @@
 			    <li class="home"><a href="/">Home</a></li>
 			    <li class="reportitem dropdown">
 					<a data-target="#" href="" class="dropdown-toggle" data-toggle="dropdown">
-			            Department Item views<b class="caret"></b>
+			           Daily Report<b class="caret"></b>
 			        </a>
 					<ul class="dropdown-menu">
-						<li class="sub-page"><a href="{% url 'photologue:report_item_list_view' %}">List views</a></li>
+						<li class="sub-page"><a href="{% url 'photologue:report_item_list_view' %}">Daily Photo Preview</a></li>
+						<li class="sub-page"><a href="{% url 'photologue:photo_catagorize' %}">Photo Catagorize</a></li>
 					</ul>
 				</li>
 			    <li class="galleries dropdown">

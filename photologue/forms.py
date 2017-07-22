@@ -191,7 +191,8 @@ class DepartmentItemForm(ModelForm):
 		fields = '__all__'
 		widgets = {
 			'color' : TextInput(attrs={'type': 'color'}),
-		}
+			'report_color' : TextInput(attrs={'type': 'color'})
+			}
 
 class DailyReportItemForm(ModelForm):
 	class Meta:

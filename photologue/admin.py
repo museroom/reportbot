@@ -17,13 +17,17 @@ from utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 	Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
-	TestingClass
+	TestingClass, Hotel
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
 
 
 MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
 
 # Daily Report Admin Items
+
+class HotelAdmin( admin.ModelAdmin ):
+	extra = 0
+	model = Hotel
 
 class DepartmentItemInline(admin.TabularInline):
 	extra = 0
@@ -37,7 +41,7 @@ class DepartmentItemAdmin(admin.ModelAdmin):
 	extra = 0
 	form = DepartmentItemForm
 
-	
+admin.site.register(Hotel, HotelAdmin)
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(DepartmentItem, DepartmentItemAdmin)
 
@@ -307,7 +311,11 @@ class PhotoAdmin(admin.ModelAdmin):
 	if MULTISITE:
 		list_filter.append('sites')
 	search_fields = ['title', 'slug', 'caption', 
-						  'department_item__name', ]
+						  'department_item__name',
+						  'department_item__tags',
+						  'department_item__name',
+						  'department_item__name_long',
+						  ]
 	list_per_page = 10
 	prepopulated_fields = {'slug': ('title',)}
 #	save_on_top = True
@@ -316,7 +324,6 @@ class PhotoAdmin(admin.ModelAdmin):
 					'fields': ('image', 'thumbnail_admin', 'title', 
 								( 'department_item','department',),
 								('date_taken', 'date_added',), 'slug',
-								'effect',
 								 )
 				}),
 				(	'', {
@@ -332,7 +339,8 @@ class PhotoAdmin(admin.ModelAdmin):
 
 	form = PhotoAdminForm
 	
-	actions = ['reset_photo_department',
+	actions = ['set_hotel_CoD',
+				  'set_hotel_SC',
 	           'fill_related_daily_report_item',]
 
 	if MULTISITE:

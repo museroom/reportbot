@@ -156,10 +156,20 @@ size_method_map = {}
 # report pre class
 
 @python_2_unicode_compatible
+class Hotel(models.Model):
+	name = models.CharField(_('hotel'),
+						max_length=64,
+						unique=True,blank=True)
+	def __str__(self):
+		return self.name
+
+@python_2_unicode_compatible
 class Department(models.Model):
 	name = models.CharField(_('department'),
 							max_length=250,
 							unique=True) 
+	hotel = models.ForeignKey( Hotel,
+							on_delete=models.SET_NULL, null=True)
 	def __str__(self):
 		return self.name
 
@@ -183,7 +193,11 @@ class DepartmentItem(models.Model):
 	location = models.CharField(_('item location'),
 							max_length=250,
 							unique=False, blank=True)
+	tags = models.CharField(_('item tag'),
+							max_length=250,
+							unique=False, blank=True)
 	color = models.CharField(max_length=7, default="#ffffff")
+	report_color = models.CharField(max_length=7, default="#777777")
 
 	class Meta:
 		ordering = ['department','name']
@@ -204,7 +218,7 @@ class DepartmentItem(models.Model):
 	def __str__(self):
 		if( self.department != None ):
 			return "{1}_{2} ({0})".format(
-				self.department.name[3:],self.name,self.location,self.color)
+				self.department.name,self.name,self.location,self.color)
 		else:
 			return "{0}_{1}".format(
 				self.name, self.location)
@@ -630,11 +644,13 @@ class Photo(ImageModel):
 									on_delete = models.SET_NULL,
 									null=True,
 									blank=True)
+	def get_hotel():
+		return {'is_public':True}
+		
 	department_item = models.ForeignKey( DepartmentItem,
 									on_delete = models.SET_NULL,
 									null=True,
-									blank=True, )
-									#limit_choices_to = {'department':'1'})
+									blank=True )
 	follow_up_date_begin = models.DateTimeField(_('follow-up begin'),
 													null=True, blank=True )
 	follow_up_date_end = models.DateTimeField(_('follow-up end'),
