@@ -18,7 +18,10 @@ from utils.logger import logger
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 	Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
 	TestingClass, Hotel
+from django.forms import Textarea
+from django.db import models
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
+						 
 
 
 MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
@@ -51,6 +54,9 @@ class DailyReportItemInline( admin.StackedInline ):
 
 	model = DailyReportItem
 
+	formfield_overrides = {
+		models.TextField: {'widget': Textarea(attrs={'rows':3, 'cols':39})},
+	}
 #	fields= ( 'daily_report_item', ('reportRowID', 'photoCol'),
 #						('time_start', 'time_stop'),
 #					'statusCK', 'planCK', )

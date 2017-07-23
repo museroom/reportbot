@@ -1093,8 +1093,8 @@ class DailyReportItem(models.Model):
 								)
 	statusCK = RichTextField( blank = True )
 	planCK = RichTextField( blank = True )
-	status_TOC_CK = RichTextField( blank = True )
-	plan_TOC_CK = RichTextField( blank = True )
+	status_TOC_CK = models.TextField( blank = True )
+	plan_TOC_CK = models.TextField( blank = True )
 	
 #	reportRowNum = models.CharField(_('reportRow'), 
 #								max_length=10, unique=True, null=True, blank=True)
