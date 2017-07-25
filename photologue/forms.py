@@ -209,4 +209,3 @@ class PhotoUploadForm(forms.Form):
 
 	my_file = forms.FileField()
 
-

@@ -11,13 +11,15 @@ from django.contrib.admin import helpers
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.contrib.admin import widgets, DateFieldListFilter
+from django.contrib.admin.widgets import FilteredSelectMultiple 
 
 from datetime import datetime, timedelta
 from utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 	Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
-	TestingClass, Hotel
+	TestingClass, Hotel, PhotoGroup, Profile
 from django.forms import Textarea
 from django.db import models
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
@@ -27,6 +29,11 @@ from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
 MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
 
 # Daily Report Admin Items
+
+class ProfileAdmin( admin.ModelAdmin ):
+	model = Profile
+
+admin.site.register(Profile, ProfileAdmin)
 
 class HotelAdmin( admin.ModelAdmin ):
 	extra = 0
@@ -176,6 +183,48 @@ admin.site.register(DailyReportItem, DailyReportItemAdmin)
 admin.site.register(DailyReport, DailyReportAdmin)
 admin.site.register( TestingClass )
 	
+class PhotoGroupAdminForm( forms.ModelForm):
+
+	filter_horizontal = ['photo']
+
+	class Meta:
+		model = Gallery
+		if MULTISITE:
+			exclude = []
+		else:
+			exclude = ['sites']
+
+	if MULTISITE:
+		filter_horizontal = ['sites']
+	if MULTISITE:
+		actions = [
+			'add_to_current_site',
+			'add_photos_to_current_site',
+			'remove_from_current_site',
+			'remove_photos_from_current_site'
+		]
+	
+class PhotoGroupAdmin( admin.ModelAdmin ):
+
+	list_display = ('name', 'date_added' ) 
+	#filter_horizontal = ['photos',]
+	form = PhotoGroupAdminForm
+
+	def formfield_for_manytomany(self, db_field, request, **kwargs):
+		""" Set the current site as initial value. """
+		if db_field.name == "photos":
+			print( "{} formfield = photo, request={}".format( self , request) )
+		vertial = True
+		kwargs['widget'] = widgets.FilteredSelectMultiple(
+			db_field.verbose_name,
+			vertial,
+			)
+		return super(PhotoGroupAdmin, self).formfield_for_manytomany(
+												db_field, request, **kwargs)
+	#	return super(PhotoGroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+
+admin.site.register(PhotoGroup, PhotoGroupAdmin)
+
 class GalleryAdminForm(forms.ModelForm):
 
 	class Meta:
@@ -184,6 +233,16 @@ class GalleryAdminForm(forms.ModelForm):
 			exclude = []
 		else:
 			exclude = ['sites']
+
+	if MULTISITE:
+		filter_horizontal = ['sites']
+	if MULTISITE:
+		actions = [
+			'add_to_current_site',
+			'add_photos_to_current_site',
+			'remove_from_current_site',
+			'remove_photos_from_current_site'
+		]
 
 
 class GalleryAdmin(admin.ModelAdmin):
@@ -307,22 +366,25 @@ class PhotoAdmin(admin.ModelAdmin):
 #									'admin_thumbnail',
 							'thumbnail_admin',
 							'department_item',  
-							'follow_up_date_end',
+							'tags',
 							'date_added',
 									)
 	list_editable = ( 'department_item',
-							 'follow_up_date_end',
+							 'tags',
+							 #'follow_up_date_end',
 						)
-	list_filter = ['date_added', 'is_public']
+	list_filter = [ 'date_added']
 	if MULTISITE:
 		list_filter.append('sites')
 	search_fields = ['title', 'slug', 'caption', 
+						  'department_item__department__name',
 						  'department_item__name',
 						  'department_item__tags',
 						  'department_item__name',
 						  'department_item__name_long',
+						  'tags',
 						  ]
-	list_per_page = 10
+	list_per_page = 30
 	prepopulated_fields = {'slug': ('title',)}
 #	save_on_top = True
 	fieldsets = (
@@ -347,7 +409,9 @@ class PhotoAdmin(admin.ModelAdmin):
 	
 	actions = ['set_hotel_CoD',
 				  'set_hotel_SC',
-	           'fill_related_daily_report_item',]
+	           'fill_related_daily_report_item',
+				  'create_new_group',
+				  ]
 
 	if MULTISITE:
 		filter_horizontal = ['sites']
@@ -386,7 +450,25 @@ class PhotoAdmin(admin.ModelAdmin):
 	def reset_photo_department( modeladmin, request, queryset ):
 		queryset.update( department = Department.objects.get( name = "Other" ) )
 
-	def fill_related_daily_report_item( modeldmin, request, queryset ):
+	def create_new_group( modeladmin, request, queryset):
+		if queryset == None:
+			messages.success( request, 'no photo selected.' )
+			return
+		photo_date_time = queryset[0].date_added
+		groupname = "{}_auto".format(photo_date_time.strftime( "%y%m%d-%H%M%S" ))
+		new_photo_group = PhotoGroup( name=groupname, date_added=photo_date_time )
+		new_photo_group.save()
+		for q_photo in queryset:
+			new_photo_group.photos.add( q_photo )
+
+		msg = ungettext(
+			'The photo has been successfully added to new group',
+			'The photos have been successfully added to new group',
+			len(queryset)
+		)
+		messages.success( request, msg )
+
+	def fill_related_daily_report_item( modeladmin, request, queryset ):
 		for q_photo in queryset:
 			q_daily_report_item = q_photo.get_related_daily_report_item()
 			if q_daily_report_item != None:

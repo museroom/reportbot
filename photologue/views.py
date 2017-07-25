@@ -189,12 +189,17 @@ def JsonReportItemQuery( request, report_pk ):
 
 
 # ReportItem Views
+class DailyReportDateView(object):
+	queryset = Photo.objects.all()
+	date_field = 'date_added'
+	allow_empty = True
+
 #@login_required
-class ReportItemListView(ListView ):
+class DailyReportListView(DailyReportDateView, ArchiveIndexView ):
 	#date_and_time = timezone.localtime().strftime("%y%m%d-%H%M")
 	#paginate_by = 5
 
-	template_name = "photologue/photo_list.html"
+	template_name = "photologue/dailyreport_edit.html"
 
 	def get_queryset(self):
 		print( 'reportitemlistview queryset={0}'.format( self.kwargs ) )
@@ -203,7 +208,9 @@ class ReportItemListView(ListView ):
 			date_and_time = self.kwargs['date_and_time']
 		else:
 			print( 'dateandtime set to today' )
-			date_and_time = '2017-07-22-1930'
+			date_and_time = '2017-07-25-1930'
+
+		print( "date_and_time = {}".format(date_and_time))
 			
 		#return Department.objects.all()
 		d = Photo
@@ -211,6 +218,49 @@ class ReportItemListView(ListView ):
 #		return { 'object_list' : qset } #, 'date_and_time':date_and_time }
 		return qset
 
+#class DailyReportListView(ListView):
+#	queryset = DailyReport.objects.all()
+#	paginate_by = 20
+
+class DailyReportDetailView( DetailView):
+	queryset = DailyReport.objects.all()
+
+
+class DailyReportDetailView(DailyReportDateView, DateDetailView):
+	pass
+
+
+class DailyReportArchiveIndexView(DailyReportDateView, ArchiveIndexView):
+	pass
+
+
+class DailyReportDayArchiveView(DailyReportDateView, DayArchiveView):
+	template_name = "photologue/dailyreport_edit.html"
+	date_and_time = timezone.localtime()
+	def get_context_data( self, **kwargs):
+		context = super(DayArchiveView, self).get_context_data(**kwargs)
+		context['daily_report'] = DailyReport.objects.all()
+		return context
+	def get_queryset(self):
+		print( "DailyReportdayArchiveView:{}".format( self.kwargs ))
+	#	date_and_time = '2017-07-25-1930'
+		date_and_time = "{}-{}-{}-1930".format(
+								self.kwargs['year'],
+								self.kwargs['month'],
+								self.kwargs['day'] )
+		print( "date_and_time={}".format(date_and_time))
+		qset = Photo.objects.filter( daily_report_item__daily_report__title = date_and_time ).order_by( 'daily_report_item__reportOrder' ) 
+		return qset
+
+	pass
+
+
+class DailyReportMonthArchiveView(DailyReportDateView, MonthArchiveView):
+	pass
+
+
+class DailyReportYearArchiveView(DailyReportDateView, YearArchiveView):
+	make_object_list = True
 
 def Update_DailyReportItem( request, daily_report_pk ):
 	print( "DEBUG: daily_report_pk = {} // request.POST= {}".format (

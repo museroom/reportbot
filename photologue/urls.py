@@ -1,9 +1,11 @@
 from django.conf.urls import url, include
 from django.views.generic import RedirectView
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.translation import ugettext as _
 from django.contrib import admin
+from django.utils import timezone
 
+from .models import Photo, DailyReportItem, Department, DepartmentItem
 from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GalleryDetailView, PhotoArchiveIndexView, PhotoDateDetailView, PhotoDayArchiveView, \
 	PhotoYearArchiveView, PhotoMonthArchiveView, GalleryArchiveIndexView, GalleryYearArchiveView, \
@@ -11,7 +13,9 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GalleryDayArchiveOldView, GalleryMonthArchiveOldView, PhotoDateDetailOldView, \
 	PhotoDayArchiveOldView, PhotoMonthArchiveOldView, \
 	JsonReportItemQuery, JsonPhotoQuery, JsonTableMapQuery, \
-	ReportItemListView, Update_DailyReportItem, \
+	DailyReportListView, DailyReportDetailView, DailyReportArchiveIndexView, \
+	DailyReportDayArchiveView, DailyReportMonthArchiveView, \
+	Update_DailyReportItem, \
 	PhotoUploadView, PhotoCatagorize, SetPhotoDepartmentItem
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
@@ -85,10 +89,18 @@ urlpatterns = [
 		JsonPhotoQuery),
 	
 	# Report Item Views
-	url(r'^reportitemlist/(?P<date_and_time>[\-\d\w|\W]+)/$', 
-		ReportItemListView.as_view(), name="report_item_list_view_year"),
+	url(r'^reportitemlist/(?P<year>\d{4})/(?P<month>[0-9]{2})/(?P<day>\w{1,2})/$', 
+		DailyReportDayArchiveView.as_view(month_format='%m'), 
+		name="dailyreport-archive-day"),
+	url(r'^reportitemlist/(?P<year>\d{4})/(?P<month>[0-9]{2})/$', 
+		DailyReportMonthArchiveView.as_view(month_format='%m'), 
+		name="dailyreport-archive-month"),
 	url(r'^reportitemlist/$',
-		ReportItemListView.as_view(), name="report_item_list_view"), 
+		DailyReportListView.as_view(),  
+		#RedirectView.as_view( url = reverse_lazy(
+	#		'dailyreport-archive-day', kwargs={
+	#				'year':2017,'month':07,'day':24} ),
+			name="report_item_list_view"),
 	url(r'^update_dailyreportitem/(?P<daily_report_pk>[\-\d\w|\W]+)/$',
 		Update_DailyReportItem, name="update_dailyreportitem"),
 	url(r'^testform/$',

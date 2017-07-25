@@ -14,7 +14,7 @@ def department_item_list( qfilter ):
 
 @register.filter(name='my_random')
 def my_random(value):
-	print( "value={}".format(value)) 
+	print( "my_random filter:{}".format(value)) 
 	return random.sample(range(100),5)
 	
 @register.inclusion_tag('photologue/tags/next_in_gallery.html')

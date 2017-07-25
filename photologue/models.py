@@ -28,6 +28,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import format_html
 from django.core.validators import RegexValidator
 from django.contrib.sites.models import Site
+from django.contrib.auth.models import User
 
 from ckeditor.fields import RichTextField
 
@@ -156,8 +157,15 @@ size_method_map = {}
 # report pre class
 
 @python_2_unicode_compatible
-class Hotel(models.Model):
-	name = models.CharField(_('hotel'),
+class Profile( models.Model):
+	user = models.OneToOneField( User, on_delete=models.CASCADE )
+	company = models.ForeignKey( 'Company' )
+	def __str__(self):
+		return "{}({})".format( self.user.username, self.company.name )
+
+@python_2_unicode_compatible
+class Company(models.Model):
+	name = models.CharField(_('Company'),
 						max_length=64,
 						unique=True,blank=True)
 	def __str__(self):
@@ -169,7 +177,7 @@ class Department(models.Model):
 							max_length=250,
 							unique=True) 
 	hotel = models.ForeignKey( Hotel,
-							on_delete=models.SET_NULL, null=True)
+							on_delete=models.SET_NULL, null=True, unique=False)
 	def __str__(self):
 		return self.name
 
@@ -599,12 +607,43 @@ class ImageModel(models.Model):
 		super(ImageModel, self).delete()
 		self.image.storage.delete(self.image.name)
 
+@python_2_unicode_compatible
+class PhotoGroup(models.Model):
+	date_added = models.DateTimeField(
+						_('date added'), default=now)
+	name = models.CharField(_('name'), max_length=250, unique=False, blank=False)
+	photos = models.ManyToManyField( 
+						'photologue.Photo', blank=True,
+						verbose_name=_('photos') ) 
+	hotel = models.ForeignKey( Hotel, on_delete=models.SET_NULL, null=True)
+	department = models.ForeignKey( Department, on_delete=models.SET_NULL, null=True)
+	contact_person = models.CharField(_('contact person'), max_length=50, unique=False, blank=True)
+	contact_number = models.CharField(_('contact number'), max_length=50, unique=False, blank=True)
+	date_of_service = models.DateTimeField(_('Date/Time of Service Provided'), default=now )
+	department_item = models.ForeignKey( DepartmentItem, on_delete=models.SET_NULL, null=True)
+	problem_description = models.CharField(_('problem description'), max_length=250, unique=False, blank=True)
+	service_provided = models.CharField(_('serviceprovided'),max_length=50,unique=False, blank=True)
+	parts_replaced = models.TextField(_('parts replaced'),unique=False, blank= True)
+	remark = models.TextField(_('remark'), unique=False, blank=True)
+	conclusion = models.TextField(_('conclusion/recommendation'), unique=False, blank=True )
+	serviced_by = models.CharField(_('services provided by'), max_length=50, unique=False, blank=True )
+	serviced_date = models.DateTimeField(_('service date'), default=now )
+	inspected_by = models.CharField(_('inspected by'), max_length=50, unique=False, blank = True )
+	inspection_date = models.DateTimeField(_('inspection date'), default=now )
+
+	sites = models.ManyToManyField(Site, verbose_name=_(u'sites'),
+								   blank=True)
+								
+	def __str__(self):
+		return "{}_{}".format( self.date_added.strftime("%y%m%d-%H%M"), self.name)
 
 @python_2_unicode_compatible
 class Photo(ImageModel):
 	title = models.CharField(_('title'),
 							 max_length=250,
 							 unique=True)
+	tags = models.CharField(_('tags'), max_length=250,
+							 unique=False, blank=True)
 	slug = models.SlugField(_('slug'),
 							unique=True,
 							max_length=250,
