@@ -18,8 +18,8 @@ from datetime import datetime, timedelta
 from utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
-	Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
-	TestingClass, Hotel, PhotoGroup, Profile
+		Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
+		TestingClass, Company, PhotoGroup, Profile
 from django.forms import Textarea
 from django.db import models
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
@@ -35,9 +35,9 @@ class ProfileAdmin( admin.ModelAdmin ):
 
 admin.site.register(Profile, ProfileAdmin)
 
-class HotelAdmin( admin.ModelAdmin ):
+class CompanyAdmin( admin.ModelAdmin ):
 	extra = 0
-	model = Hotel
+	model = Company
 
 class DepartmentItemInline(admin.TabularInline):
 	extra = 0
@@ -51,7 +51,7 @@ class DepartmentItemAdmin(admin.ModelAdmin):
 	extra = 0
 	form = DepartmentItemForm
 
-admin.site.register(Hotel, HotelAdmin)
+admin.site.register(Company, CompanyAdmin)
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(DepartmentItem, DepartmentItemAdmin)
 
@@ -93,10 +93,26 @@ class DailyReportAdmin( admin.ModelAdmin):
 	list_per_page = 10
 	inlines = [DailyReportItemInline]
 	actions = [
-		'clone_report'
+		'clone_report',
+		'test_user_action'
 	]
 
+	def test_user_action(modeladmin, request, queryset):
+		print( "modeladmin ={}\nrequest={}\nqueryset={}\n".format(
+					modeladmin, request, queryset
+				))
+		print( "request user ={}".format( request.user.profile ) )
+		print( "request company ={}".format( request.user.profile.company ) )
+		print( "request active_report ={}".format( request.user.profile.active_report ) )
+		msg = ungettext(
+				"Successfully tested action",
+				"Successfully tested actions",
+				len( queryset )
+			)
+		messages.success( request, msg )
+
 	def clone_report(modeladmin, request, queryset):
+		print( 'debug: hello from clone_report' )
 		for q in queryset:
 			logger( "clone_report {}".format(q) )
 			# find yesterday report
@@ -407,8 +423,8 @@ class PhotoAdmin(admin.ModelAdmin):
 
 	form = PhotoAdminForm
 	
-	actions = ['set_hotel_CoD',
-				  'set_hotel_SC',
+	actions = ['set_company_CoD',
+				  'set_company_SC',
 	           'fill_related_daily_report_item',
 				  'create_new_group',
 				  ]

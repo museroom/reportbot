@@ -3,7 +3,7 @@ from django import template
 from django.template.defaultfilters import stringfilter
 
 from ..models import Gallery
-from ..models import Photo, DepartmentItem, Hotel, Department 
+from ..models import Photo, DepartmentItem, Company, Department 
 
 register = template.Library()
 

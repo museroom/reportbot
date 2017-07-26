@@ -3,20 +3,24 @@ from django.views.generic import RedirectView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.translation import ugettext as _
 from django.contrib import admin
-from django.utils import timezone
+from django.utils import timezone 
 
-from .models import Photo, DailyReportItem, Department, DepartmentItem
+from django.contrib.auth.models import User
+from django.views.generic.list import ListView
+
+from .models import Photo, DailyReportItem, Department, DepartmentItem, Profile
+
 from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GalleryDetailView, PhotoArchiveIndexView, PhotoDateDetailView, PhotoDayArchiveView, \
-	PhotoYearArchiveView, PhotoMonthArchiveView, GalleryArchiveIndexView, GalleryYearArchiveView, \
-	GalleryDateDetailView, GalleryDayArchiveView, GalleryMonthArchiveView, GalleryDateDetailOldView, \
-	GalleryDayArchiveOldView, GalleryMonthArchiveOldView, PhotoDateDetailOldView, \
-	PhotoDayArchiveOldView, PhotoMonthArchiveOldView, \
-	JsonReportItemQuery, JsonPhotoQuery, JsonTableMapQuery, \
+	PhotoYearArchiveView, PhotoMonthArchiveView, GalleryArchiveIndexView, \
+	GalleryYearArchiveView, GalleryDateDetailView, GalleryDayArchiveView, \
+	GalleryMonthArchiveView, GalleryDateDetailOldView, GalleryDayArchiveOldView, \
+	GalleryMonthArchiveOldView,  PhotoDateDetailOldView, PhotoDayArchiveOldView, \
+	PhotoMonthArchiveOldView, JsonReportItemQuery, JsonPhotoQuery, JsonTableMapQuery, \
 	DailyReportListView, DailyReportDetailView, DailyReportArchiveIndexView, \
 	DailyReportDayArchiveView, DailyReportMonthArchiveView, \
-	Update_DailyReportItem, \
-	PhotoUploadView, PhotoCatagorize, SetPhotoDepartmentItem
+	Update_DailyReportItem,  PhotoUploadView, PhotoCatagorize, \
+	SetPhotoDepartmentItem
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -96,10 +100,9 @@ urlpatterns = [
 		DailyReportMonthArchiveView.as_view(month_format='%m'), 
 		name="dailyreport-archive-month"),
 	url(r'^reportitemlist/$',
-		DailyReportListView.as_view(),  
-		#RedirectView.as_view( url = reverse_lazy(
-	#		'dailyreport-archive-day', kwargs={
-	#				'year':2017,'month':07,'day':24} ),
+		RedirectView.as_view( url = reverse_lazy( 
+			'photologue:dailyreport-archive-day', kwargs={
+				'year':'2017','month':'07','day':'25'} )), 
 			name="report_item_list_view"),
 	url(r'^update_dailyreportitem/(?P<daily_report_pk>[\-\d\w|\W]+)/$',
 		Update_DailyReportItem, name="update_dailyreportitem"),
@@ -111,6 +114,9 @@ urlpatterns = [
 		PhotoCatagorize.as_view(), name="photo_catagorize"),
 	url(r'^set_dailyreportitem/$',
 		SetPhotoDepartmentItem, name="set_dailyreportitem"),
+	
+	url(r'^user/view/$',
+		ListView.as_view( model=User ), name="user_view" ),
 	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

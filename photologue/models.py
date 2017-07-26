@@ -160,6 +160,7 @@ size_method_map = {}
 class Profile( models.Model):
 	user = models.OneToOneField( User, on_delete=models.CASCADE )
 	company = models.ForeignKey( 'Company' )
+	active_report = models.ForeignKey( 'DailyReport', blank=True )
 	def __str__(self):
 		return "{}({})".format( self.user.username, self.company.name )
 
@@ -176,7 +177,7 @@ class Department(models.Model):
 	name = models.CharField(_('department'),
 							max_length=250,
 							unique=True) 
-	hotel = models.ForeignKey( Hotel,
+	company = models.ForeignKey( Company,
 							on_delete=models.SET_NULL, null=True, unique=False)
 	def __str__(self):
 		return self.name
@@ -615,7 +616,7 @@ class PhotoGroup(models.Model):
 	photos = models.ManyToManyField( 
 						'photologue.Photo', blank=True,
 						verbose_name=_('photos') ) 
-	hotel = models.ForeignKey( Hotel, on_delete=models.SET_NULL, null=True)
+	company = models.ForeignKey( Company, on_delete=models.SET_NULL, null=True)
 	department = models.ForeignKey( Department, on_delete=models.SET_NULL, null=True)
 	contact_person = models.CharField(_('contact person'), max_length=50, unique=False, blank=True)
 	contact_number = models.CharField(_('contact number'), max_length=50, unique=False, blank=True)
@@ -684,12 +685,13 @@ class Photo(ImageModel):
 									null=True,
 									blank=True)
 	def get_hotel():
-		return {'is_public':True}
+		return {''}
 		
 	department_item = models.ForeignKey( DepartmentItem,
 									on_delete = models.SET_NULL,
 									null=True,
-									blank=True )
+									blank=True,
+									)
 	follow_up_date_begin = models.DateTimeField(_('follow-up begin'),
 													null=True, blank=True )
 	follow_up_date_end = models.DateTimeField(_('follow-up end'),

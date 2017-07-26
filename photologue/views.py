@@ -208,7 +208,7 @@ class DailyReportListView(DailyReportDateView, ArchiveIndexView ):
 			date_and_time = self.kwargs['date_and_time']
 		else:
 			print( 'dateandtime set to today' )
-			date_and_time = '2017-07-25-1930'
+			date_and_time = '2017-07-26-1930'
 
 		print( "date_and_time = {}".format(date_and_time))
 			
@@ -240,17 +240,13 @@ class DailyReportDayArchiveView(DailyReportDateView, DayArchiveView):
 	def get_context_data( self, **kwargs):
 		context = super(DayArchiveView, self).get_context_data(**kwargs)
 		context['daily_report'] = DailyReport.objects.all()
-		return context
-	def get_queryset(self):
-		print( "DailyReportdayArchiveView:{}".format( self.kwargs ))
-	#	date_and_time = '2017-07-25-1930'
 		date_and_time = "{}-{}-{}-1930".format(
 								self.kwargs['year'],
 								self.kwargs['month'],
 								self.kwargs['day'] )
-		print( "date_and_time={}".format(date_and_time))
 		qset = Photo.objects.filter( daily_report_item__daily_report__title = date_and_time ).order_by( 'daily_report_item__reportOrder' ) 
-		return qset
+		context['photo_list'] = qset
+		return context
 
 	pass
 
