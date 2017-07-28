@@ -7,6 +7,9 @@ try:
 except ImportError:
 	from PIL import Image
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.views.generic.dates import ArchiveIndexView, DateDetailView,  \
 													DayArchiveView, MonthArchiveView, \
 													YearArchiveView
@@ -27,7 +30,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
-						  Department, DailyReport
+						  Department, DailyReport, PhotoGroup
 
 from .forms import PhotoUploadForm
 import time, datetime
@@ -194,6 +197,12 @@ class DailyReportDateView(object):
 	date_field = 'date_added'
 	allow_empty = True
 
+# PhotoGroup Views
+class PhotoGroupDetailView(object):
+	queryset = PhotoGroup.objects.all()
+	date_field = 'date_added'
+	allow_empty = True
+
 #@login_required
 class DailyReportListView(DailyReportDateView, ArchiveIndexView ):
 	#date_and_time = timezone.localtime().strftime("%y%m%d-%H%M")
@@ -234,17 +243,30 @@ class DailyReportArchiveIndexView(DailyReportDateView, ArchiveIndexView):
 	pass
 
 
-class DailyReportDayArchiveView(DailyReportDateView, DayArchiveView):
+class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArchiveView):
+	login_url = '/login/'
+	redirect_field_name = 'report_item_list_view'
 	template_name = "photologue/dailyreport_edit.html"
 	date_and_time = timezone.localtime()
 	def get_context_data( self, **kwargs):
+		print("debug: active report={}".format(self.request.user.profile.active_report))
 		context = super(DayArchiveView, self).get_context_data(**kwargs)
 		context['daily_report'] = DailyReport.objects.all()
-		date_and_time = "{}-{}-{}-1930".format(
+		context['active_report'] = self.request.user.profile.active_report.title
+		if self.kwargs.has_key('year'):
+			date_and_time = "{}-{}-{}-1930".format(
 								self.kwargs['year'],
 								self.kwargs['month'],
 								self.kwargs['day'] )
-		qset = Photo.objects.filter( daily_report_item__daily_report__title = date_and_time ).order_by( 'daily_report_item__reportOrder' ) 
+		else:
+			report_dt = self.request.user.profile.active_report.report_date.astimezone(
+								timezone.get_default_timezone())
+			date_and_time = report_dt.strftime( "%Y-%m-%d-%H%M" ) 
+		print("date_and_time={}".format(date_and_time))
+
+		qset = Photo.objects.filter( 
+			daily_report_item__daily_report__title = date_and_time 
+			).order_by( 'daily_report_item__reportOrder' ) 
 		context['photo_list'] = qset
 		return context
 

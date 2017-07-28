@@ -13,13 +13,15 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.contrib.admin import widgets, DateFieldListFilter
 from django.contrib.admin.widgets import FilteredSelectMultiple 
+from django.http import HttpResponse
 
+import tempfile, zipfile
 from datetime import datetime, timedelta
 from utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 		Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
-		TestingClass, Company, PhotoGroup, Profile
+		Company, PhotoGroup, Profile
 from django.forms import Textarea
 from django.db import models
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
@@ -112,7 +114,6 @@ class DailyReportAdmin( admin.ModelAdmin):
 		messages.success( request, msg )
 
 	def clone_report(modeladmin, request, queryset):
-		print( 'debug: hello from clone_report' )
 		for q in queryset:
 			logger( "clone_report {}".format(q) )
 			# find yesterday report
@@ -197,7 +198,6 @@ class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 #admin.site.register(DailyReport)
 admin.site.register(DailyReportItem, DailyReportItemAdmin)
 admin.site.register(DailyReport, DailyReportAdmin)
-admin.site.register( TestingClass )
 	
 class PhotoGroupAdminForm( forms.ModelForm):
 
@@ -226,10 +226,21 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	#filter_horizontal = ['photos',]
 	form = PhotoGroupAdminForm
 
+	def get_form( self, request, obj=None, **kwargs):
+		if( obj != None ):
+			request.current_object = obj
+		return super(PhotoGroupAdmin, self).get_form(request, obj, **kwargs)
+
 	def formfield_for_manytomany(self, db_field, request, **kwargs):
 		""" Set the current site as initial value. """
 		if db_field.name == "photos":
 			print( "{} formfield = photo, request={}".format( self , request) )
+			print( u"request.current_object.date_added.date = {}".format(
+				request.current_object.date_added.date()) )
+			qset = Photo.objects.filter( 
+				department_item__department__company  = request.user.profile.company ).filter( 
+					date_added__date = request.current_object.date_added.date() )
+			kwargs['queryset'] = qset
 		vertial = True
 		kwargs['widget'] = widgets.FilteredSelectMultiple(
 			db_field.verbose_name,
@@ -389,7 +400,7 @@ class PhotoAdmin(admin.ModelAdmin):
 							 'tags',
 							 #'follow_up_date_end',
 						)
-	list_filter = [ 'date_added']
+	list_filter = [ 'date_added', 'department_item']
 	if MULTISITE:
 		list_filter.append('sites')
 	search_fields = ['title', 'slug', 'caption', 
@@ -427,6 +438,7 @@ class PhotoAdmin(admin.ModelAdmin):
 				  'set_company_SC',
 	           'fill_related_daily_report_item',
 				  'create_new_group',
+				  'download_photos',
 				  ]
 
 	if MULTISITE:
@@ -462,16 +474,47 @@ class PhotoAdmin(admin.ModelAdmin):
 		if db_field.name == "sites":
 			kwargs["initial"] = [Site.objects.get_current()] 
 		return super(PhotoAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+	
+	def formfield_for_foreignkey( self, db_field, request, **kwargs):
+		if db_field.name == "department_item":
+			user_company = request.user.profile.company
+			#user_department = request.user.profile.department
+			if user_company.name != "Any": 
+				kwargs["queryset"] = DepartmentItem.objects.filter( 
+						department__company = request.user.profile.company )
+			else:
+				kwargs["queryset"] = DepartmentItem.objects.all()
+		return super( PhotoAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs ) 
 
 	def reset_photo_department( modeladmin, request, queryset ):
 		queryset.update( department = Department.objects.get( name = "Other" ) )
+
+	def download_photos( modeladmin, request, queryset):
+		with tempfile.SpooledTemporaryFile() as tmp:
+			with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as archive:
+				for photo in queryset:
+					#projectUrl = str(item.cv) + ''
+					date_time = photo.date_added.astimezone( 
+									timezone.get_default_timezone( ) 
+									).strftime( "%y%m%d-%H%M%S" )
+					fileNameInZip = '{2}_{1}_{0}.jpg'.format(
+									photo.slug, photo.department_item.name, 
+									date_time )
+					archive.write(photo.image.path,fileNameInZip)
+				tmp.seek(0)
+				response = HttpResponse(tmp.read())
+				response.content_type = 'application/x-zip-compressed'
+				response['Content-Disposition'] = 'attachment; filename="reportbot.zip"'
+				return response	
 
 	def create_new_group( modeladmin, request, queryset):
 		if queryset == None:
 			messages.success( request, 'no photo selected.' )
 			return
-		photo_date_time = queryset[0].date_added
-		groupname = "{}_auto".format(photo_date_time.strftime( "%y%m%d-%H%M%S" ))
+		photo_date_time = queryset[0].date_added.astimezone( timezone.get_default_timezone()) 
+		groupname = u"{2}_{0}_{1}_auto".format(photo_date_time.strftime( "%y%m%d-%H%M%S" ),
+											queryset[0].department_item.name,
+											queryset[0].department_item.department.company.name )
 		new_photo_group = PhotoGroup( name=groupname, date_added=photo_date_time )
 		new_photo_group.save()
 		for q_photo in queryset:

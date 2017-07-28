@@ -6,9 +6,12 @@ from django.contrib import admin
 from django.utils import timezone 
 
 from django.contrib.auth.models import User
+from django.contrib.auth import views as auth_views
 from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 
-from .models import Photo, DailyReportItem, Department, DepartmentItem, Profile
+from .models import Photo, DailyReportItem, Department, DepartmentItem, Profile, \
+						  PhotoGroup
 
 from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GalleryDetailView, PhotoArchiveIndexView, PhotoDateDetailView, PhotoDayArchiveView, \
@@ -32,6 +35,7 @@ The new style will coexist with the existing 'pl-' prefix for a couple of releas
 
 """
 
+dt = timezone.localtime() 
 
 urlpatterns = [
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[0-9]{2})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',
@@ -91,6 +95,14 @@ urlpatterns = [
 		JsonReportItemQuery),
 	url(r'^json/Photo/(?P<report_item>[\-\d\w|\W]+)/(?P<date_and_time>[\-\d\w|\W]+)/$',
 		JsonPhotoQuery),
+
+	# Photo Group Views
+	url(r'^photogroup/$',
+		ListView.as_view( model = PhotoGroup ),
+		name = 'photogroup-list' ),
+	url(r'^photogroup/(?P<pk>[\d]+)/$',
+		DetailView.as_view( model = PhotoGroup ),
+		name = 'photogroup-detail' ), 
 	
 	# Report Item Views
 	url(r'^reportitemlist/(?P<year>\d{4})/(?P<month>[0-9]{2})/(?P<day>\w{1,2})/$', 
@@ -100,10 +112,9 @@ urlpatterns = [
 		DailyReportMonthArchiveView.as_view(month_format='%m'), 
 		name="dailyreport-archive-month"),
 	url(r'^reportitemlist/$',
-		RedirectView.as_view( url = reverse_lazy( 
-			'photologue:dailyreport-archive-day', kwargs={
-				'year':'2017','month':'07','day':'25'} )), 
-			name="report_item_list_view"),
+		DailyReportDayArchiveView.as_view(month_format='%m', 
+						year=str(dt.year),month=str(dt.month),day=str(dt.day) ),
+		name="report_item_list_view"),
 	url(r'^update_dailyreportitem/(?P<daily_report_pk>[\-\d\w|\W]+)/$',
 		Update_DailyReportItem, name="update_dailyreportitem"),
 	url(r'^testform/$',

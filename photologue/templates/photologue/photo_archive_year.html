@@ -27,7 +27,7 @@
 
 			{% if object_list %}
 				<div class="row col-lg-12">
-				    {% for photo in object_list %}
+				    {% for photo in object_list|slice:":50"  %}
 				        <a href="{{ photo.get_absolute_url }}">
 				             <img src="{{ photo.get_thumbnail_url }}" class="thumbnail" alt="{{ photo.title }}">
 				        </a>

@@ -162,7 +162,8 @@ class Profile( models.Model):
 	company = models.ForeignKey( 'Company' )
 	active_report = models.ForeignKey( 'DailyReport', blank=True )
 	def __str__(self):
-		return "{}({})".format( self.user.username, self.company.name )
+		return u"{}({})_{}".format( self.user.username, self.company.name, 
+											self.active_report.title )
 
 @python_2_unicode_compatible
 class Company(models.Model):
@@ -180,13 +181,7 @@ class Department(models.Model):
 	company = models.ForeignKey( Company,
 							on_delete=models.SET_NULL, null=True, unique=False)
 	def __str__(self):
-		return self.name
-
-@python_2_unicode_compatible
-class TestingClass( models.Model):
-	title = models.CharField(max_length=250, unique=False)
-	def __str__(self):
-		return title
+		return unicode(self.name)
 
 @python_2_unicode_compatible
 class DepartmentItem(models.Model):
@@ -226,10 +221,10 @@ class DepartmentItem(models.Model):
 
 	def __str__(self):
 		if( self.department != None ):
-			return "{1}_{2} ({0})".format(
-				self.department.name,self.name,self.location,self.color)
+			return u"{1}_{0}".format(
+				self.department.name, self.name)
 		else:
-			return "{0}_{1}".format(
+			return u"{0}_{1}".format(
 				self.name, self.location)
 
 # photlogue default 
@@ -621,6 +616,7 @@ class PhotoGroup(models.Model):
 	contact_person = models.CharField(_('contact person'), max_length=50, unique=False, blank=True)
 	contact_number = models.CharField(_('contact number'), max_length=50, unique=False, blank=True)
 	date_of_service = models.DateTimeField(_('Date/Time of Service Provided'), default=now )
+	place_or_system = models.CharField(_('place/system'), max_length=250, unique=False, blank=True)
 	department_item = models.ForeignKey( DepartmentItem, on_delete=models.SET_NULL, null=True)
 	problem_description = models.CharField(_('problem description'), max_length=250, unique=False, blank=True)
 	service_provided = models.CharField(_('serviceprovided'),max_length=50,unique=False, blank=True)
@@ -636,7 +632,7 @@ class PhotoGroup(models.Model):
 								   blank=True)
 								
 	def __str__(self):
-		return "{}_{}".format( self.date_added.strftime("%y%m%d-%H%M"), self.name)
+		return self.name
 
 @python_2_unicode_compatible
 class Photo(ImageModel):
@@ -706,7 +702,7 @@ class Photo(ImageModel):
 		verbose_name_plural = _("photos")
 
 	def __str__(self):
-		return "{}.{}".format(self.title, self.department_item.__str__())
+		return u"{}.{}".format(self.title, self.department_item.__str__())
 
 	def save(self, *args, **kwargs):
 		if self.slug is None:

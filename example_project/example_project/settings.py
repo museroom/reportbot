@@ -2,6 +2,7 @@
 
 import os
 import sys
+from django.urls import reverse_lazy
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -17,6 +18,7 @@ ALLOWED_HOSTS = ['meitim.ddns.net','report.5tring.com',
 					  ]
 CSRF_TRUSTED_ORIGINS = ['www.5tring.com','.5tring.com','5tring.com']
 
+LOGIN_REDIRECT_URL = reverse_lazy( 'photologue:report_item_list_view' )
 INSTALLED_APPS = (
 	'flat_responsive', 
 	#'flat', 
