@@ -237,9 +237,16 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 			print( "{} formfield = photo, request={}".format( self , request) )
 			print( u"request.current_object.date_added.date = {}".format(
 				request.current_object.date_added.date()) )
+                        obj = request.current_object
+                        dt_report = obj.date_added
+                        dt_range = 4
+                        dt_from = dt_report - timezone.timedelta(dt_range,0,0)
+                        dt_to   = dt_report + timezone.timedelta(dt_range,0,0)
 			qset = Photo.objects.filter( 
 				department_item__department__company  = request.user.profile.company ).filter( 
-					date_added__date = request.current_object.date_added.date() )
+                                        date_added__date__gt = dt_from.date() ).filter(
+                                        date_added__date__lt = dt_to.date() ) 
+					#date_added__date = request.current_object.date_added.date() )
 			kwargs['queryset'] = qset
 		vertial = True
 		kwargs['widget'] = widgets.FilteredSelectMultiple(

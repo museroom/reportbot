@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import views as auth_views
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+from django.views.generic import TemplateView
 
 from .models import Photo, DailyReportItem, Department, DepartmentItem, Profile, \
 						  PhotoGroup
@@ -22,8 +23,10 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	PhotoMonthArchiveOldView, JsonReportItemQuery, JsonPhotoQuery, JsonTableMapQuery, \
 	DailyReportListView, DailyReportDetailView, DailyReportArchiveIndexView, \
 	DailyReportDayArchiveView, DailyReportMonthArchiveView, \
-	Update_DailyReportItem,  PhotoUploadView, PhotoCatagorize, \
-	SetPhotoDepartmentItem
+	Update_DailyReportItem, Update_PhotoGroup, \
+        PhotoUploadView, PhotoCatagorize, \
+	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
+	MonthlyReportDetailView 
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -97,15 +100,15 @@ urlpatterns = [
 		JsonPhotoQuery),
 
 	# Photo Group Views
-	url(r'^photogroup/$',
-		ListView.as_view( model = PhotoGroup ),
-		name = 'photogroup-list' ),
-	url(r'^photogroup/(?P<pk>[\d]+)/$',
-		DetailView.as_view( model = PhotoGroup ),
-		name = 'photogroup-detail' ), 
+	url(r'^monthlyreport/$',
+		MonthlyReportListView.as_view(),
+		name = 'monthly-report-list' ),
+	url(r'^monthlyreport/(?P<pk>[\d]+)/$',
+		MonthlyReportDetailView.as_view(),
+		name = 'monthly-report-detail' ), 
 	
 	# Report Item Views
-	url(r'^reportitemlist/(?P<year>\d{4})/(?P<month>[0-9]{2})/(?P<day>\w{1,2})/$', 
+	url(r'^reportitemlist/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/$', 
 		DailyReportDayArchiveView.as_view(month_format='%m'), 
 		name="dailyreport-archive-day"),
 	url(r'^reportitemlist/(?P<year>\d{4})/(?P<month>[0-9]{2})/$', 
@@ -117,6 +120,8 @@ urlpatterns = [
 		name="report_item_list_view"),
 	url(r'^update_dailyreportitem/(?P<daily_report_pk>[\-\d\w|\W]+)/$',
 		Update_DailyReportItem, name="update_dailyreportitem"),
+	url(r'^update_photogroup/(?P<photo_group_pk>[\-\d\w|\W]+)/$',
+		Update_PhotoGroup, name="update_photogroup"),
 	url(r'^testform/$',
 		PhotoUploadView, name="upload_photo"),
 	url(r'^catagorize/(?P<date_and_time>[\-\d\w|\W]+)/$',
@@ -126,8 +131,13 @@ urlpatterns = [
 	url(r'^set_dailyreportitem/$',
 		SetPhotoDepartmentItem, name="set_dailyreportitem"),
 	
-	url(r'^user/view/$',
-		ListView.as_view( model=User ), name="user_view" ),
+	# Photo Selector Popup
+	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/$',
+		PhotoSelectListView.as_view(), name = 'photo-select-popup-list' ), 
+
+        # General Message Redirect View
+        url(r'^message/success/$',
+                TemplateView.as_view(template_name='photologue/message_success.html'), name='message-success' ),
 	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

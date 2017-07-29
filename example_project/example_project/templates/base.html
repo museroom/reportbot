@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>{% block title %}{% endblock %}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<head>
+		<meta charset="utf-8">
+		<title>{% block title %}{% endblock %}</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<!-- Bootstrap -->
 		<link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" media="screen">
 		<link href="{{ STATIC_URL }}css/screen.css" rel="stylesheet" media="screen">
-	    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-	    <!--[if lt IE 9]>
-	      <script src="{{ STATIC_URL }}js/html5shiv.min.js"></script>
-	      <script src="{{ STATIC_URL }}js/respond.min.js"></script>
-	    <![endif]-->
+		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+		  <script src="{{ STATIC_URL }}js/html5shiv.min.js"></script>
+		  <script src="{{ STATIC_URL }}js/respond.min.js"></script>
+		<![endif]-->
 		 <style>
 		 .button-wrapper .btn {
-		 	margin-bottom:5px;
+			margin-bottom:5px;
 		}
 		</style> 
 	<script src="http://code.jquery.com/jquery-1.9.1.js" media="screen"></script>
@@ -23,69 +23,71 @@
 	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" media="screen"></script>
 		<link href="{{ STATIC_URL }}css/bootstrap-toggle.min.css" rel="stylesheet" media="screen">
 		<script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js" media="screen"></script>
-    </head>
-    <body>
-        <!-- Navigation -->
+	</head>
+	<body>
+		<!-- Navigation -->
 		<nav class="navbar navbar-default" role="navigation">
 		  <!-- Brand and toggle get grouped for better mobile display -->
 		  <div class="navbar-header">
-		    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-		      <span class="sr-only">Toggle navigation</span>
-		      <span class="icon-bar"></span>
-		      <span class="icon-bar"></span>
-		      <span class="icon-bar"></span>
-		    </button>
-		    <a class="navbar-brand" href="/">ReportBot</a>
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+			  <span class="sr-only">Toggle navigation</span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/">ReportBot</a>
 		  </div>
 		
 		  <!-- Collect the nav links, forms, and other content for toggling -->
 		  <div class="collapse navbar-collapse navbar-ex1-collapse">
-		    <ul class="nav navbar-nav">
-			    <li class="home"><a href="/">Home</a></li>
-			    <li class="reportitem dropdown">
+			<ul class="nav navbar-nav">
+				<li class="home"><a href="/">Home</a></li>
+				<li class="reportitemlist dropdown">
 					<a data-target="#" href="" class="dropdown-toggle" data-toggle="dropdown">
-			           Daily Report<b class="caret"></b>
-			        </a>
+					   Daily Report<b class="caret"></b>
+					</a>
 					<ul class="dropdown-menu">
 						<li class="sub-page"><a href="{% url 'photologue:report_item_list_view' %}">Daily Report Preview</a></li>
 						<li class="sub-page"><a href="{% url 'photologue:photo_catagorize' %}">Photo Catagorize</a></li>
 					</ul>
 				</li>
-			    <li class="galleries dropdown">
+				{%comment%}
+				<li class="galleries dropdown">
 					<a data-target="#" href="" class="dropdown-toggle" data-toggle="dropdown">
-			            Gallery views<b class="caret"></b>
-			        </a>
+						Gallery views<b class="caret"></b>
+					</a>
 					<ul class="dropdown-menu">
-						<li class="sub-page"><a href="{% url 'photologue:photogroup-list' %}">CM/PM</a></li>
+						<li class="sub-page"><a href="{% url 'photologue:monthly-report-list' %}">CM/PM</a></li>
 						<li class="sub-page"><a href="{% url 'photologue:pl-gallery-archive' %}">Date views</a></li>
 						<li class="sub-page"><a href="{% url 'photologue:gallery-list' %}">List views</a></li>
 					</ul>
 				</li>
-			    <li class="photogroups dropdown">
+				{%endcomment%}
+				<li class="monthlyreport dropdown">
 					<a data-target="#" href="" class="dropdown-toggle" data-toggle="dropdown">
 						Monthly Report<b class="caret"></b>
-			        </a>
+					</a>
 					<ul class="dropdown-menu">
-						<li class="sub-page"><a href="{% url 'photologue:photogroup-list' %}">CM/PM</a></li>
+						<li class="sub-page"><a href="{% url 'photologue:monthly-report-list' %}">CM/PM</a></li>
 					</ul>
 				</li>
-			    <li class="photos dropdown">
+				<li class="photos dropdown">
 					<a data-target="#" href="" class="dropdown-toggle" data-toggle="dropdown">
-			            Photo views<b class="caret"></b>
-			        </a>
+						Photo views<b class="caret"></b>
+					</a>
 					<ul class="dropdown-menu">
 						<li class="sub-page"><a href="{% url 'photologue:pl-photo-archive' %}">Date views</a></li>
 						<li class="sub-page"><a href="{% url 'photologue:photo-list' %}">List views</a></li>
 					</ul>
 				</li>
-		    </ul>
+			</ul>
 		  </div><!-- /.navbar-collapse -->
 		</nav>
-    	<div class="container-fluid">
-        	{% block content %}{% endblock %}
-        </div>
-        <script src="{{ STATIC_URL }}js/jquery.js"></script>
-        <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+		<div class="container-fluid">
+			{% block content %}{% endblock %}
+		</div>
+		<script src="{{ STATIC_URL }}js/jquery.js"></script>
+		<script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
 		<script src="{{ STATIC_URL }}js/project.js"></script>
-    </body>
+	</body>
 </html>

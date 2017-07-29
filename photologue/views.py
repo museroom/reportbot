@@ -30,7 +30,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
-						  Department, DailyReport, PhotoGroup
+						  Department, DailyReport, PhotoGroup, Profile, Company
 
 from .forms import PhotoUploadForm
 import time, datetime
@@ -191,19 +191,90 @@ def JsonReportItemQuery( request, report_pk ):
 	return JsonResponse(dict(reportItems=rspGroup) ) #, safe=False)
 
 
-# ReportItem Views
+# ReportItem / Daily Report Views
 class DailyReportDateView(object):
 	queryset = Photo.objects.all()
 	date_field = 'date_added'
 	allow_empty = True
 
-# PhotoGroup Views
+# PhotoGroup / Monthly Report Views
 class PhotoGroupDetailView(object):
 	queryset = PhotoGroup.objects.all()
 	date_field = 'date_added'
 	allow_empty = True
 
-#@login_required
+
+# Photo Select Pop Views
+class PhotoSelectListView(ListView): 
+	model = Photo,
+	template_name = "photologue/photoselect_list.html"
+	
+	def get_context_data( self, **kwargs):
+		context = super( PhotoSelectListView, self).get_context_data(**kwargs)
+		date_time = timezone.datetime.strptime(  
+						"{}-{}-{}".format(
+							self.kwargs['year'], 
+							self.kwargs['month'],
+							self.kwargs['day'] ),"%Y-%m-%d")
+		date_time_prev = date_time - timezone.timedelta(1,0,0)
+		date_time_next = date_time + timezone.timedelta(1,0,0)
+		context['date_prev'] = date_time_prev
+		context['date_prev_url'] = reverse( 'photologue:photo-select-popup-list',
+											kwargs={'year':date_time.year,
+											        'month':date_time.month,
+											   	    'day':date_time.day-1} )
+
+		context['date_report'] = date_time
+		context['date_next'] = date_time_next
+		context['date_next_url'] = reverse( 'photologue:photo-select-popup-list',
+											kwargs={'year':date_time.year,
+											        'month':date_time.month,
+											   	    'day':date_time.day+1} )
+		context['active_photogroup']=self.request.user.profile.active_report
+		return context
+
+
+	def get_queryset(self):
+		date_time = timezone.datetime.strptime(  
+						"{}-{}-{}".format(
+							self.kwargs['year'], 
+							self.kwargs['month'],
+							self.kwargs['day'] ),"%Y-%m-%d")
+		qset = Photo.objects.filter( date_added__date = date_time.date() ).filter(
+					department_item__department__company = self.request.user.profile.company )
+
+		return qset
+
+class MonthlyReportListView( ListView ):
+	model = PhotoGroup
+	template_name="photologue/monthlyreport_list.html"
+
+
+class MonthlyReportDetailView( DetailView ):
+	model = PhotoGroup
+	template_name="photologue/monthlyreport_detail.html"
+	def get_context_data( self, **kwargs):
+		obj = kwargs['object']
+		print( "debug: MonthlyReportDetailView:Obj:photogroup={}".format(obj) )
+		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
+		q_profile.active_photogroup = obj 
+		q_profile.save()
+		date_time = obj.date_added
+		context = super( MonthlyReportDetailView, self).get_context_data(**kwargs)
+		context['var1'] = 'value1'
+		context['popup_url'] = reverse( 'photologue:photo-select-popup-list',
+													kwargs={'year':date_time.year,
+														     'month':date_time.month,
+															  'day':date_time.day} )
+		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
+		q_profile.active_photogroup = obj
+		q_profile.save()
+		context['active_photogroup'] = q_profile.active_photogroup
+		context['select_company'] = Company.objects.all();
+		context['select_department'] = Department.objects.all();
+		return context
+
+
 class DailyReportListView(DailyReportDateView, ArchiveIndexView ):
 	#date_and_time = timezone.localtime().strftime("%y%m%d-%H%M")
 	#paginate_by = 5
@@ -274,25 +345,46 @@ class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArch
 
 
 class DailyReportMonthArchiveView(DailyReportDateView, MonthArchiveView):
-	pass
-
+	pass 
 
 class DailyReportYearArchiveView(DailyReportDateView, YearArchiveView):
 	make_object_list = True
 
+# Update Forms
+
+def Update_PhotoGroup( request, photo_group_pk ):
+	print( u"DEBUG: photo_group_pk = {}".format( photo_group_pk ) )
+	print( u"DEBUG: active_photogroup = {}".format( request.user.profile.active_photogroup ) )
+	q_photogroup = request.user.profile.active_photogroup
+	for q_photo_pk in request.POST.getlist('report_photo'):
+		print( u"adding q_photo_pk={}".format( q_photo_pk ) )
+		q_photo = Photo.objects.get( pk = q_photo_pk )
+		q_photogroup.photos.add( q_photo )
+	for q_photo_pk in request.POST.getlist('delete_photo'):
+		print( u"deleting q_photo_pk={}".format( q_photo_pk))
+		q_photo = Photo.objects.get( pk = q_photo_pk )
+		q_photogroup.photos.remove( q_photo )
+	
+	if request.POST.has_key('delete_photo'):
+		return HttpResponseRedirect( reverse(
+			'photologue:monthly-report-detail', args=[ photo_group_pk ] ) )
+	else:
+		return HttpResponseRedirect( reverse( 'photologue:message-success' ) )
+	
+
 def Update_DailyReportItem( request, daily_report_pk ):
-	print( "DEBUG: daily_report_pk = {} // request.POST= {}".format (
+	print( u"DEBUG: daily_report_pk = {} // request.POST= {}".format (
 			 daily_report_pk, request.POST.getlist('report_photo'))) 
-	print( "DEBUG: submit department_item_pk = {}".format(
+	print( u"DEBUG: submit department_item_pk = {}".format(
 			 request.POST.getlist('department_pk')))
 	for q_photo_pk in request.POST.getlist('report_photo'):
-		print( "updating pk:{} related daily_report_item".format(q_photo_pk) )
+		print( u"updating pk:{} related daily_report_item".format(q_photo_pk) )
 		q_photo = Photo.objects.get( pk = int(q_photo_pk) )
 		q_related_daily_report_item = q_photo.get_related_daily_report_item()
 		q_photo.daily_report_item.add( q_related_daily_report_item )
 		q_photo.save()
 	for q_photo_pk in request.POST.getlist('delete_photo'):
-		print( "removing pk:{} related daily_report_item".format(q_photo_pk) )
+		print( u"removing pk:{} related daily_report_item".format(q_photo_pk) )
 		q_photo = Photo.objects.get( pk = int(q_photo_pk) )
 		q_related_daily_report_item = q_photo.get_related_daily_report_item()
 		q_photo.daily_report_item.remove(

@@ -8,7 +8,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #PHOTOLOGUE_MULTISITE = True
 
-
 SECRET_KEY = '=_v6sfp8u2uuhdncdz9t1_nu8(#8q4=40$f$4rorj4q3)f-nlc'
 
 DEBUG = True
@@ -19,6 +18,7 @@ ALLOWED_HOSTS = ['meitim.ddns.net','report.5tring.com',
 CSRF_TRUSTED_ORIGINS = ['www.5tring.com','.5tring.com','5tring.com']
 
 LOGIN_REDIRECT_URL = reverse_lazy( 'photologue:report_item_list_view' )
+
 INSTALLED_APPS = (
 	'flat_responsive', 
 	#'flat', 

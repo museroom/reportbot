@@ -161,6 +161,8 @@ class Profile( models.Model):
 	user = models.OneToOneField( User, on_delete=models.CASCADE )
 	company = models.ForeignKey( 'Company' )
 	active_report = models.ForeignKey( 'DailyReport', blank=True )
+	active_photogroup = models.ForeignKey( 'PhotoGroup', blank=True,on_delete=models.SET_NULL, null=True )
+
 	def __str__(self):
 		return u"{}({})_{}".format( self.user.username, self.company.name, 
 											self.active_report.title )
