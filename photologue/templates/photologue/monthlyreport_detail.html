@@ -15,7 +15,6 @@
 	 <form action="{% url 'photologue:update_photogroup' object.pk %}"
 			 method="post"> {% csrf_token %}
 		<p>Photo Group database name: <code>{{object.name}}</code>
-		<a href="{% url 'admin:photologue_photogroup_change' object.id%}">[Admin]</a> 
 		 </p>
 	
 		<div class="row"> 
@@ -39,6 +38,7 @@
 		<hr/>
 
 		<p class="text-danger">IN PROGRESS, edit text have will not save, only Photo will be saved!</p>
+		<a href="{% url 'admin:photologue_photogroup_change' object.id%}">[Admin]</a> 
 		<table style="width: 89.8752%;" border="1"> 
 			<tbody> 
 				<tr style="height: 21px;"> 
