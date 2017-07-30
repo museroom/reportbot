@@ -3,16 +3,16 @@ import os
 from io import BytesIO
 
 try:
-	import Image
+    import Image
 except ImportError:
-	from PIL import Image
+    from PIL import Image
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.views.generic.dates import ArchiveIndexView, DateDetailView,  \
-													DayArchiveView, MonthArchiveView, \
-													YearArchiveView
+    DayArchiveView, MonthArchiveView, \
+    YearArchiveView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.base import RedirectView
@@ -30,7 +30,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
-						  Department, DailyReport, PhotoGroup, Profile, Company
+    Department, DailyReport, PhotoGroup, Profile, Company
 
 from .forms import PhotoUploadForm
 import time, datetime
@@ -263,9 +263,9 @@ class MonthlyReportDetailView( DetailView ):
 		context = super( MonthlyReportDetailView, self).get_context_data(**kwargs)
 		context['var1'] = 'value1'
 		context['popup_url'] = reverse( 'photologue:photo-select-popup-list',
-													kwargs={'year':date_time.year,
-														     'month':date_time.month,
-															  'day':date_time.day} )
+					kwargs={'year':date_time.year,
+                                        'month':date_time.month,
+                                        'day':date_time.day} )
 		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
 		q_profile.active_photogroup = obj
 		q_profile.save()

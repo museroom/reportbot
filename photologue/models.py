@@ -632,9 +632,14 @@ class PhotoGroup(models.Model):
 
 	sites = models.ManyToManyField(Site, verbose_name=_(u'sites'),
 								   blank=True)
-								
+
+	def sample( self ):
+	   count = 4
+	   qset = self.photos.all()[:count]
+	   return qset
+
 	def __str__(self):
-		return self.name
+		return self.name.replace( "_", " " )
 
 @python_2_unicode_compatible
 class Photo(ImageModel):
@@ -1195,7 +1200,7 @@ class DailyReportItem(models.Model):
 	  #					self.daily_report_item.name
 		if( self.name != "" ):
 #			return self.get_report_date_str()+"_" + \
-#	  					self.daily_report_item.name + "_" + \
+#						self.daily_report_item.name + "_" + \
 #							self.name
 			return self.daily_report.get_formatted_date() + "_" +\
 						 self.department_item.name + "_" + \
@@ -1204,7 +1209,7 @@ class DailyReportItem(models.Model):
 			return self.daily_report.get_formatted_date() + "_" +\
 						 self.department_item.name + "_" 
 #			return self.get_report_date_str()+"_" + \
-#`	  					self.daily_report_item.name
+#`						self.daily_report_item.name
 
 
 # Extra unknown

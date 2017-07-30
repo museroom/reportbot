@@ -12,21 +12,19 @@
 			<p><mark>Project under early development pharse.</mark></p>
 			<p>Any photo uploaded will be kept safe and throughout the development. Daily backup will be performed to Google Cloud Storage </p>
 			<p>To apply for an account contact Ken Fung <a href="mailto:mr.forgot@gmail.com">mr.forgot@gmail.com</a>. Or contact +853-6612-1024 during normal office hour.
-				<p><a class="btn btn-info" role="button" href= {% url "admin:login" %}> User Login </a></p>
-				<table class"table">
-					<thead>
-						<tr>
-							<th>username</th>
-							<th>password</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="info">
-							<td>meitim</td>
-							<td>meitim</td>
-						</tr>
-					</tbody>
-				</table>
+			<div class="row">
+				<div class="col-xs-2">
+					<p><a class="btn btn-info" role="button" href= {% url "admin:login" %}> Admin </a></p>
+				</div>
+				<div class="col-xs-2">
+					<p><b>username</b><br>
+					meitim</p>
+				</div>
+				<div class="col-xs-">
+					<p><b>password</b><br>
+					meitim </p>
+				</div>
+			</div>
 		</div>
 	</div>
 {% endblock %}
