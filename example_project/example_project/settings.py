@@ -34,6 +34,7 @@ INSTALLED_APPS = (
 	'django.contrib.sitemaps',
 	'photologue',
 	'sortedm2m',
+	'fontawesome',
 	'ckeditor',
 	'example_project',
 )
