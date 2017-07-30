@@ -1,8 +1,11 @@
 /* Some customisation for the Photologue demo site. */
 
+
+
 div.row img.thumbnail {
 	margin-bottom: 5px;
 	display: inline-block;
+	margin : 0 auto;
 }
 
 .page-header {
@@ -19,3 +22,7 @@ a.btn.btn-default {
 	margin-bottom: 20px;
 }
 
+.nopadding {
+	padding: 0 !important;
+	margin: 0 !important;
+}
