@@ -1,0 +1,14 @@
+<h1>{{ title }}</h1>
+<form action="{% url 'photologue:upload_photo' %}" method="post"
+	enctype="multipart/form-data"> 
+	<input type="text" name="date"/>
+	<br/>
+	<input type="text" name="time"/>
+	<br/>
+	<input type="text" name="from_name"/>
+	<br/>
+	<input type="file" name="my_file" accept="image/*"/>
+	<br/>
+
+	<input type="submit"/>
+</form>

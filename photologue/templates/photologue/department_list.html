@@ -1,0 +1,57 @@
+{% extends "photologue/root.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "All Report Items" %}{% endblock %}
+
+{% block content %}
+
+	<div class="row col-lg-12">
+		<h1 class="page-header">{% trans "All Department Items" %}</h1>
+	</div>
+
+	<div class="row">
+		<aside class="col-md-2">
+
+			<h4>{% trans "Filter by year" %}</h4>
+			<ul>
+			{% for date in date_list %}
+				<li><a href="{% url 'photologue:pl-gallery-archive-year' date.year %}">{{ date|date:"Y" }}</a></li>
+			{% endfor %}
+			</ul>
+
+		</aside>
+	</div>
+
+	<code> count= {{ request.GET }} </code>
+	{% if object_list %}
+		<form action="{% url 'photologue:update_dailyreportitem' '2017-07-26-1930' %}" method="post">
+		{% csrf_token %}
+		{% for report_item in object_list %}
+		<div class="row col-lg-12" style="background-color:lightgrey;">
+			<h2>{{ report_item.name_long }}</h2>
+			<p class="muted"><small>{% trans "Location:" %} {{ report_item.location }}</small></p>
+			{% if report_item.name %}<p><a href="{{ report_item.get_absolute_url }}">edit {{ report_item.name|safe }}</a></p>{% endif %} 
+			{%comment%}
+			<div class="row" style="background-color:blue;">
+			{%endcomment%}
+			{% for photo in report_item.sample %}
+				<div class="col-xs-6 col-sm-3 col-md-2 col-lg-1" style=" min-width:165px;" >
+					<a href="{{ photo.get_absolute_url }}">
+					<img src="{{ photo.get_thumbnail_url }}" class="thumbnail" alt="{{ photo.title }}">
+					</a>
+					<p>clone to active report<input type="checkbox" value="{{ photo.pk }}"  name="report_photo"> </p>
+				</div>
+				{% endfor %}
+				{%comment%} </div> {%endcomment%}
+				</div>
+			{% endfor %}
+			<input type="submit" value="Vote" />
+		</form>
+	{% else %}
+		<div class="row col-lg-12">{% trans "No Report Item were found" %}.</div>
+	{% endif %}
+
+	{% include "photologue/includes/paginator.html" %}
+
+{% endblock %}
+

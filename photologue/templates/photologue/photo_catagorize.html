@@ -1,0 +1,75 @@
+	{% extends "photologue/root.html" %}
+	{% load i18n %}
+	{% load photologue_tags %}
+
+	{% block title %}{% trans "Select Photo(s) and set Department Item" %}{% endblock %}
+
+	{% block content %}
+	
+
+	<div class="row col-lg-12">
+		<h4 class="page-header"> {% trans "Select Photo(s) and set Department Item" %}{{request.url}}</h4>
+	</div>
+
+	{% if object_list %}
+		<form action="{% url 'photologue:set_dailyreportitem' %}"
+				method="post"> {% csrf_token %}
+
+			<!-- Photo List -->
+			<div class="row col-lg-12">
+				{% for photo in object_list %}
+
+				<div class="col-xs-4 col-sm-3 col-md-2 col-lg-1" style=" min-width:165px;" >
+					<a href="{{ photo.get_absolute_url }}">
+						<img src="{{ photo.get_thumbnail_url }}" class="thumbnail" alt="{{ photo.title }}">
+					</a>
+					<div class="checkbox">
+						<input  type="checkbox" data-toggle="toggle"
+						 	 	 data-on="Select" data-off="Select"
+								 data-onstyle="warning" data-size="mini"
+								 value="{{ photo.pk }}" name="set_photo" >
+						<span class="small"><a href="#department" >[&#9660;]</a></span>
+						<span class="small"><a href="{% url 'admin:photologue_photo_change' photo.pk %}" >[admin]</a></span>
+						{%comment%}
+						<input  type="checkbox" data-toggle="toggle"
+						 	 	 data-on="Drop" data-off="Drop"
+								 data-onstyle="danger" data-size="mini"
+								 value="{{ photo.pk }}" name="drop_photo" >
+						{%endcomment%}
+					</div>
+					<p class="small" style="background-color:{{ photo.department_item.color }}">{{ photo.department_item.name }}({{photo.department_item.department.name}})</p>
+				</div>
+				{% endfor %}
+			</div>
+
+			<!-- Department List -->
+			<p><hr><p>
+			<a name="department"></a>Set Selected Photo(s) to:
+			<div class="button-wrapper">
+				{% for department_item in title|department_item_list %}
+						<button class="btn btn-sm" 
+							    style="background-color:{{department_item.report_color}}"
+								 value={{department_item.pk}}
+								 name="department_pk" type="submit">
+							{{department_item.name}}
+						</button>
+				{% endfor %}
+			</div>
+
+			<!-- footer -->
+			<p><hr></p>
+		</form>
+	{% else %}
+		<div class="row">{% trans "No photos were found" %}.</div>
+	{% endif %}
+	{% comment %}
+	{% include "photologue/includes/paginator.html" %}
+	{% endcomment %}
+	<div style="float:left">
+		<p > Tags:
+			<a href="#"><span class="label label-info">Go To Top</span></a>
+			| <i class="icon-user"></i>Photo in view: {{ object_list|length }}<a href="#"></a>
+		</p>
+	</div>
+
+	{% endblock %}

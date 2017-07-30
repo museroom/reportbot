@@ -1,0 +1,41 @@
+{% extends "photologue/root.html" %}
+{% load i18n %}
+{% load static %}
+
+{% load photologue_tags %}
+
+{% block title %}{% trans "All Monthly Report" %}{% endblock %}
+
+{% block content %}
+
+	<div class="row col-lg-12">
+		<code>debug: monthlyreport_list.html</code>
+		<h1 class="page-header"> {% trans "All Monthly Report" %}</h1>
+	</div>
+
+	{% if object_list %}
+		{% for photogroup in object_list %}
+		<div class="row">
+			<hr>
+			<div class="col-xs-12 col-sm-3">
+				<a href="{% url 'photologue:monthly-report-detail' photogroup.pk %}" >
+					<p>{{photogroup}}</p>
+					<p class='text-warning'>{{photogroup.problem_description}}</p>
+				</a>
+			</div>
+			<div class="col-xs-12 col-sm-9">
+				<div class="row">
+				{% for photo_sample in photogroup.sample %}
+				<div class="col-xs-3 nopadding">
+					<img class="thumbnail img-responsive" src="{{photo_sample.get_thumbnail_url}}">
+				</div>
+				{% endfor %}
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	{% endif %}
+
+
+{% endblock %}
+

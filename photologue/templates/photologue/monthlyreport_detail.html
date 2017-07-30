@@ -1,0 +1,145 @@
+{% extends "photologue/root.html" %}
+{% load photologue_tags i18n %}
+
+{% block title %}{{ object.title }}{% endblock %}
+
+{% block content %}
+
+	<div class="row col-lg-12">
+		<h1 class="page-header">{{ object.title }}</h1>
+		<p class="muted"><small>{% trans "Published" %} {{ object.date_added }}</small></p>
+	<p> <code> debug: photogroup_detail.html </code> </p>
+	</div> 
+
+	{% if object %}
+	 <form action="{% url 'photologue:update_photogroup' object.pk %}"
+			 method="post"> {% csrf_token %}
+		<p>Photo Group database name: <code>{{object.name}}</code>
+		<a href="{% url 'admin:photologue_photogroup_change' object.id%}">[Admin]</a> 
+		 </p>
+	
+		<div class="row"> 
+		{% for photo in object.photos.all %}
+			<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" >
+				<img class="thumbnail img-responsive" src="{{photo.get_thumbnail_url}}"/>
+			   <div class="checkbox">
+			   <input  type="checkbox" data-toggle="toggle"
+					data-on="Remove" data-off="Remove"
+					data-onstyle="danger" data-size="mini"
+					value="{{ photo.pk }}" name="delete_photo" >
+			   </div>
+			</div>
+		{% endfor %}
+		</div> 
+			<a href="#" 
+			   	onClick='window.open( 
+					"{{ popup_url }}", "newWindow" )'>
+				[Add Photo]
+			</a>
+		<hr/>
+
+		<p class="text-danger">IN PROGRESS, edit text have will not save, only Photo will be saved!</p>
+		<table style="width: 89.8752%;" border="1"> 
+			<tbody> 
+				<tr style="height: 21px;"> 
+					<td style="width: 23%; height: 21px;">Client</td> 
+					<td style="width: 24%; height: 21px;">
+					   <select>
+						  {% for company in select_company %}
+						  <option value="{{company.pk}}" 
+						  	{% if company.pk == object.company.pk %}selected{%endif%} >
+						  	{{company.name}}</option>
+						  {% endfor%} 
+					   </select>
+					</td> 
+					<td style="width: 25%; height: 21px;">Department</td> 
+					<td style="width: 210%; height: 21px;">
+					   <select>
+						  {% for department in select_department %}
+						  <option value="{{department.pk}}" 
+						  	{% if department.pk == object.department.pk %}selected{%endif%} >
+						  	{{department.name}}</option>
+						  {% endfor%} 
+					   </select>
+					</td> 
+				</tr> 
+				<tr style="height: 21px;"> 
+					<td style="width: 23%; height: 21px;">Contact Person</td> 
+					<td style="width: 24%; height: 21px;">
+					   <input type="text" name="contact_person" value="{{object.contact_person}}">
+					</td> 
+					<td style="width: 25%; height: 21px;">Contact Number</td> 
+					<td style="width: 210%; height: 21px;">
+					   <input type="text" name="contact_number" value="{{object.contact_number}}">
+					</td> 
+				</tr> 
+			</tbody> 
+		</table> 
+		<p>&nbsp;</p> 
+		<table style="width: 90%;" border="1"> 
+			<tbody> 
+				<tr style="height: 21px;"> 
+					<td style="height: 21px; width: 36%;">Date/Time of Service Provided 維修日期 :</td> 
+					<td style="height: 21px; width: 64%;">
+					   <input type="text" name="date_of_service" size="70" value="{{object.date_of_service.date}}">
+					</td> 
+				</tr> 
+				<tr style="height: 21px;"> 
+					<td style="height: 21px; width: 36%;">Place/System 維修地點/系統:</td> 
+					<td style="height: 21px; width: 64%;">
+					   <input type="text" name="place_or_system" size="70" value="{{object.place_or_system}}">
+					</td> 
+				</tr> 
+				<tr style="height: 21px;"> 
+					<td style="height: 21px; width: 36%;">problem description 簡述有關問題 :</td> 
+					<td style="height: 21px; width: 64%;">
+					   <input type="text" name="problem_description" size="70" value="{{object.problem_description}}">
+					</td> 
+				</tr> 
+			</tbody> 
+		</table> 
+		<p>&nbsp;</p>
+		<p>Service Provided 維修內容 : 
+		{{object.service_provided}}</p> 
+		<p>&nbsp;</p> 
+		<p>Parts replaced/changed 零件更換: 
+		{{object.parts_replaced}}</p>
+		<p>&nbsp;</p> 
+		<p>Remark 備註 : 
+		{{object.remark}}</p>
+		<p>&nbsp;</p> 
+		<p>Conclusion /Recommendation 結論 /建議: 
+		{{object.conslusion}}</p> 
+		<p>&nbsp;</p> 
+		<table style="width: 90%;" border="1"> 
+			<tbody> 
+				<tr> 
+					<td>Services Provide By維修者:</td> 
+					<td>{{object.serviced_by}}</td> 
+					<td>Date</td> 
+					<td>{{object.serviced_date.date}}</td> 
+				</tr> 
+				<tr> 
+					<td>Inspected By 驗收者:</td> 
+					<td>{{object.inspected_by}}</td> 
+					<td>Date</td> 
+					<td>{{object.inspection_date.date}}</td> 
+				</tr> 
+			</tbody> 
+		</table>	
+		 <!-- footer -->
+		 <div class="submit-row">
+			<p><hr></p>
+			<a  name="department"></a>
+			<button class="btn btn-danger" type="submit">
+			   Submit Changes / Save
+			</button>
+		 <p><hr></p>
+		 </div>
+	</form>
+	 {% else %}
+		 <code>object does not exists</code> 
+	 {% endif %}
+
+
+{% endblock %}

@@ -325,6 +325,7 @@ class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArch
 		context['daily_report'] = DailyReport.objects.all()
 		context['active_report'] = self.request.user.profile.active_report.title
 		if self.kwargs.has_key('year'):
+			print( "debug: dailyrepot_edit using redirect date" )
 			date_and_time = "{}-{}-{}-1930".format(
 								self.kwargs['year'],
 								self.kwargs['month'],
@@ -332,17 +333,26 @@ class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArch
 			report_dt = timezone.make_aware(timezone.datetime.strptime( "{}-{}-{}".format( 
 								self.kwargs['year'], self.kwargs['month'], self.kwargs['day']),
 								"%Y-%m-%d" ))
+			#context['is_active'] = True
 		else:
 			report_dt = self.request.user.profile.active_report.report_date.astimezone(
 								timezone.get_default_timezone())
 			date_and_time = report_dt.strftime( "%Y-%m-%d-%H%M" ) 
-		print("date_and_time={}".format(date_and_time))
+			#context['is_active'] = False
+		if DailyReport.objects.get( 
+				report_date__date = report_dt.date() ) == self.request.user.profile.active_report:
+			context['is_active'] = True
+		else:
+			context['is_active'] = False
+					
+		print("date_and_time={}".format(report_dt))
 
 		qset = Photo.objects.filter( 
 			daily_report_item__daily_report__report_date__date = report_dt.date()).order_by(
 					'daily_report_item__reportOrder' )
 		context['photo_list'] = qset
-		qset = DailyReportItem.objects.filter( report_date__date = report_dt.date()).order_by(
+		print( "debug: dailyreport_edit report_dt={}".format( report_dt ) )
+		qset = DailyReportItem.objects.filter( daily_report__report_date__date = report_dt.date()).order_by(
 					'reportOrder' )
 		context['daily_report_item_list'] = qset 
 		return context

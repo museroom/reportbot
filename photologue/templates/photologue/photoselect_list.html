@@ -1,0 +1,75 @@
+{% extends "photologue/root.html" %}
+{% load i18n %}
+{% load photologue_tags %}
+
+{% block title %}{% trans "Photo Select Popup" %}{% endblock %}
+
+{% block content %}
+
+	<div class="row col-lg-12">
+		<h1 class="page-header"> {% trans "Photo Select Popup" %}</h1>
+	</div>
+	<code>debug: photoselect_list.html</code>
+	<div class="row">
+	<main class="col-md-12">
+
+	<ul class="list-inline">
+	   <li>
+		  <a href="{{date_prev_url}}">&lt;&nbsp;{{date_prev.date}}</a>
+	   </li>
+	   <li>
+		  <a href="{{date_next_url}}">{{date_next.date}}&nbsp&gt;</a>
+	   </li>
+	</ul>
+
+	{% if object_list %}
+	<form action="{% url 'photologue:update_photogroup' active_photogroup %}"
+		   method="post"> {% csrf_token %}
+		<div class="row">
+		{% for photo in object_list %}
+		<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" >
+			<a href="{% url 'admin:photologue_photo_change' photo.pk %}" >
+			<img class="thumbnail img-responsive" src="{{photo.get_thumbnail_url}}"/>
+			</a>
+			<p class="small" style="background-color:{{ photo.department_item.color }}">
+				{{ photo.department_item.name }}</p>
+				<div class="checkbox">
+					<input  type="checkbox" data-toggle="toggle"
+							 data-on="Select" data-off="Select"
+							 data-onstyle="warning" data-size="mini"
+							 value="{{ photo.pk }}" name="report_photo" >
+					<span class="small"><a href="#endofpage" >[&#9660;]</a></span>
+					{%comment%}
+					<span class="small"><a href="{% url 'admin:photologue_photo_change' photo.pk %}" >[admin]</a></span>
+					{%endcomment%}
+				</div>
+		</div>
+		{% endfor %}
+		</div>
+		 <!-- footer -->
+		 <div class="submit-row">
+			<p><hr></p>
+			<a  name="endofpage"></a>
+			<button class="btn btn-danger" type="submit">
+			   add to active photo group
+			</button>
+		 <p><hr></p>
+ </div>
+	</form>
+
+	<ul class="list-inline">
+	   <li>
+		  <a href="{{date_prev_url}}">&lt;&nbsp;{{date_prev.date}}</a>
+	   </li>
+	   <li>
+		  <a href="{{date_next_url}}">{{date_next.date}}&nbsp&gt;</a>
+	   </li>
+	</ul>
+
+{% endif %}
+
+	</main>
+	</div>
+
+{% endblock %}
+
