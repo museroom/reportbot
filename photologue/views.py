@@ -3,16 +3,16 @@ import os
 from io import BytesIO
 
 try:
-    import Image
+	import Image
 except ImportError:
-    from PIL import Image
+	from PIL import Image
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.views.generic.dates import ArchiveIndexView, DateDetailView,  \
-    DayArchiveView, MonthArchiveView, \
-    YearArchiveView
+	DayArchiveView, MonthArchiveView, \
+	YearArchiveView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.base import RedirectView
@@ -30,7 +30,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
-    Department, DailyReport, PhotoGroup, Profile, Company
+	Department, DailyReport, PhotoGroup, Profile, Company
 
 from .forms import PhotoUploadForm
 import time, datetime
@@ -221,15 +221,15 @@ class PhotoSelectListView(ListView):
 		context['date_prev'] = date_time_prev
 		context['date_prev_url'] = reverse( 'photologue:photo-select-popup-list',
 											kwargs={'year':date_time.year,
-											        'month':date_time.month,
-											   	    'day':date_time.day-1} )
+													'month':date_time.month,
+													'day':date_time.day-1} )
 
 		context['date_report'] = date_time
 		context['date_next'] = date_time_next
 		context['date_next_url'] = reverse( 'photologue:photo-select-popup-list',
 											kwargs={'year':date_time.year,
-											        'month':date_time.month,
-											   	    'day':date_time.day+1} )
+													'month':date_time.month,
+													'day':date_time.day+1} )
 		context['active_photogroup']=self.request.user.profile.active_report
 		return context
 
@@ -264,8 +264,8 @@ class MonthlyReportDetailView( DetailView ):
 		context['var1'] = 'value1'
 		context['popup_url'] = reverse( 'photologue:photo-select-popup-list',
 					kwargs={'year':date_time.year,
-                                        'month':date_time.month,
-                                        'day':date_time.day} )
+										'month':date_time.month,
+										'day':date_time.day} )
 		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
 		q_profile.active_photogroup = obj
 		q_profile.save()
@@ -329,6 +329,9 @@ class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArch
 								self.kwargs['year'],
 								self.kwargs['month'],
 								self.kwargs['day'] )
+			report_dt = timezone.make_aware(timezone.datetime.strptime( "{}-{}-{}".format( 
+								self.kwargs['year'], self.kwargs['month'], self.kwargs['day']),
+								"%Y-%m-%d" ))
 		else:
 			report_dt = self.request.user.profile.active_report.report_date.astimezone(
 								timezone.get_default_timezone())
@@ -336,8 +339,7 @@ class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArch
 		print("date_and_time={}".format(date_and_time))
 
 		qset = Photo.objects.filter( 
-			daily_report_item__daily_report__title = date_and_time 
-			).order_by( 'daily_report_item__reportOrder' ) 
+			daily_report_item__daily_report__report_date__date = report_dt.date())
 		context['photo_list'] = qset
 		return context
 
