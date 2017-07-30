@@ -339,8 +339,12 @@ class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArch
 		print("date_and_time={}".format(date_and_time))
 
 		qset = Photo.objects.filter( 
-			daily_report_item__daily_report__report_date__date = report_dt.date())
+			daily_report_item__daily_report__report_date__date = report_dt.date()).order_by(
+					'daily_report_item__reportOrder' )
 		context['photo_list'] = qset
+		qset = DailyReportItem.objects.filter( report_date__date = report_dt.date()).order_by(
+					'reportOrder' )
+		context['daily_report_item'] = qset 
 		return context
 
 	pass
