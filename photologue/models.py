@@ -1190,6 +1190,10 @@ class DailyReportItem(models.Model):
 		ordering = ['daily_report', 'reportOrder']
 		get_latest_by = 'report_date'
 
+	def get_optime(self):
+		return u"{}:{}".format(
+				self.time_start.strftime("%H%M"),
+				self.time_stop.strftime("%H%M"))
 	def get_photos(self):
 		qset = Photo.objects.filter( daily_report_item = self ) 
 		return qset
