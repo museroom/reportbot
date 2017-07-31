@@ -397,7 +397,6 @@ class PhotoAdminForm(forms.ModelForm):
 
 class PhotoAdmin(admin.ModelAdmin):
 	list_display = ( 'title', 
-#									'admin_thumbnail',
 							'thumbnail_admin',
 							'department_item',  
 							'tags',
@@ -418,7 +417,7 @@ class PhotoAdmin(admin.ModelAdmin):
 						  'department_item__name_long',
 						  'tags',
 						  ]
-	list_per_page = 30
+	list_per_page = 20
 	prepopulated_fields = {'slug': ('title',)}
 #	save_on_top = True
 	fieldsets = (

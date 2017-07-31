@@ -23,7 +23,9 @@
 	</ul>
 
 	{% if object_list %}
+	{% if target_photo_group %}
 	<form action="{% url 'photologue:update_photogroup' active_photogroup %}"
+	{% endif %}
 		   method="post"> {% csrf_token %}
 		<div class="row">
 		{% for photo in object_list %}

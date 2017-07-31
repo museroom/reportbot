@@ -245,12 +245,14 @@ class PhotoSelectListView(ListView):
 
 		return qset
 
-class MonthlyReportListView( ListView ):
+class MonthlyReportListView( LoginRequiredMixin, ListView ):
+	login_url = '/login'
 	model = PhotoGroup
 	template_name="photologue/monthlyreport_list.html"
 
 
-class MonthlyReportDetailView( DetailView ):
+class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
+	login_url = '/login' 
 	model = PhotoGroup
 	template_name="photologue/monthlyreport_detail.html"
 	def get_context_data( self, **kwargs):
@@ -270,8 +272,9 @@ class MonthlyReportDetailView( DetailView ):
 		q_profile.active_photogroup = obj
 		q_profile.save()
 		context['active_photogroup'] = q_profile.active_photogroup
-		context['select_company'] = Company.objects.all();
-		context['select_department'] = Department.objects.all();
+		context['select_company'] = Company.objects.all()
+		context['select_department'] = Department.objects.all()
+		context['target_photo_group'] = self
 		return context
 
 
