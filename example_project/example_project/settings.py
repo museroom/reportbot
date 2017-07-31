@@ -17,7 +17,8 @@ ALLOWED_HOSTS = ['meitim.ddns.net','report.5tring.com',
 					  ]
 CSRF_TRUSTED_ORIGINS = ['www.5tring.com','.5tring.com','5tring.com']
 
-LOGIN_REDIRECT_URL = reverse_lazy( 'photologue:report_item_list_view' )
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 INSTALLED_APPS = (
 	'flat_responsive', 

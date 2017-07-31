@@ -1190,6 +1190,9 @@ class DailyReportItem(models.Model):
 		ordering = ['daily_report', 'reportOrder']
 		get_latest_by = 'report_date'
 
+	def get_admin_url(self):
+		return reverse( 'admin:photologue_dailyreportitem_change', args=[self.id])
+
 	def get_optime(self):
 		return u"{}:{}".format(
 				self.time_start.strftime("%H%M"),

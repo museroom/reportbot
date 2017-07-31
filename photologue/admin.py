@@ -225,6 +225,14 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	list_display = ('name', 'date_added' ) 
 	#filter_horizontal = ['photos',]
 	form = PhotoGroupAdminForm
+	fields = ( #'date_added', 
+			  'name', 
+		       #'company', 'department', 
+			  'contact_person', 'contact_number', 'date_of_service',
+			  'place_or_system', 'department_item', 'problem_description', 
+			  'service_provided', 'parts_replaced', 'remark', 'conclusion', 
+			  'serviced_by', 'serviced_date', 'inspected_by', 'inspection_date',
+			  )
 
 	def get_form( self, request, obj=None, **kwargs):
 		if( obj != None ):
@@ -237,15 +245,15 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 			print( "{} formfield = photo, request={}".format( self , request) )
 			print( u"request.current_object.date_added.date = {}".format(
 				request.current_object.date_added.date()) )
-                        obj = request.current_object
-                        dt_report = obj.date_added
-                        dt_range = 4
-                        dt_from = dt_report - timezone.timedelta(dt_range,0,0)
-                        dt_to   = dt_report + timezone.timedelta(dt_range,0,0)
+			obj = request.current_object
+			dt_report = obj.date_added
+			dt_range = 4
+			dt_from = dt_report - timezone.timedelta(dt_range,0,0)
+			dt_to	= dt_report + timezone.timedelta(dt_range,0,0)
 			qset = Photo.objects.filter( 
 				department_item__department__company  = request.user.profile.company ).filter( 
-                                        date_added__date__gt = dt_from.date() ).filter(
-                                        date_added__date__lt = dt_to.date() ) 
+										date_added__date__gt = dt_from.date() ).filter(
+										date_added__date__lt = dt_to.date() ) 
 					#date_added__date = request.current_object.date_added.date() )
 			kwargs['queryset'] = qset
 		vertial = True
@@ -398,7 +406,7 @@ class PhotoAdminForm(forms.ModelForm):
 class PhotoAdmin(admin.ModelAdmin):
 	list_display = ( 'title', 
 							'thumbnail_admin',
-							'department_item',  
+							'department_item',	
 							'tags',
 							'date_added',
 									)
@@ -442,7 +450,7 @@ class PhotoAdmin(admin.ModelAdmin):
 	
 	actions = ['set_company_CoD',
 				  'set_company_SC',
-	           'fill_related_daily_report_item',
+			   'fill_related_daily_report_item',
 				  'create_new_group',
 				  'download_photos',
 				  ]
@@ -469,13 +477,13 @@ class PhotoAdmin(admin.ModelAdmin):
 #				#print( "DEBUG: Department hasattr" )
 #				department = Department.objects.get( name=instance.report_item.department )
 #				kwargs["queryset"] = DailyReportItem.objects.filter(
-#                     report_date__gt = timezone.make_aware(yesterday)  ).filter(
+#					  report_date__gt = timezone.make_aware(yesterday)	).filter(
 #										 daily_report_item__department = department  ).order_by(
 #										 "-report_date" )
 #			else:
 #				#print( "ERROR: Department not set" )
 #				kwargs["queryset"] = DailyReportItem.objects.filter(
-#                     report_date__gt = timezone.make_aware(yesterday) )
+#					  report_date__gt = timezone.make_aware(yesterday) )
 		""" Set the current site as initial value. """
 		if db_field.name == "sites":
 			kwargs["initial"] = [Site.objects.get_current()] 

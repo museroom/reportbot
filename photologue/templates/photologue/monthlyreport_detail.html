@@ -6,19 +6,16 @@
 {% block content %}
 
 	<div class="row col-lg-12">
-		<h1 class="page-header">{{ object.title }}</h1>
+		<h2 class="page-header">{{ object.name }}</h2>
 		<p class="muted"><small>{% trans "Published" %} {{ object.date_added }}</small></p>
-	<p> <code> debug: photogroup_detail.html </code> </p>
 	</div> 
 
 	{% if object %}
 	 <form action="{% url 'photologue:update_photogroup' object.pk %}"
 			 method="post"> {% csrf_token %}
-		<p>Photo Group database name: <code>{{object.name}}</code>
-		 </p>
 	
 		<div class="row"> 
-		{% for photo in object.photos.all %}
+			{% for photo in object.photos.all %}
 			<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" >
 				<img class="thumbnail img-responsive" src="{{photo.get_thumbnail_url}}"/>
 			   <div class="checkbox">
@@ -28,22 +25,28 @@
 					value="{{ photo.pk }}" name="delete_photo" >
 			   </div>
 			</div>
-		{% endfor %}
-		</div> 
-			<a href="#" 
-			   	onClick='window.open( 
-					"{{ popup_url }}", "newWindow" )'>
-				[Add Photo]
-			</a>
-		<hr/>
+			{% endfor %}
+		</div>
+		{%comment%}
+		<a href="#" 
+			onClick='window.open( 
+				"{{ popup_url }}", "newWindow" )'>
+			[Add Photo]
+		</a>
+		{%endcomment%}
 
-		<p class="text-danger">IN PROGRESS, edit text have will not save, only Photo will be saved!</p>
-		<a href="{% url 'admin:photologue_photogroup_change' object.id%}">[Admin]</a> 
+		<!-- PhotoGroup Record tables -->
+
+		{%comment%}
+		<a href="{% url 'admin:photologue_photogroup_change' object.id%}">[Edit Record]</a> 
+		{%endcomment%}
+		<div class="row col-lg-12"><hr></div>
 		<table style="width: 89.8752%;" border="1"> 
 			<tbody> 
 				<tr style="height: 21px;"> 
-					<td style="width: 23%; height: 21px;">Client</td> 
-					<td style="width: 24%; height: 21px;">
+					<td style="width: 23%; height: 21px;"><b>Client</b></td> 
+					<td style="width: 24%; height: 21px;">{{object.company}}
+						{%comment%}
 					   <select>
 						  {% for company in select_company %}
 						  <option value="{{company.pk}}" 
@@ -51,9 +54,11 @@
 						  	{{company.name}}</option>
 						  {% endfor%} 
 					   </select>
+					   {%endcomment%}
 					</td> 
-					<td style="width: 25%; height: 21px;">Department</td> 
-					<td style="width: 210%; height: 21px;">
+					<td style="width: 25%; height: 21px;"><b>Department</b></td> 
+					<td style="width: 210%; height: 21px;">{{object.department}}
+						{%comment%}
 					   <select>
 						  {% for department in select_department %}
 						  <option value="{{department.pk}}" 
@@ -61,16 +66,21 @@
 						  	{{department.name}}</option>
 						  {% endfor%} 
 					   </select>
+					   {%endcomment%}
 					</td> 
 				</tr> 
 				<tr style="height: 21px;"> 
-					<td style="width: 23%; height: 21px;">Contact Person</td> 
-					<td style="width: 24%; height: 21px;">
+					<td style="width: 22%; height: 21px;"><b>Contact Person</b></td> 
+					<td style="width: 24%; height: 21px;">{{object.contact_person}}
+						{%comment%}
 					   <input type="text" name="contact_person" value="{{object.contact_person}}">
+					   {%endcomment%}
 					</td> 
-					<td style="width: 25%; height: 21px;">Contact Number</td> 
-					<td style="width: 210%; height: 21px;">
+					<td style="width: 25%; height: 21px;"><b>Contact Number</b></td> 
+					<td style="width: 210%; height: 21px;">{{object.contact_number}}
+						{%comment%}
 					   <input type="text" name="contact_number" value="{{object.contact_number}}">
+					   {%endcomment%}
 					</td> 
 				</tr> 
 			</tbody> 
@@ -79,36 +89,42 @@
 		<table style="width: 90%;" border="1"> 
 			<tbody> 
 				<tr style="height: 21px;"> 
-					<td style="height: 21px; width: 36%;">Date/Time of Service Provided 維修日期 :</td> 
-					<td style="height: 21px; width: 64%;">
+					<td style="height: 21px; width: 45%;"><b>Date/Time of Service Provided 維修日期:</b></td> 
+					<td style="height: 21px; width: 55%;">{{object.date_of_service.date}}
+						{%comment%}
 					   <input type="text" name="date_of_service" size="70" value="{{object.date_of_service.date}}">
+					   {%endcomment%}
 					</td> 
 				</tr> 
 				<tr style="height: 21px;"> 
-					<td style="height: 21px; width: 36%;">Place/System 維修地點/系統:</td> 
-					<td style="height: 21px; width: 64%;">
+					<td style="height: 21px; width: 45%;"><b>Place/System 維修地點/系統:</b></td> 
+					<td style="height: 21px; width: 55%;">{{object.place_or_system}}
+						{%comment%}
 					   <input type="text" name="place_or_system" size="70" value="{{object.place_or_system}}">
+					   {%endcomment%}
 					</td> 
 				</tr> 
 				<tr style="height: 21px;"> 
-					<td style="height: 21px; width: 36%;">problem description 簡述有關問題 :</td> 
-					<td style="height: 21px; width: 64%;">
+					<td style="height: 21px; width: 45%;"><b>Problem description 簡述有關問題 :</b></td> 
+					<td style="height: 21px; width: 55%;">{{object.problem_description}}
+						{%comment%}
 					   <input type="text" name="problem_description" size="70" value="{{object.problem_description}}">
+					   {%endcomment%}
 					</td> 
 				</tr> 
 			</tbody> 
 		</table> 
 		<p>&nbsp;</p>
-		<p>Service Provided 維修內容 : 
+		<p><b>Service Provided 維修內容 :</b><br/> 
 		{{object.service_provided}}</p> 
 		<p>&nbsp;</p> 
-		<p>Parts replaced/changed 零件更換: 
+		<p><b>Parts replaced/changed 零件更換:</b><br/> 
 		{{object.parts_replaced}}</p>
 		<p>&nbsp;</p> 
-		<p>Remark 備註 : 
+		<p><b>Remark 備註 :</b><br/> 
 		{{object.remark}}</p>
 		<p>&nbsp;</p> 
-		<p>Conclusion /Recommendation 結論 /建議: 
+		<p><b>Conclusion /Recommendation 結論 /建議:</b><br/> 
 		{{object.conslusion}}</p> 
 		<p>&nbsp;</p> 
 		<table style="width: 90%;" border="1"> 
@@ -128,14 +144,23 @@
 			</tbody> 
 		</table>	
 		 <!-- footer -->
-		 <div class="submit-row">
-			<p><hr></p>
+		 <div class="row"> <hr/> </div>
+		<div class="row col-xs-12  button-wrapper" >
+			<a class="btn btn-warning" role="button" href="#"
+			onClick='window.open( "{{ add_photo_url }}", "newWindow" )'> 
+			Add Photo </a>
+			<a class="btn btn-info" role="button" href="#"
+			onClick='window.open( "{{ edit_record_url }}", "newWindow" )'> 
+			Edit Record </a>
+			{%comment%}
+			<a class="btn btn-info" role="button" href="{% url 'admin:photologue_photogroup_change' object.id%}">
+			Edit Record </a>
+			{%endcomment%}
 			<a  name="department"></a>
 			<button class="btn btn-danger" type="submit">
 			   Submit Changes / Save
 			</button>
-		 <p><hr></p>
-		 </div>
+		</div>
 	</form>
 	 {% else %}
 		 <code>object does not exists</code> 

@@ -264,10 +264,11 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 		date_time = obj.date_added
 		context = super( MonthlyReportDetailView, self).get_context_data(**kwargs)
 		context['var1'] = 'value1'
-		context['popup_url'] = reverse( 'photologue:photo-select-popup-list',
+		context['add_photo_url'] = reverse( 'photologue:photo-select-popup-list',
 					kwargs={'year':date_time.year,
 										'month':date_time.month,
 										'day':date_time.day} )
+		context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
 		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
 		q_profile.active_photogroup = obj
 		q_profile.save()
@@ -319,7 +320,6 @@ class DailyReportArchiveIndexView(DailyReportDateView, ArchiveIndexView):
 
 class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArchiveView):
 	login_url = '/login/'
-	redirect_field_name = 'report_item_list_view'
 	template_name = "photologue/dailyreport_edit.html"
 	date_and_time = timezone.localtime()
 	def get_context_data( self, **kwargs):

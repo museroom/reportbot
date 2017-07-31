@@ -9,7 +9,6 @@
 	<div class="row col-lg-12">
 		<h1 class="page-header"> {% trans "Photo Select Popup" %}</h1>
 	</div>
-	<code>debug: photoselect_list.html</code>
 	<div class="row">
 	<main class="col-md-12">
 
@@ -25,8 +24,8 @@
 	{% if object_list %}
 	{% if target_photo_group %}
 	<form action="{% url 'photologue:update_photogroup' active_photogroup %}"
+		method="post"> {% csrf_token %}
 	{% endif %}
-		   method="post"> {% csrf_token %}
 		<div class="row">
 		{% for photo in object_list %}
 		<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" >
