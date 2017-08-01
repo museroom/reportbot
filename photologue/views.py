@@ -242,6 +242,14 @@ class PhotoSelectListView(ListView):
 		elif target == 'dailyreport':
 			context['target_daily_report'] = target
 		context['pk'] = pk
+		user_profile = self.request.user.profile
+		context['department_item_list'] = DepartmentItem.objects.filter(
+				department__company = user_profile.company )
+		context['daily_report_item_list'] = DailyReportItem.objects.filter(
+				department_item__department__company = 
+				self.request.user.profile.company ).filter( 
+						daily_report = user_profile.active_report )
+
 		return context
 
 

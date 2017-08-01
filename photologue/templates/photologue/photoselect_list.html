@@ -66,6 +66,22 @@
 				add to active daily report item
 				{%endif%} 
 			</button>
+			<div>
+			<code>debug:[{{pk}}]{{target_daily_report}}/{{target_photo_group}}
+			</code>
+			<code>{%if pk == '2169' %}ok{%endif%}</code>
+				<select>
+					{% for daily_report_item in daily_report_item_list %}
+					<option value = "{{daily_report_item}}" name="select_dri"
+							{% if pk == daily_report_item.pk|stringformat:"i" %}
+							selected="selected"
+							{% endif %}
+					>
+					{{daily_report_item.department_item.name_long}}
+					</option>
+					{%endfor%}
+				</select>
+			</div>
 		 <p><hr></p>
  </div>
 	</form>

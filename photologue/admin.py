@@ -525,11 +525,16 @@ class PhotoAdmin(admin.ModelAdmin):
 		if queryset == None:
 			messages.success( request, 'no photo selected.' )
 			return
-		photo_date_time = queryset[0].date_added.astimezone( timezone.get_default_timezone()) 
+		q_photo = queryset[0]
+		photo_date_time = q_photo.date_added.astimezone( timezone.get_default_timezone()) 
 		groupname = u"{2}_{0}_{1}_auto".format(photo_date_time.strftime( "%y%m%d-%H%M%S" ),
-											queryset[0].department_item.name,
-											queryset[0].department_item.department.company.name )
+											q_photo.department_item.name,
+											q_photo.department_item.department.company.name )
 		new_photo_group = PhotoGroup( name=groupname, date_added=photo_date_time )
+		new_photo_group.department_item = q_photo.department_item
+		new_photo_group.date_of_service =  photo_date_time
+		new_photo_group.serviced_date = photo_date_time
+		new_photo_group.inspection_date = photo_date_time
 		new_photo_group.save()
 		for q_photo in queryset:
 			new_photo_group.photos.add( q_photo )
