@@ -1190,6 +1190,19 @@ class DailyReportItem(models.Model):
 		ordering = ['daily_report', 'reportOrder']
 		get_latest_by = 'report_date'
 
+	def get_add_photo_url(self):
+		date_time = self.report_date.astimezone( 
+				timezone.get_default_timezone() )
+		target = 'dailyreport'
+		pk = self.pk
+		url = reverse( 'photologue:photo-select-popup-list',
+									kwargs={'year':date_time.year,
+											'month':date_time.month,
+											'day':date_time.day,
+											'target':target,
+											'pk':pk} )
+		return url
+		
 	def get_admin_url(self):
 		return reverse( 'admin:photologue_dailyreportitem_change', args=[self.id])
 

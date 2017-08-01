@@ -120,8 +120,10 @@ urlpatterns = [
                                                   month=str(dt.month),
                                                   day=str(dt.day) ),
 		name="report_item_list_view"),
-	url(r'^update_dailyreportitem/(?P<daily_report_pk>[\-\d\w|\W]+)/$',
+	url(r'^update_dailyreportitem/(?P<daily_report_item_pk>[\-\d\w|\W]+)/$',
 		Update_DailyReportItem, name="update_dailyreportitem"),
+	url(r'^update_dailyreportitem/title/(?P<daily_report_pk>[\-\d\w|\W]+)/$',
+		Update_DailyReportItem, name="update_dailyreport"),
 	url(r'^update_photogroup/(?P<photo_group_pk>[\-\d\w|\W]+)/$',
 		Update_PhotoGroup, name="update_photogroup"),
 	url(r'^testform/$',
@@ -134,7 +136,7 @@ urlpatterns = [
 		SetPhotoDepartmentItem, name="set_dailyreportitem"),
 	
 	# Photo Selector Popup
-	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/$',
+	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/(?P<target>[\w|\W]+)/(?P<pk>\d+)/$',
 		PhotoSelectListView.as_view(), name = 'photo-select-popup-list' ), 
 
         # General Message Redirect View

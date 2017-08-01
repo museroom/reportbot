@@ -25,6 +25,9 @@
 	{% if target_photo_group %}
 	<form action="{% url 'photologue:update_photogroup' active_photogroup %}"
 		method="post"> {% csrf_token %}
+	{% elif target_daily_report %}
+	<form action="{% url 'photologue:update_dailyreportitem' pk %}"
+		method="post"> {% csrf_token %}
 	{% endif %}
 		<div class="row">
 		{% for photo in object_list %}
@@ -38,7 +41,7 @@
 					<input  type="checkbox" data-toggle="toggle"
 							 data-on="Select" data-off="Select"
 							 data-onstyle="warning" data-size="mini"
-							 value="{{ photo.pk }}" name="report_photo" >
+							 value="{{ photo.pk }}" name="add_photo" >
 					<span class="small"><a href="#endofpage" >[&#9660;]</a></span>
 					{%comment%}
 					<span class="small"><a href="{% url 'admin:photologue_photo_change' photo.pk %}" >[admin]</a></span>
@@ -52,7 +55,11 @@
 			<p><hr></p>
 			<a  name="endofpage"></a>
 			<button class="btn btn-danger" type="submit">
-			   add to active photo group
+				{%if target_photo_group%}
+				add to active photo group
+				{%elif target_daily_report %}
+				add to active daily report item
+				{%endif%} 
 			</button>
 		 <p><hr></p>
  </div>

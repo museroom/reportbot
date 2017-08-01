@@ -218,19 +218,30 @@ class PhotoSelectListView(ListView):
 							self.kwargs['day'] ),"%Y-%m-%d")
 		date_time_prev = date_time - timezone.timedelta(1,0,0)
 		date_time_next = date_time + timezone.timedelta(1,0,0)
+		target = self.kwargs['target']
+		pk = self.kwargs['pk']
 		context['date_prev'] = date_time_prev
 		context['date_prev_url'] = reverse( 'photologue:photo-select-popup-list',
 											kwargs={'year':date_time.year,
 													'month':date_time.month,
-													'day':date_time.day-1} )
+													'day':date_time.day-1,
+													'target':target,
+													'pk':pk} )
 
 		context['date_report'] = date_time
 		context['date_next'] = date_time_next
 		context['date_next_url'] = reverse( 'photologue:photo-select-popup-list',
 											kwargs={'year':date_time.year,
 													'month':date_time.month,
-													'day':date_time.day+1} )
+													'day':date_time.day+1,
+													'target':target,
+													'pk':pk} )
 		context['active_photogroup']=self.request.user.profile.active_report
+		if target == 'photogroup':
+			context['target_photo_group'] = target
+		elif target == 'dailyreport':
+			context['target_daily_report'] = target
+		context['pk'] = pk
 		return context
 
 
@@ -240,8 +251,10 @@ class PhotoSelectListView(ListView):
 							self.kwargs['year'], 
 							self.kwargs['month'],
 							self.kwargs['day'] ),"%Y-%m-%d")
-		qset = Photo.objects.filter( date_added__date = date_time.date() ).filter(
-					department_item__department__company = self.request.user.profile.company )
+		qset = Photo.objects.filter( date_added__date = date_time.date() )
+		#.filter( department_item__department__company = self.request.user.profile.company )
+#		qset_nodate = Photo.objects.filter( date_added__date = date_time.date()).filter( department_item = None )
+#		qset += qset_nodate
 
 		return qset
 
@@ -265,9 +278,8 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 		context = super( MonthlyReportDetailView, self).get_context_data(**kwargs)
 		context['var1'] = 'value1'
 		context['add_photo_url'] = reverse( 'photologue:photo-select-popup-list',
-					kwargs={'year':date_time.year,
-										'month':date_time.month,
-										'day':date_time.day} )
+					kwargs={'year':date_time.year, 'month':date_time.month, 'day':date_time.day,
+						    'target':'photogroup', 'pk':obj.pk} )
 		context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
 		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
 		q_profile.active_photogroup = obj
@@ -375,7 +387,7 @@ def Update_PhotoGroup( request, photo_group_pk ):
 	print( u"DEBUG: photo_group_pk = {}".format( photo_group_pk ) )
 	print( u"DEBUG: active_photogroup = {}".format( request.user.profile.active_photogroup ) )
 	q_photogroup = request.user.profile.active_photogroup
-	for q_photo_pk in request.POST.getlist('report_photo'):
+	for q_photo_pk in request.POST.getlist('add_photo'):
 		print( u"adding q_photo_pk={}".format( q_photo_pk ) )
 		q_photo = Photo.objects.get( pk = q_photo_pk )
 		q_photogroup.photos.add( q_photo )
@@ -391,11 +403,21 @@ def Update_PhotoGroup( request, photo_group_pk ):
 		return HttpResponseRedirect( reverse( 'photologue:message-success' ) )
 	
 
-def Update_DailyReportItem( request, daily_report_pk ):
-	print( u"DEBUG: daily_report_pk = {} // request.POST= {}".format (
-			 daily_report_pk, request.POST.getlist('report_photo'))) 
+def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=None ):
+	print( u"DEBUG: daily_report_pk = {} daily_report_item_pk = {} // request.POST= {}".format (
+			 daily_report_pk, daily_report_item_pk, request.POST.getlist('report_photo'))) 
 	print( u"DEBUG: submit department_item_pk = {}".format(
 			 request.POST.getlist('department_pk')))
+	if '2017' not in daily_report_item_pk:
+	#if not isinstance(daily_report_item_pk, basestring):
+	#if daily_report_item_pk:
+		q_dri = DailyReportItem.objects.get( pk = daily_report_item_pk )
+		for q_photo_pk in request.POST.getlist('add_photo' ):
+			q_photo = Photo.objects.get( pk = int(q_photo_pk) )
+			q_photo.daily_report_item.add( q_dri )
+			q_photo.department_item = q_dri.department_item
+			q_photo.save()
+
 	for q_photo_pk in request.POST.getlist('report_photo'):
 		print( u"updating pk:{} related daily_report_item".format(q_photo_pk) )
 		q_photo = Photo.objects.get( pk = int(q_photo_pk) )

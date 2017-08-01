@@ -6,9 +6,6 @@
 	{% block title %}{% trans "Photos in Daily Report" %}{% endblock %}
 
 	{% block content %}
-	<code>debug: date-and-time: {{ day }}/{{month}}/{{year}} </code>
-	<code>debug: qset length: {{ object_list  | length}} </code>
-	<code>debug: dailyrepot_edit.html </code> 
 
 	<div class="row col-lg-12">
 		<h1 class="page-header"> {% trans "Photos in Daily Report" %}{{request.url}}</h1>
@@ -20,10 +17,9 @@
 	<li><a href="{{ report.get_edit_url }} ">{{ report }}</a></li>
 	{% endfor %}
 	</ul>
-	<code>debug: len(daily_report_item_list)={{daily_report_item_list|length}}</code>
 	{% if photo_list and daily_report_item_list %}
 	<div class="row" >
-		<form action="{% url 'photologue:update_dailyreportitem' active_report %}"
+		<form action="{% url 'photologue:update_dailyreport' active_report %}"
 				method="post"> {% csrf_token %}
 
 			<!-- Photo List -->
@@ -31,17 +27,27 @@
 			<article>
 				{% for daily_report_item in daily_report_item_list %}
 				<section><div class="row">
-				<div class="col-xs-12 ">
-					<div class="col-xs-2 bg-warning ">
+				<div class="col-xs-12 " >
+					<div class="col-xs-2"
+							style="background-color:{{daily_report_item.department_item.report_color}}">
 						<strong>{{daily_report_item.reportRowID}} </strong>
 					</div>
-					<div class="col-xs-10 bg-info h4 nopadding">
+					<div class="col-xs-10 h4 nopadding" 
+							style="background-color:{{daily_report_item.department_item.report_color}}">
+						<a class="btn btn-warning btn-xs" role="button" href="#"
+						onClick='window.open( "{{ daily_report_item.get_add_photo_url }}", "newWindow" )'> 
+						+Photo </a>
+						<a class="btn btn-info btn-xs" role="button" href="#"
+						onClick='window.open( "{{ daily_report_item.get_admin_url }}", "newWindow" )'> 
+						Edit </a> 
+						{%comment%}
 						<a class="btn btn-info btn-xs" role="button" href="{{daily_report_item.get_admin_url}}">
 							edit</a>
+						{%endcomment%}
 						{{daily_report_item.department_item.name_long}}
 					</div>
-					<div class="col-xs-3 bg-warning small"> {{daily_report_item.status_TOC_CK}} </div>
-					<div class="col-xs-6 bg-success small"> {{daily_report_item.plan_TOC_CK}} </div>
+					<div class="col-xs-4 bg-warning small"> {{daily_report_item.status_TOC_CK}} </div>
+					<div class="col-xs-5 bg-success small"> {{daily_report_item.plan_TOC_CK}} </div>
 					<div class="col-xs-3 bg-success small"> {{daily_report_item.get_optime}} </div>
 					<div class="col-xs-12 bg-warning small"> {{daily_report_item.statusCK|safe}} </div>
 					<div class="col-xs-12 bg-info small"> {{daily_report_item.planCK|safe}} </div>
