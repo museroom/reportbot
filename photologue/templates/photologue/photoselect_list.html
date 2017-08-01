@@ -35,8 +35,13 @@
 			<a href="{% url 'admin:photologue_photo_change' photo.pk %}" >
 			<img class="thumbnail img-responsive" src="{{photo.get_thumbnail_url}}"/>
 			</a>
-			<p class="small" style="background-color:{{ photo.department_item.color }}">
-				{{ photo.department_item.name }}</p>
+			<p class="small" style="white-space: nowrap;background-color:{{ photo.department_item.color }}">
+			{% if photo.department_item.name %}
+			{{ photo.department_item.name }}
+			{% else %}
+			<i>no department</i>
+			{% endif %}
+			</p>
 				<div class="checkbox">
 					<input  type="checkbox" data-toggle="toggle"
 							 data-on="Select" data-off="Select"

@@ -222,18 +222,18 @@ class PhotoSelectListView(ListView):
 		pk = self.kwargs['pk']
 		context['date_prev'] = date_time_prev
 		context['date_prev_url'] = reverse( 'photologue:photo-select-popup-list',
-											kwargs={'year':date_time.year,
-													'month':date_time.month,
-													'day':date_time.day-1,
+											kwargs={'year':date_time_prev.year,
+													'month':date_time_prev.month,
+													'day':date_time_prev.day,
 													'target':target,
 													'pk':pk} )
 
 		context['date_report'] = date_time
 		context['date_next'] = date_time_next
 		context['date_next_url'] = reverse( 'photologue:photo-select-popup-list',
-											kwargs={'year':date_time.year,
-													'month':date_time.month,
-													'day':date_time.day+1,
+											kwargs={'year':date_time_next.year,
+													'month':date_time_next.month,
+													'day':date_time_next.day,
 													'target':target,
 													'pk':pk} )
 		context['active_photogroup']=self.request.user.profile.active_report

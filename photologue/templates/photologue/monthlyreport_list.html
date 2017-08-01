@@ -10,8 +10,14 @@
 {% block content %}
 
 	<div class="row col-lg-12">
-		<h1 class="page-header"> {% trans "All Monthly Report" %}</h1>
+		<h1 class="page-header"> {% trans "All Monthly Report" %}
+		<div class="btn btn-wrapper">
+			<a class="btn btn-warning" role="button" href="{% url 'admin:photologue_photogroup_add'%}"> 
+					+Add Report Record (PhotoGroup) </a>
+		</div>
+		</h1>
 	</div>
+	
 
 	{% if object_list %}
 	<div class="row col-lg-12">
@@ -20,13 +26,14 @@
 		<section>
 			<div class="row col-xs-12" style="background-color:{{photogroup.department_item.report_color}}" >
 				<a href="{% url 'photologue:monthly-report-detail' photogroup.pk %}" 
-				   >
-					<b>{{photogroup}}</b>
-					<small> <p class='text-warning'>{{photogroup.problem_description}}</p>
-					</small>
+				   class="btn btn-primary btn-xs" role="button" >
+				   Edit
 				</a>
+					<b>{{photogroup}}</b>
+					<small> <p class='text-warning'>
+					{{photogroup.problem_description}}</small></p>
 			</div>
-			<div clas:ws="row col-xs-12 ">:w
+			<div class="row col-xs-12 ">
 				{% for photo_sample in photogroup.sample %}
 				<div class="col-xs-3 nopadding">
 					<img class="thumbnail img-responsive" src="{{photo_sample.get_thumbnail_url}}">
