@@ -416,10 +416,21 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 			 daily_report_pk, daily_report_item_pk, request.POST.getlist('report_photo'))) 
 	print( u"DEBUG: submit department_item_pk = {}".format(
 			 request.POST.getlist('department_pk')))
+	redirect_url = reverse( 'photologue:report_item_list_view' )
 	if '2017' not in daily_report_item_pk:
 	#if not isinstance(daily_report_item_pk, basestring):
 	#if daily_report_item_pk:
+#		date_time = timezone.datetime.strptime( 
+#				"%Y-%m-%d-%H%M", daily_report_item_pk )
 		q_dri = DailyReportItem.objects.get( pk = daily_report_item_pk )
+		date_time = q_dri.daily_report.report_date
+		redirect_url = reverse( 'photologue:photo-select-popup-list',
+				kwargs = {'year':date_time.year,
+					      'month':date_time.month,
+						  'day':date_time.day,
+						  'target':'dailyreport',
+						  'pk':q_dri.pk }
+				)
 		for q_photo_pk in request.POST.getlist('add_photo' ):
 			q_photo = Photo.objects.get( pk = int(q_photo_pk) )
 			q_photo.daily_report_item.add( q_dri )
@@ -439,7 +450,7 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 		q_photo.daily_report_item.remove(
 								q_related_daily_report_item)
 		#q_photo.save()
-	return HttpResponseRedirect( reverse( 'photologue:report_item_list_view' ))
+	return HttpResponseRedirect( redirect_url )
 
 class PhotoCatagorize(ListView):
 	template_name = "photologue/photo_catagorize.html"

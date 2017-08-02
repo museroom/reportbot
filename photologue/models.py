@@ -57,7 +57,7 @@ IMAGE_FIELD_MAX_LENGTH = getattr(settings, 'PHOTOLOGUE_IMAGE_FIELD_MAX_LENGTH', 
 
 # Path to sample image
 SAMPLE_IMAGE_PATH = getattr(settings, 'PHOTOLOGUE_SAMPLE_IMAGE_PATH', os.path.join(
-						    os.path.dirname(__file__), 'res', 'sample.jpg'))
+							os.path.dirname(__file__), 'res', 'sample.jpg'))
 
 # Modify image file buffer size.
 ImageFile.MAXBLOCK = getattr(settings, 'PHOTOLOGUE_MAXBLOCK', 256 * 2 ** 10)
@@ -606,6 +606,24 @@ class ImageModel(models.Model):
 		self.image.storage.delete(self.image.name)
 
 @python_2_unicode_compatible
+class PhotoGroupImageClass( models.Model ):
+	name = models.CharField(_('Image Class in Photo Group'), max_length=50, unique=True, null=True )
+	
+	def __str__(self):
+		return name
+
+@python_2_unicode_compatible
+class PhotoGroupImage(models.Model): 
+	photo = models.ForeignKey( 'photologue.Photo', on_delete=models.SET_NULL, null=True)
+	photo_class = models.ForeignKey( PhotoGroupImageClass, on_delete=models.SET_NULL, null=True) 
+	page = models.IntegerField( default=1 )
+
+	def __str__(self):
+		return u"{}_{}_{}".format( self.photo.slug, self.photo_class.name, self.page ) 
+
+
+
+@python_2_unicode_compatible
 class PhotoGroup(models.Model):
 	date_added = models.DateTimeField(
 						_('date added'), default=now)
@@ -613,6 +631,8 @@ class PhotoGroup(models.Model):
 	photos = models.ManyToManyField( 
 						'photologue.Photo', blank=True,
 						verbose_name=_('photos') ) 
+	photo_record = models.ForeignKey( PhotoGroupImage, on_delete=models.SET_NULL, null=True,
+						verbose_name=_('photos with classes') )
 	company = models.ForeignKey( Company, on_delete=models.SET_NULL, null=True)
 	department = models.ForeignKey( Department, on_delete=models.SET_NULL, null=True)
 	contact_person = models.CharField(_('contact person'), max_length=50, unique=False, blank=True)

@@ -37,7 +37,7 @@
 								 value="{{ photo.pk }}" name="drop_photo" >
 						{%endcomment%}
 					</div>
-					<p class="small" style="background-color:{{ photo.department_item.color }}">{{ photo.department_item.name }}({{photo.department_item.department.name}})</p>
+					<p class="small" style="white-space:nowrap;background-color:{{ photo.department_item.color }}">{{ photo.department_item.name }}({{photo.department_item.department.name}})</p>
 				</div>
 				{% endfor %}
 			</div>

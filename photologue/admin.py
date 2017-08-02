@@ -93,7 +93,7 @@ class DailyReportItemInline( admin.StackedInline ):
 class DailyReportAdmin( admin.ModelAdmin):
 
 	list_per_page = 10
-	inlines = [DailyReportItemInline]
+	#inlines = [DailyReportItemInline]
 	actions = [
 		'clone_report',
 		'test_user_action'
