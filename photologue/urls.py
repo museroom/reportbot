@@ -26,7 +26,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	Update_DailyReportItem, Update_PhotoGroup, \
         PhotoUploadView, PhotoCatagorize, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
-	MonthlyReportDetailView 
+	MonthlyReportDetailView, SortableSubmitTest
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -88,7 +88,7 @@ urlpatterns = [
 		PhotoListView.as_view(),
 		name='photo-list'),
 	
-	# TinyMCE interace
+	# TinyMCE inte)race
 	url(r'^tinymce/', include('tinymce.urls')),
 	
 	# Report Bot Json interface
@@ -139,16 +139,19 @@ urlpatterns = [
 	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/(?P<target>[\w|\W]+)/(?P<pk>\d+)/$',
 		PhotoSelectListView.as_view(), name = 'photo-select-popup-list' ), 
 
-        # General Message Redirect View
-        url(r'^message/success/$',
-                TemplateView.as_view(template_name='photologue/message_success.html'), name='message-success' ),
+    # General Message Redirect View
+    url(r'^message/success/$',
+            TemplateView.as_view(template_name='photologue/message_success.html'), name='message-success' ),
 
-        # -testes-
-        # Sortable.js 
-        url(r'^sortable/(?P<pk>\d+)/$',
-                DetailView.as_view( model=PhotoGroup, template_name='photologue/test-sortable.html'),
-               # TemplateView.as_view(template_name='photologue/test-sortable.html'), 
-                name='test-sortable' ),
+    # -testes-
+    # Sortable.js 
+    url(r'^sortable/(?P<pk>\d+)/$',
+            DetailView.as_view( model=PhotoGroup, template_name='photologue/test-sortable.html'),
+           # TemplateView.as_view(template_name='photologue/test-sortable.html'), 
+            name='test-sortable' ),
+    url(r'^updatetest/$', 
+            SortableSubmitTest,
+            name = "test-sortable-submit" ),
 	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

@@ -30,7 +30,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
-	Department, DailyReport, PhotoGroup, Profile, Company
+	Department, DailyReport, PhotoGroup, Profile, Company, \
+	PhotoGroupImage, PhotoGroupImageClass
 
 from .forms import PhotoUploadForm
 import time, datetime
@@ -549,6 +550,18 @@ def PhotoUploadView( request ):
 			'name2': 'test_form2',
 		})
 	#return HttpResponse( "Success" )
+
+# Test Views for sortable
+def SortableSubmitTest( request ):
+	print ('debug: sortable sumbmit')
+	print (request.POST)
+	print (request.POST.getlist('report_photo'))
+	for q_photo_pk in request.POST.getlist( 'report_photo' ):
+		print( "{}:{}".format( q_photo_pk, "report_photo" ) ) 
+	return HttpResponseRedirect( reverse( 'photologue:test-sortable',
+		args=[6]))
+	
+	
 	
 
 # Gallery views.

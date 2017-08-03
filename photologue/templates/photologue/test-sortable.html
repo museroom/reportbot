@@ -1,41 +1,74 @@
-{% extends "photologue/root.html" %}
-{% load i18n %}
-{% load photologue_tags %}
+	{% extends "photologue/root.html" %}
+	{% load i18n %}
+	{% load photologue_tags %}
 
-{% block title %}{% trans "Photo Select Popup" %}{% endblock %}
+	{% block title %}{% trans "Photo Select Popup" %}{% endblock %}
 
-{% block content %}
+	{% block content %}
+
+	<div class="row col-lg-12">
+		<h1 class="page-header"> {% trans "Sortable Test" %}{{request.url}}</h1>
+	</div>
 	
-	<div class="row col-xs-12" >
-			{% if object %}
-		<div id="multi">
-			<div class="tile__name">Group A</div>
-			<div class="col-xs-4">
-			<div class="tile__list">
-				{% for photo in object.photos.all %}
-				<div>
-				<a href="#">
-				<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
-				</a>
-				<small>{{photo.pk}}</small>
+	<h4>{% trans "Drag and Drop photo to sort" %}</h4>
+	
+	<form action="{% url 'photologue:test-sortable-submit' %}"
+				method="post"> {% csrf_token %}
+		<div class="row col-xs-12" >
+		{% if object %}
+			<div id="multi">
+				<div class="col-xs-6">
+				<div class="tile__name">Group A</div>
+				<div class="tile__list">
+					{% for photo in object.photos.all %}
+					<div>
+						<a href="#">
+						<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
+						</a>
+						<div class="checkbox">
+						<input  type="checkbox" data-toggle="toggle"
+							data-on="Clone" data-off="Clone"
+							data-onstyle="primary" data-size="mini"
+							value="{{ photo.pk }}" name="report_photo" >
+						</div>
+					</div>
+					{% endfor %} 
 				</div>
-				{% endfor %} 
+				</div>
+				<div class="col-xs-6">
+				<div class="tile__name">Group B</div>
+				<div class="tile__list">
+					{% for photo in object.photos.all %}
+					<div>
+					<a href="#">
+					<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
+					</a>
+					<p><small>{{photo.pk}}</small></p>
+					</div>
+					{% endfor %} 
+				</div>
 			</div>
 			</div>
-			<div class="tile__name">Group B</div>
-			<div class="tile__list">
-				{% for photo in object.photos.all %}
-				<div>
-				<a href="#">
-				<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
-				</a>
-				<small>{{photo.pk}}</small>
-				</div>
-				{% endfor %} 
+			{% endif %}
+		</div>
+		<p><hr></p>
+		<div class="row col-lg-12" >
+			<div class="col-lg-6" >
+				<a name="endofpage"></a>
+				<button class="btn btn-danger"  type="submit">
+					Submit Changes to Active Report
+				</button>
+			</div>
+			<div class="col-lg-6" >
+				<p > Tags:
+					<a href="#"><span class="label label-info">Go To Top</span></a>
+					| <i class="icon-user"></i>Photo in view: 
+					{{ object_list|length }}<a href="#"></a>
+				</p>
 			</div>
 		</div>
-			{% endif %}
-	</div>
+		<p><hr></p>
+	</form>
 
 	<div class="row col-xs-12" >
 		<div class="h4">Title</div>
@@ -60,16 +93,16 @@
 						});
 
 				[].forEach.call(byId('multi').getElementsByClassName('tile__list'), function (el){
-							Sortable.create(el, {
-								group: 'photo',
-								animation: 150
-							});
+						Sortable.create(el, {
+							group: 'photo',
+							animation: 150
+						});
 				});
 
-				Sortable.create( foo, {});
+				Sortable.create(byId('foo'), {});
 		} catch (error) { throw error; }
 	</script>
 		
 
-{% endblock %}
+	{% endblock %}
 
