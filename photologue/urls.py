@@ -26,7 +26,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	Update_DailyReportItem, Update_PhotoGroup, \
         PhotoUploadView, PhotoCatagorize, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
-	MonthlyReportDetailView 
+	MonthlyReportDetailView, SortableSubmitTest
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -149,6 +149,9 @@ urlpatterns = [
                 DetailView.as_view( model=PhotoGroup, template_name='photologue/test-sortable.html'),
                # TemplateView.as_view(template_name='photologue/test-sortable.html'), 
                 name='test-sortable' ),
+        url(r'^sortable/submit/$',
+                SortableSubmitTest,
+                name='test-submit-sortable' ),
 	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

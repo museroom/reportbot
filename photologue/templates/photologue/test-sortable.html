@@ -7,6 +7,8 @@
 {% block content %}
 	
 	<div class="row col-xs-12" >
+		<form action="{% url 'photologue:test-submit-sortable' %}"
+			  method="post"> {% csrf_token %}
 			{% if object %}
 		<div id="multi">
 			<div class="tile__name">Group A</div>
@@ -17,7 +19,12 @@
 				<a href="#">
 				<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
 				</a>
-				<small>{{photo.pk}}</small>
+				<div class="checkbox">
+					   <input  type="checkbox" data-toggle="toggle"
+							data-on="Clone" data-off="Clone"
+							data-onstyle="primary" data-size="mini"
+							value="{{ photo.pk }}" name="report_photo" >
+				</div>
 				</div>
 				{% endfor %} 
 			</div>
@@ -34,7 +41,23 @@
 				{% endfor %} 
 			</div>
 		</div>
+			<div class="row col-lg-12" >
+				<div class="col-lg-6" >
+					<a name="endofpage"></a>
+					<button class="btn btn-danger"  type="submit">
+						Submit Changes to Active Report
+					</button>
+				</div>
+				<div class="col-lg-6" >
+					<p > Tags:
+						<a href="#"><span class="label label-info">Go To Top</span></a>
+						| <i class="icon-user"></i>Photo in view: 
+						{{ object_list|length }}<a href="#"></a>
+					</p>
+				</div>
+			</div>
 			{% endif %}
+		</form>
 	</div>
 
 	<div class="row col-xs-12" >

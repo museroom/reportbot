@@ -549,6 +549,15 @@ def PhotoUploadView( request ):
 			'name2': 'test_form2',
 		})
 	#return HttpResponse( "Success" )
+
+def SortableSubmitTest( request ):
+	print('debug: SortableSubmitTest {}'.format( request.POST ) )
+	for q_photo_pk in request.POST.getlist('report_photo'):
+		print( "{}".format( q_photo_pk  ) ) 
+
+	return HttpResponseRedirect( 
+			reverse( 'photologue:test-sortable',args=[6] 
+				) )
 	
 
 # Gallery views.
