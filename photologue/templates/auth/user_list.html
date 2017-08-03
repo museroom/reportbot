@@ -1,0 +1,5 @@
+{% if object_list %}
+	{% for user in object_list %}
+		<div>{{user}}({{user.profile.company}})</div>
+	{% endfor%}
+{%endif%}
