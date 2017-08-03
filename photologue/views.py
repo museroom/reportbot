@@ -287,7 +287,7 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 		context['var1'] = 'value1'
 		context['add_photo_url'] = reverse( 'photologue:photo-select-popup-list',
 					kwargs={'year':date_time.year, 'month':date_time.month, 'day':date_time.day,
-						    'target':'photogroup', 'pk':obj.pk} )
+							'target':'photogroup', 'pk':obj.pk} )
 		context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
 		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
 		q_profile.active_photogroup = obj
@@ -426,7 +426,7 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 		date_time = q_dri.daily_report.report_date
 		redirect_url = reverse( 'photologue:photo-select-popup-list',
 				kwargs = {'year':date_time.year,
-					      'month':date_time.month,
+						  'month':date_time.month,
 						  'day':date_time.day,
 						  'target':'dailyreport',
 						  'pk':q_dri.pk }

@@ -12,7 +12,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic import TemplateView
 
 from .models import Photo, DailyReportItem, Department, DepartmentItem, Profile, \
-						  PhotoGroup
+					PhotoGroup 
 
 from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GalleryDetailView, PhotoArchiveIndexView, PhotoDateDetailView, PhotoDayArchiveView, \
@@ -142,6 +142,13 @@ urlpatterns = [
         # General Message Redirect View
         url(r'^message/success/$',
                 TemplateView.as_view(template_name='photologue/message_success.html'), name='message-success' ),
+
+        # -testes-
+        # Sortable.js 
+        url(r'^sortable/(?P<pk>\d+)/$',
+                DetailView.as_view( model=PhotoGroup, template_name='photologue/test-sortable.html'),
+               # TemplateView.as_view(template_name='photologue/test-sortable.html'), 
+                name='test-sortable' ),
 	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

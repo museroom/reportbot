@@ -610,7 +610,7 @@ class PhotoGroupImageClass( models.Model ):
 	name = models.CharField(_('Image Class in Photo Group'), max_length=50, unique=True, null=True )
 	
 	def __str__(self):
-		return name
+		return self.name
 
 @python_2_unicode_compatible
 class PhotoGroupImage(models.Model): 

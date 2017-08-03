@@ -21,7 +21,7 @@ from utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 		Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
-		Company, PhotoGroup, Profile
+		Company, PhotoGroup, Profile, PhotoGroupImageClass, PhotoGroupImage
 from django.forms import Textarea
 from django.db import models
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
@@ -198,6 +198,16 @@ class DailyReportItemAdmin(admin.ModelAdmin): #list_per_page = 10
 #admin.site.register(DailyReport)
 admin.site.register(DailyReportItem, DailyReportItemAdmin)
 admin.site.register(DailyReport, DailyReportAdmin)
+
+#class PhotoGroupImageClassInline( admin.StackedInline ):
+#	model = PhotoGroupImageClass
+
+class PhotoGroupImageAdmin( admin.ModelAdmin ):
+	extra = 0
+#	inlines = [PhotoGroupImageClassInline]
+
+admin.site.register( PhotoGroupImage, PhotoGroupImageAdmin )
+admin.site.register( PhotoGroupImageClass )
 	
 class PhotoGroupAdminForm( forms.ModelForm):
 
@@ -227,7 +237,7 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	form = PhotoGroupAdminForm
 	fields = ( #'date_added', 
 			  'name', 
-		       #'company', 'department', 
+			   #'company', 'department', 
 			  'contact_person', 'contact_number', 'date_of_service',
 			  'place_or_system', 'department_item', 'problem_description', 
 			  'service_provided', 'parts_replaced', 'remark', 'conclusion', 
