@@ -143,15 +143,15 @@ urlpatterns = [
     url(r'^message/success/$',
             TemplateView.as_view(template_name='photologue/message_success.html'), name='message-success' ),
 
-    # -testes-
-    # Sortable.js 
-    url(r'^sortable/(?P<pk>\d+)/$',
-            DetailView.as_view( model=PhotoGroup, template_name='photologue/test-sortable.html'),
-           # TemplateView.as_view(template_name='photologue/test-sortable.html'), 
-            name='test-sortable' ),
-    url(r'^updatetest/$', 
-            SortableSubmitTest,
-            name = "test-sortable-submit" ),
+        # -testes-
+        # Sortable.js 
+        url(r'^sortable/(?P<pk>\d+)/$',
+                DetailView.as_view( model=PhotoGroup, template_name='photologue/test-sortable.html'),
+               # TemplateView.as_view(template_name='photologue/test-sortable.html'), 
+                name='test-sortable' ),
+        url(r'^sortable/submit/$',
+                SortableSubmitTest,
+                name='test-submit-sortable' ),
 	
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

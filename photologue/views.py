@@ -551,17 +551,14 @@ def PhotoUploadView( request ):
 		})
 	#return HttpResponse( "Success" )
 
-# Test Views for sortable
 def SortableSubmitTest( request ):
-	print ('debug: sortable sumbmit')
-	print (request.POST)
-	print (request.POST.getlist('report_photo'))
-	for q_photo_pk in request.POST.getlist( 'report_photo' ):
-		print( "{}:{}".format( q_photo_pk, "report_photo" ) ) 
-	return HttpResponseRedirect( reverse( 'photologue:test-sortable',
-		args=[6]))
-	
-	
+	print('debug: SortableSubmitTest {}'.format( request.POST ) )
+	for q_photo_pk in request.POST.getlist('report_photo'):
+		print( "{}".format( q_photo_pk  ) ) 
+
+	return HttpResponseRedirect( 
+			reverse( 'photologue:test-sortable',args=[6] 
+				) )
 	
 
 # Gallery views.

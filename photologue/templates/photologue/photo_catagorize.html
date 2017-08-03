@@ -23,6 +23,12 @@
 					<a href="{{ photo.get_absolute_url }}">
 						<img src="{{ photo.get_thumbnail_url }}" class="thumbnail img-responsive" alt="{{ photo.title }}">
 					</a>
+					<p class="small" 
+					   style="white-space:nowrap;background-color:
+					     {{ photo.department_item.color }}">
+					     {{ photo.department_item.name }}
+						 ({{photo.department_item.department.name}})
+					</p>
 					<div class="checkbox">
 						<input  type="checkbox" data-toggle="toggle"
 						 	 	 data-on="Select" data-off="Select"
@@ -37,7 +43,6 @@
 								 value="{{ photo.pk }}" name="drop_photo" >
 						{%endcomment%}
 					</div>
-					<p class="small" style="white-space:nowrap;background-color:{{ photo.department_item.color }}">{{ photo.department_item.name }}({{photo.department_item.department.name}})</p>
 				</div>
 				{% endfor %}
 			</div>
