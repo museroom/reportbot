@@ -1,0 +1,75 @@
+{% extends "photologue/root.html" %}
+{% load i18n %}
+{% load photologue_tags %}
+
+{% block title %}{% trans "Photo Select Popup" %}{% endblock %}
+
+{% block content %}
+	
+	<div class="row col-xs-12" >
+			{% if object %}
+		<div id="multi">
+			<div class="tile__name">Group A</div>
+			<div class="col-xs-4">
+			<div class="tile__list">
+				{% for photo in object.photos.all %}
+				<div>
+				<a href="#">
+				<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
+				</a>
+				<small>{{photo.pk}}</small>
+				</div>
+				{% endfor %} 
+			</div>
+			</div>
+			<div class="tile__name">Group B</div>
+			<div class="tile__list">
+				{% for photo in object.photos.all %}
+				<div>
+				<a href="#">
+				<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
+				</a>
+				<small>{{photo.pk}}</small>
+				</div>
+				{% endfor %} 
+			</div>
+		</div>
+			{% endif %}
+	</div>
+
+	<div class="row col-xs-12" >
+		<div class="h4">Title</div>
+		<ul class="h3" id="foo">
+			<li>hello</li>
+			<li>world</li>
+			<li>corny</li>
+			<li>unpig</li>
+		</ul>
+	</div>
+	<script src="{{ STATIC_URL }}js/Sortable.js"> </script>
+	<script>
+		var byId = function (id) { 
+			return document.getElementById(id); 
+		}
+		try {
+				// Multi groups
+				Sortable.create(byId('multi'), {
+							animation: 150,
+							draggable: '.tile',
+							handle: '.tile__name'
+						});
+
+				[].forEach.call(byId('multi').getElementsByClassName('tile__list'), function (el){
+							Sortable.create(el, {
+								group: 'photo',
+								animation: 150
+							});
+				});
+
+				Sortable.create( foo, {});
+		} catch (error) { throw error; }
+	</script>
+		
+
+{% endblock %}
+
