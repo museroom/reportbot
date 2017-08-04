@@ -7,8 +7,8 @@ import django.contrib.auth
 import django.contrib.auth.urls
 
 urlpatterns = [
-	url('^', include('django.contrib.auth.urls')),
-	url(r'^admin/', include(admin.site.urls)),
-	url(r'^photologue/', include('photologue.urls', namespace='photologue')),
-	url(r'^$', TemplateView.as_view(template_name="homepage.html"), name='homepage'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+                  url('^', include('django.contrib.auth.urls')),
+                  url(r'^admin/', include(admin.site.urls)),
+                  url(r'^photologue/', include('photologue.urls', namespace='photologue')),
+                  url(r'^$', TemplateView.as_view(template_name="homepage.html"), name='homepage'),
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
