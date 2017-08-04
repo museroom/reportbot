@@ -1,85 +1,87 @@
-	{% extends "photologue/root.html" %}
-	{% load i18n %}
-	{% load photologue_tags %}
+{% extends "photologue/root.html" %}
+{% load i18n %}
+{% load photologue_tags %}
 
-	{% block title %}{% trans "Photo Select Popup" %}{% endblock %}
+{% block title %}{% trans "Photo Select Popup" %}{% endblock %}
 
-	{% block content %}
+{% block content %}
 
-	<div class="row col-lg-12">
-		<h1 class="page-header"> {% trans "Sortable Test" %}{{request.url}}</h1>
-	</div>
-	
-	<div class="row col-xs-12" >
-		<form action="{% url 'photologue:test-submit-sortable' %}"
-			  method="post"> {% csrf_token %}
-			{% if object %}
-		<div id="multi">
-			<div class="tile__name">Group A</div>
-			<div class="col-xs-4">
-			<div class="tile__list">
-				{% for photo in object.photos.all %}
-				<div>
-				<a href="#">
-				<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
-				</a>
-				<div class="checkbox">
-					   <input  type="checkbox" data-toggle="toggle"
-							data-on="Clone" data-off="Clone"
-							data-onstyle="primary" data-size="mini"
-							value="{{ photo.pk }}" name="report_photo" >
-				</div>
-				</div>
-			</div>
-			</div>
-			{% endif %}
-		</div>
-		<p><hr></p>
-		<div class="row col-lg-12" >
-			<div class="col-lg-6" >
-				<a name="endofpage"></a>
-				<button class="btn btn-danger"  type="submit">
-					Submit Changes to Active Report
-				</button>
-			</div>
-			<div class="col-lg-6" >
-				<p > Tags:
-					<a href="#"><span class="label label-info">Go To Top</span></a>
-					| <i class="icon-user"></i>Photo in view: 
-					{{ object_list|length }}<a href="#"></a>
-				</p>
-			</div>
-		</div>
-			<div class="row col-lg-12" >
-				<div class="col-lg-6" >
-					<a name="endofpage"></a>
-					<button class="btn btn-danger"  type="submit">
-						Submit Changes to Active Report
-					</button>
-				</div>
-				<div class="col-lg-6" >
-					<p > Tags:
-						<a href="#"><span class="label label-info">Go To Top</span></a>
-						| <i class="icon-user"></i>Photo in view: 
-						{{ object_list|length }}<a href="#"></a>
-					</p>
-				</div>
-			</div>
-			{% endif %}
-		</form>
-	</div>
+<div class="row col-lg-12">
+    <h1 class="page-header"> {% trans "Sortable Test" %}{{request.url}}</h1>
+</div>
 
-	<div class="row col-xs-12" >
-		<div class="h4">Title</div>
-		<ul class="h3" id="foo">
-			<li>hello</li>
-			<li>world</li>
-			<li>corny</li>
-			<li>unpig</li>
-		</ul>
-	</div>
-	<script src="{{ STATIC_URL }}js/Sortable.js"> </script>
-	<script>
+<div class="row col-xs-12">
+    <form action="{% url 'photologue:test-submit-sortable' %}"
+          method="post"> {% csrf_token %}
+        {% if object %}
+        <div id="multi">
+            <div class="tile__name">Group A</div>
+            <div class="col-xs-4">
+                <div class="tile__list">
+                    {% for photo in object.photos.all %}
+                    <div>
+                        <a href="#">
+                            <img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
+                        </a>
+                        <div class="checkbox">
+                            <input type="checkbox" data-toggle="toggle"
+                                   data-on="Clone" data-off="Clone"
+                                   data-onstyle="primary" data-size="mini"
+                                   value="{{ photo.pk }}" name="report_photo">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <p>
+        <hr>
+        </p>
+        <div class="row col-lg-12">
+            <div class="col-lg-6">
+                <a name="endofpage"></a>
+                <button class="btn btn-danger" type="submit">
+                    Submit Changes to Active Report
+                </button>
+            </div>
+            <div class="col-lg-6">
+                <p> Tags:
+                    <a href="#"><span class="label label-info">Go To Top</span></a>
+                    | <i class="icon-user"></i>Photo in view:
+                    {{ object_list|length }}<a href="#"></a>
+                </p>
+            </div>
+        </div>
+        <div class="row col-lg-12">
+            <div class="col-lg-6">
+                <a name="endofpage"></a>
+                <button class="btn btn-danger" type="submit">
+                    Submit Changes to Active Report
+                </button>
+            </div>
+            <div class="col-lg-6">
+                <p> Tags:
+                    <a href="#"><span class="label label-info">Go To Top</span></a>
+                    | <i class="icon-user"></i>Photo in view:
+                    {{ object_list|length }}<a href="#"></a>
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<div class="row col-xs-12">
+    <div class="h4">Title</div>
+    <ul class="h3" id="foo">
+        <li>hello</li>
+        <li>world</li>
+        <li>corny</li>
+        <li>unpig</li>
+    </ul>
+</div>
+<script src="{{ STATIC_URL }}js/Sortable.js"></script>
+<script>
 		var byId = function (id) { 
 			return document.getElementById(id); 
 		}
@@ -100,8 +102,9 @@
 
 				Sortable.create(byId('foo'), {});
 		} catch (error) { throw error; }
-	</script>
-		
 
-	{% endblock %}
+</script>
+
+
+{% endblock %}
 
