@@ -5,21 +5,30 @@
 
 {% block content %}
 
+	<div class="row">
+		<div class="col-md-6">
+			{% if object.caption %}<p>{{ object.caption|safe }}</p>{% endif %}
+			<a href="{{ object.image.url }}">
+				<img src="{{ object.get_display_url }}" class="thumbnail img-responsive" alt="{{ object.title }}">
+			</a>
+		</div>
+		<div class="col-md-6"> 
     <div class="row col-lg-12">
-        <h1 class="page-header">{{ object.title }}</h1>
-        <p class="muted"><small>{% trans "Published" %} {{ object.date_added }}</small></p>
+        <h1 class="page-header h4">{{ object.title }}</h1>
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
-					<div>
-						<a href="{% url 'admin:photologue_photo_change' object.pk %}"> Admin Photo </a>
-					</div>
-			    {% if object.caption %}<p>{{ object.caption|safe }}</p>{% endif %}
-			    <a href="{{ object.image.url }}">
-			        <img src="{{ object.get_display_url }}" class="thumbnail" alt="{{ object.title }}">
-			    </a>
-        </div>
+			<div>
+				<a href="{% url 'admin:photologue_photo_change' object.pk %}" 
+				   class="btn btn-warning" role="button"> Admin Photo </a>
+			</div>
+			<small>
+				{{object.date_added}}//
+				{{object.image.size}}bytes//
+				{{object.image.width}}x{{object.image.height}}
+			</small>
+        	<p class="muted"><small>{% trans "Published" %} {{ object.date_added }}</small></p>
+		</div>
+		{%comment%}
         <div class="col-md-6">
             {% if object.public_galleries %}
                 <p>{% trans "This photo is found in the following galleries" %}:</p>
@@ -34,6 +43,7 @@
 				</table>
 			{% endif %}
         </div>
+		{%endcomment%}
     </div>
 
 {% endblock %}

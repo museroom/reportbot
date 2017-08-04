@@ -612,6 +612,9 @@ class ImageModel(models.Model):
         super(ImageModel, self).delete()
         self.image.storage.delete(self.image.name)
 
+    def get_size( self ):
+        return 0
+
 
 @python_2_unicode_compatible
 class PhotoGroupImageClass(models.Model):
