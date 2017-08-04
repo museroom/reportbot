@@ -557,15 +557,13 @@ def PhotoUploadView( request ):
 		})
 	#return HttpResponse( "Success" )
 
-def SortableSubmitTest( request ):
+def SortableSubmitTest( request, photo_group_pk ):
 	print('debug: SortableSubmitTest {}'.format( request.POST ) )
 	for q_photo_pk in request.POST.getlist('photo_order'):
 			print( "order:{}".format( q_photo_pk  ) ) 
-	for q_photo_pk in request.POST.getlist('photo_remove'):
-			print( "remove:{}".format( q_photo_pk  ) ) 
 
 	return HttpResponseRedirect( 
-			reverse( 'photologue:test-sortable',args=[6] 
+			reverse( 'photologue:test-sortable', args=[photo_group_pk]
 				) )
 	
 

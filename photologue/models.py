@@ -642,7 +642,7 @@ class PhotoGroup(models.Model):
     photos = models.ManyToManyField(
         'photologue.Photo', blank=True,
         verbose_name=_('photos'))
-    photo_record = models.ForeignKey(PhotoGroupImage, on_delete=models.SET_NULL, null=True,
+    photo_records = models.ForeignKey(PhotoGroupImage, on_delete=models.SET_NULL, null=True,
                                      verbose_name=_('photos with classes'))
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)

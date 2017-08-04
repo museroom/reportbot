@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load photologue_tags %}
 
-{% block title %}{% trans "Photo Select Popup" %}{% endblock %}
+{% block title %}{% trans "Sortable Test" %}{% endblock %}
 
 {% block content %}
 
@@ -12,7 +12,7 @@
 
 <div class="row col-xs-12">
 	{% if object %}
-	<form action="{% url 'photologue:test-submit-sortable' %}"
+	<form action="{% url 'photologue:test-submit-sortable' object.pk %}"
 		  method="post" id="dj_form"> {% csrf_token %}
 		<div id="multi">
 			<div class="layer tile row col-lg-12"  >
@@ -22,6 +22,7 @@
 					{% for photo in object.photos.all %}
 					<div class="col-xs-3 col-sm-2 col-lg-1 nopadding" >
 						<img class="thumbnail img-responsive" src="{{photo.get_thumbnail_url}}">
+						{{photo.pk}}
 						<input type="hidden" id="imgorder{{photo.pk}}" name="imgorder" value="{{photo.pk}}">
 						{%comment%}
 						<div class="checkbox">
@@ -85,48 +86,58 @@
 <script src="{{ STATIC_URL }}js/Sortable.js"></script>
 <script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js" media="screen"></script>
 <script>
-		var byId = function (id) { 
-			return document.getElementById(id); 
-		}
-		try {
-				// Multi groups
-				Sortable.create(byId('multi'), {
-							animation: 150,
-							draggable: '.tile',
-							handle: '.tile__name'
-						});
+	var byId = function (id) { 
+		return document.getElementById(id); 
+	}
+	try {
+			// Multi groups
+			Sortable.create(byId('multi'), {
+						animation: 150,
+						draggable: '.tile',
+						handle: '.tile__name'
+					});
 
-				[].forEach.call(byId('multi').getElementsByClassName('tile__list'), function (el){
-						Sortable.create(el, {
-							group: 'photo',
-							animation: 150
-						});
-				});
+			[].forEach.call(byId('multi').getElementsByClassName('tile__list'), function (el){
+					Sortable.create(el, {
+						group: 'photo',
+						animation: 150
+					});
+			});
 
-				Sortable.create(byId('foo'), {});
-		} catch (error) { throw error; };
-		
-		/*
-		$("#dj_form").submit( function(e) {
-			e.preventDefault();
-		});
-		*/
+			Sortable.create(byId('foo'), {});
+	} catch (error) { throw error; };
+	
+	// tricks to prevent submiting for debug purpose
+	/*
+	$("#dj_form").submit( function(e) {
+		e.preventDefault();
+	});
+	*/
 
-		document.getElementById("submit_btn").onclick = function() {
-			var form = document.getElementById("dj_form");
-			var inputs = form.getElementsByTagName("input");
-			inputs_len = inputs.length
-			for( var i=0; i < inputs_len; i++ ) {
-				if( inputs[i].type == "hidden" && inputs[i].name != "csrfmiddlewaretoken") {
-					var parent_name = inputs[i].parentNode.parentNode.getAttribute("name");
-					var parent_style = inputs[i].parentNode.getAttribute("style");
-					var photo_pk = inputs[i].value
-					//inputs[i].value = inputs[i].parentNode.parentNode.getAttribute("name") + ":test";
+	// Submit button onclick handler
+	// for deleting Hidden fields not displayed on sortable style
+	document.getElementById("submit_btn").onclick = function() {
+		var form = document.getElementById("dj_form");
+		var inputs = form.getElementsByTagName("input");
+		inputs_len = inputs.length
+		for( var i=0; i < inputs_len; i++ ) {
+			if( inputs[i].type == "hidden" && inputs[i].name != "csrfmiddlewaretoken") {
+				var parent_name = inputs[i].parentNode.parentNode.getAttribute("name");
+				var parent_style = inputs[i].parentNode.getAttribute("style");
+				var photo_pk = inputs[i].value
+				//inputs[i].value = inputs[i].parentNode.parentNode.getAttribute("name") + ":test";
+				if( parent_style  )  {
+					if( parent_style.match( '/dis.*none/' ) ){
+						console.log( inputs[i] + " destroyed" )
+						inputs[i].destroy();
+					}
+				} else {
 					inputs[i].value = parent_name + "/" +parent_style + "/" + photo_pk
-					console.log( inputs[i].value + ":"+ inputs[i].name );
+					console.log( inputs[i].value )
 				}
 			}
 		}
+	}
 
 
 </script>
