@@ -11,6 +11,8 @@
 	</div> 
 
 	{% if object %}
+	<a class="btn btn-primary" role="button" 
+	   href="{% url 'photologue:test-sortable' object.pk %}">Change Photo Order</a>
 	 <form action="{% url 'photologue:update_photogroup' object.pk %}"
 			 method="post"> {% csrf_token %}
 	

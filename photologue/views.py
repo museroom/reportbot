@@ -272,6 +272,12 @@ class MonthlyReportListView( LoginRequiredMixin, ListView ):
 	model = PhotoGroup
 	template_name="photologue/monthlyreport_list.html"
 
+	def get_queryset(self):
+		qset = PhotoGroup.objects.all().order_by(
+				"date_of_service" )
+		return qset
+
+
 
 class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 	login_url = '/login' 
@@ -553,8 +559,10 @@ def PhotoUploadView( request ):
 
 def SortableSubmitTest( request ):
 	print('debug: SortableSubmitTest {}'.format( request.POST ) )
-	for q_photo_pk in request.POST.getlist('report_photo'):
-		print( "{}".format( q_photo_pk  ) ) 
+	for q_photo_pk in request.POST.getlist('photo_order'):
+			print( "order:{}".format( q_photo_pk  ) ) 
+	for q_photo_pk in request.POST.getlist('photo_remove'):
+			print( "remove:{}".format( q_photo_pk  ) ) 
 
 	return HttpResponseRedirect( 
 			reverse( 'photologue:test-sortable',args=[6] 
