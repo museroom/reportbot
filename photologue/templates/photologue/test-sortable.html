@@ -16,34 +16,20 @@
           method="post"> {% csrf_token %}
         <div id="multi">
             <div class="tile__name">Group A</div>
-                <div class="tile__list">
-                    {% for photo in object.photos.all %}
-                    <div>
-                        <img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
-                        <div class="checkbox">
-                            <input type="checkbox" data-toggle="toggle"
-                                   data-on="Left" data-off="Left"
-                                   data-onstyle="primary" data-size="mini"
-                                   value="{{ photo.pk }}" name="report_photo">
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+			<div class="tile__list">
+				{% for photo in object.photos.all %}
+				<div style="float:left">
+					<img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
+					<div class="checkbox">
+						<input type="checkbox" data-toggle="toggle"
+							   data-on="Left" data-off="Left"
+							   data-onstyle="primary" data-size="mini"
+							   value="{{ photo.pk }}" name="report_photo">
+					</div>
+				</div>
+				{% endfor %}
 			</div>
-           	<div class="tile__name">Group B</div>
-                <div class="tile__list">
-                    {% for photo in object.photos.all %}
-                    <div>
-                        <img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
-                        <div class="checkbox">
-                            <input type="checkbox" data-toggle="toggle"
-                                   data-on="Right" data-off="Right"
-                                   data-onstyle="primary" data-size="mini"
-                                   value="{{ photo.pk }}" name="report_photo">
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+		</div>
             </div>
         </div>
         <div class="row col-lg-12">
