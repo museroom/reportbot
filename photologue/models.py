@@ -157,7 +157,7 @@ size_method_map = {}
 
 @python_2_unicode_compatible
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
     company = models.ForeignKey('Company')
     active_report = models.ForeignKey('DailyReport', blank=True)
     active_photogroup = models.ForeignKey('PhotoGroup', blank=True, on_delete=models.SET_NULL, null=True)
@@ -626,12 +626,15 @@ class PhotoGroupImageClass(models.Model):
 
 @python_2_unicode_compatible
 class PhotoGroupImage(models.Model):
-    photo = models.ForeignKey('photologue.Photo', on_delete=models.SET_NULL, null=True)
+    photo = models.ForeignKey(
+				'photologue.Photo', 
+				on_delete=models.SET_NULL,
+				null=True )
     photo_class = models.ForeignKey(PhotoGroupImageClass, on_delete=models.SET_NULL, null=True)
     page = models.IntegerField(default=1)
 
     def __str__(self):
-        return u"{}_{}_{}".format(self.photo.slug, self.photo_class.name, self.page)
+        return u"{}_{}".format( self.photo_class.name, self.page)
 
 
 @python_2_unicode_compatible
