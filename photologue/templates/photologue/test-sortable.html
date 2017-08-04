@@ -25,18 +25,34 @@
                         </a>
                         <div class="checkbox">
                             <input type="checkbox" data-toggle="toggle"
-                                   data-on="Clone" data-off="Clone"
+                                   data-on="Left" data-off="Left"
                                    data-onstyle="primary" data-size="mini"
                                    value="{{ photo.pk }}" name="report_photo">
                         </div>
                     </div>
+                    {% endfor %}
+                </div>
+                <div class="tile__list">
+                    {% for photo in object.photos.all %}
+                    <div>
+                        <a href="#">
+                            <img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
+                        </a>
+                        <div class="checkbox">
+                            <input type="checkbox" data-toggle="toggle"
+                                   data-on="Right" data-off="Right"
+                                   data-onstyle="primary" data-size="mini"
+                                   value="{{ photo.pk }}" name="report_photo">
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            {% endif %}
         </div>
-        <p>
-        <hr>
-        </p>
+        {% endif %}
+        <div>
+            <hr>
+        </div>
         <div class="row col-lg-12">
             <div class="col-lg-6">
                 <a name="endofpage"></a>
@@ -102,6 +118,7 @@
 
 				Sortable.create(byId('foo'), {});
 		} catch (error) { throw error; }
+
 
 </script>
 
