@@ -642,8 +642,8 @@ class PhotoGroup(models.Model):
     photos = models.ManyToManyField(
         'photologue.Photo', blank=True,
         verbose_name=_('photos'))
-    photo_records = models.ForeignKey(PhotoGroupImage, on_delete=models.SET_NULL, null=True,
-                                     verbose_name=_('photos with classes'))
+    photo_records = models.ManyToManyField(
+		PhotoGroupImage,   verbose_name=_('photos with classes'))
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     contact_person = models.CharField(_('contact person'), max_length=50, unique=False, blank=True)
@@ -666,7 +666,7 @@ class PhotoGroup(models.Model):
 
     def sample(self):
         count = 4
-        qset = self.photos.all()[:count]
+        qset = self.photo_records.all()[:count]
         return qset
 
     def __str__(self):

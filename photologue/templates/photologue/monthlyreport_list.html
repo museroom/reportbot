@@ -17,7 +17,6 @@
 		</div>
 		</h1>
 	</div>
-	
 
 	{% if object_list %}
 	<div class="row col-lg-12">
@@ -36,7 +35,7 @@
 			<div class="row col-xs-12 ">
 				{% for photo_sample in photogroup.sample %}
 				<div class="col-xs-3 nopadding">
-					<img class="thumbnail img-responsive" src="{{photo_sample.get_thumbnail_url}}">
+					<img class="thumbnail img-responsive" src="{{photo_sample.photo.get_thumbnail_url}}">
 				</div>
 				{% endfor %}
 			</div>

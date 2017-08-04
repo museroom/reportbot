@@ -19,9 +19,9 @@
 				<div class="tile__name h4">
 					Before</div>
 				<div class="tile__list" name="grp_before" style="min-height:50px;min-width:80%;">
-					{% for photo in object.photos.all %}
+					{% for photo in object.photo_records.all %}
 					<div class="col-xs-3 col-sm-2 col-lg-1 nopadding" >
-						<img class="thumbnail img-responsive" src="{{photo.get_thumbnail_url}}">
+						<img class="thumbnail img-responsive" src="{{photo.photo.get_thumbnail_url}}">
 						{{photo.pk}}
 						<input type="hidden" id="imgorder{{photo.pk}}" name="imgorder" value="{{photo.pk}}">
 						{%comment%}
