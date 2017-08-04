@@ -11,18 +11,15 @@
 </div>
 
 <div class="row col-xs-12">
+    {% if object %}
     <form action="{% url 'photologue:test-submit-sortable' %}"
           method="post"> {% csrf_token %}
-        {% if object %}
         <div id="multi">
             <div class="tile__name">Group A</div>
-            <div class="col-xs-4">
                 <div class="tile__list">
                     {% for photo in object.photos.all %}
                     <div>
-                        <a href="#">
-                            <img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
-                        </a>
+                        <img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
                         <div class="checkbox">
                             <input type="checkbox" data-toggle="toggle"
                                    data-on="Left" data-off="Left"
@@ -32,12 +29,12 @@
                     </div>
                     {% endfor %}
                 </div>
+			</div>
+           	<div class="tile__name">Group B</div>
                 <div class="tile__list">
                     {% for photo in object.photos.all %}
                     <div>
-                        <a href="#">
-                            <img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
-                        </a>
+                        <img class="thumbnail img-responsive" width=80 height=80 src="{{photo.get_thumbnail_url}}">
                         <div class="checkbox">
                             <input type="checkbox" data-toggle="toggle"
                                    data-on="Right" data-off="Right"
@@ -49,10 +46,6 @@
                 </div>
             </div>
         </div>
-        {% endif %}
-        <div>
-            <hr>
-        </div>
         <div class="row col-lg-12">
             <div class="col-lg-6">
                 <a name="endofpage"></a>
@@ -68,23 +61,8 @@
                 </p>
             </div>
         </div>
-        <div class="row col-lg-12">
-            <div class="col-lg-6">
-                <a name="endofpage"></a>
-                <button class="btn btn-danger" type="submit">
-                    Submit Changes to Active Report
-                </button>
-            </div>
-            <div class="col-lg-6">
-                <p> Tags:
-                    <a href="#"><span class="label label-info">Go To Top</span></a>
-                    | <i class="icon-user"></i>Photo in view:
-                    {{ object_list|length }}<a href="#"></a>
-                </p>
-            </div>
-        </div>
-        {% endif %}
     </form>
+    {% endif %}
 </div>
 
 <div class="row col-xs-12">
@@ -97,6 +75,7 @@
     </ul>
 </div>
 <script src="{{ STATIC_URL }}js/Sortable.js"></script>
+<script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js" media="screen"></script>
 <script>
 		var byId = function (id) { 
 			return document.getElementById(id); 
@@ -118,8 +97,6 @@
 
 				Sortable.create(byId('foo'), {});
 		} catch (error) { throw error; }
-
-
 </script>
 
 
