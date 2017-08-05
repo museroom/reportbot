@@ -1,6 +1,14 @@
 import warnings 
-import os
+import os 
 from io import BytesIO
+from django.utils.encoding import smart_str
+import tempfile, zipfile
+
+import re, openpyxl
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
 
 try:
 	import Image
@@ -22,6 +30,7 @@ from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils import timezone
 from django.core.files.base import ContentFile
+from django.conf import settings
 
 from django.views.generic import View
 from django.http import JsonResponse
@@ -295,6 +304,7 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 					kwargs={'year':date_time.year, 'month':date_time.month, 'day':date_time.day,
 							'target':'photogroup', 'pk':obj.pk} )
 		context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
+		context['generate_xlsx_url'] = reverse( 'photologue:generate-xlsx', args=[obj.id] )
 		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
 		q_profile.active_photogroup = obj
 		q_profile.save()
@@ -603,6 +613,90 @@ def SortableSubmitTest( request, photo_group_pk ):
 			  reverse( 'photologue:test-sortable', 
 			  args=[photo_group_pk]) )
 	
+# XLSX output with openpyxl
+def GenerateXLSX( request, photo_group_pk ):
+	
+	static_root = getattr( settings, 'STATIC_ROOT', '' )
+	static_url = getattr( settings, 'STATIC_URL', '' )
+	#FIXME have site url in setting?
+	app_url = 'http://reportbot.5tring.com:4000'
+	tmp_root = '/media/djmedia/mr_forgot/tmp'
+	xlsx_root = 'xlsx'
+	filename_in = 'cm-template.xlsx'
+	filename_out = 'month-report-{}.xlsx'.format( photo_group_pk )
+	fn_in = os.path.join(static_root,xlsx_root,filename_in)
+	url_in = app_url + os.path.join( static_url, xlsx_root,filename_in )
+	fn_out = os.path.join(tmp_root,xlsx_root,filename_out)
+
+	print( 'url_in='+url_in)
+	xlsx_data = BytesIO(urlopen(url_in).read())
+
+	img_url = "http://reportbot.5tring.com:4000/media/photologue/photos/image1.png"
+
+	wb = openpyxl.load_workbook( xlsx_data )
+	ws = wb.active
+
+	fn_out_path, filename = os.path.split(fn_out)
+	print( "fn_out_path={}, filename={}".format( fn_out_path, filename ) )
+	if not os.path.exists( fn_out_path ): 
+		os.mkdir( fn_out_path )
+
+	# Insert Logo on every page
+	print ('insert image {}'.format( img_url ) )
+	image_data = BytesIO(urlopen(img_url).read())
+	img_width = 151
+	img_height = 134
+	img = openpyxl.drawing.image.Image( image_data, size=[img_width,img_height] )
+	print(dir(img.drawing))
+	#img.drawing.width = 152
+	#img.drawing.height = 134
+	ws.add_image( img, 'B1' )
+
+	q_pg = PhotoGroup.objects.get( id = 6 )
+	fields_pg = q_pg._meta.get_fields()
+
+	pattern = r'^{{(?P<name>\w+)}}$'
+	non_db_field = ['page_num', 'page_total','serial_no']
+	for cell in ws.get_cell_collection():
+		if cell.value:
+			res = re.match( pattern, cell.value )
+			if res:
+				db_field = res.group('name')
+				if db_field not in non_db_field:
+					db_value = eval( "q_pg.{}".format( db_field ) )
+				else:
+					db_value == 'non db_value FIXME'
+				cell.value = db_value
+
+
+	# save and exit
+
+	print( 'saving {}'.format(fn_out))
+	wb.save( fn_out )
+
+	#response = HttpResponse( 
+	#	           content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+	#response['Content-Disposition'] = 'attachment; filename={}'.format( smart_str(filename_out) )
+	#response['X-Sendfile'] = smart_str(fn_out)
+	#return response
+	#return HttpResponse( 'GenerateXLSX photo_group_pk = {}'.format( photo_group_pk ) )
+	with tempfile.SpooledTemporaryFile() as tmp:
+		with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as archive:
+			#for photo in queryset:
+				#projectUrl = str(item.cv) + ''
+				#date_time = photo.date_added.astimezone( 
+				#				timezone.get_default_timezone( ) 
+				#				).strftime( "%y%m%d-%H%M%S" )
+				#fileNameInZip = '{2}_{1}_{0}.jpg'.format(
+				#				photo.slug, photo.department_item.name, 
+				#				date_time )
+			archive.write(fn_out,filename_out)
+			tmp.seek(0)
+			response = HttpResponse(tmp.read())
+			response.content_type = 'application/x-zip-compressed'
+			response['Content-Disposition'] = 'attachment; filename="{}"'.format( filename_out[:-5]+'.zip' )
+			return response	
+
 
 # Gallery views.
 

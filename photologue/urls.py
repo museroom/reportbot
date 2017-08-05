@@ -24,9 +24,10 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	DailyReportListView, DailyReportDetailView, DailyReportArchiveIndexView, \
 	DailyReportDayArchiveView, DailyReportMonthArchiveView, \
 	Update_DailyReportItem, Update_PhotoGroup, \
-        PhotoUploadView, PhotoCatagorize, \
+    PhotoUploadView, PhotoCatagorize, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
-	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder
+	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder, \
+	GenerateXLSX
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -153,6 +154,11 @@ urlpatterns = [
 	url(r'^sortable/submit/(?P<photo_group_pk>\d+)/$',
 			SortableSubmitTest,
 			name='test-submit-sortable' ),
+
+	# OpenPyXL output XLSX url
+	url(r'^xlsx/download/(?P<photo_group_pk>\d+)/$',
+			GenerateXLSX,
+			name='generate-xlsx' ),
 
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',

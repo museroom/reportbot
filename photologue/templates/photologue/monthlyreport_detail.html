@@ -6,21 +6,19 @@
 {% block content %}
 
 	<div class="row col-lg-12">
-		<h2 class="page-header">{{ object.name }}</h2>
-		<p class="muted"><small>{% trans "Published" %} {{ object.date_added }}</small></p>
+		<h4 class="page-header">{{ object.name }}</h4>
 	</div> 
 
 	{% if object %}
-	<a class="btn btn-primary" role="button" 
-	   href="{% url 'photologue:test-sortable' object.pk %}">Change Photo Order</a>
 	 <form action="{% url 'photologue:update_photogroup' object.pk %}"
 			 method="post"> {% csrf_token %}
 	
-		<div class="row"> 
+		<div class="row col-lg-12"> 
 			{% for photo in object.photo_records.all %}
 			<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" >
-				<img class="thumbnail img-responsive" src="{{photo.photo.get_thumbnail_url}}"/>
-				<small>{{photo.photo.pk}}_{{photo.photo_class}}</small>
+				<a href="{{photo.photo.get_absolute_url}}">
+				<img class="thumbnail img-responsive" 
+				     src="{{photo.photo.get_thumbnail_url}}"/> </a>
 			   <div class="checkbox">
 			   <input  type="checkbox" data-toggle="toggle"
 					data-on="Remove" data-off="Remove"
@@ -30,6 +28,23 @@
 			</div>
 			{% endfor %}
 		</div>
+		<div class="row col-lg-12 btn-wrapper ">
+			<a class="btn btn-warning" role="button" href="#"
+				onClick='window.open( "{{ add_photo_url }}", "newWindow" )'> 
+				Add Photo </a>
+			<a class="btn btn-primary" role="button" 
+				href="{% url 'photologue:test-sortable' object.pk %}">
+				Change Photo Order</a>
+			<a class="btn btn-info" role="button" href="#"
+				onClick='window.open( "{{ edit_record_url }}", "newWindow" )'> 
+				Edit Record </a>
+			<a class="btn btn-info" role="button" href="#"
+				onClick='window.open( "{{ generate_xlsx_url }}", "newWindow" )'> 
+				Download Excel </a>
+			<button class="btn btn-danger" type="submit">
+				Submit Changes / Save
+			</button>
+	   </div>
 		{%comment%}
 		<a href="#" 
 			onClick='window.open( 
@@ -149,20 +164,7 @@
 		 <!-- footer -->
 		 <div class="row"> <hr/> </div>
 		<div class="row col-xs-12  button-wrapper" >
-			<a class="btn btn-warning" role="button" href="#"
-			onClick='window.open( "{{ add_photo_url }}", "newWindow" )'> 
-			Add Photo </a>
-			<a class="btn btn-info" role="button" href="#"
-			onClick='window.open( "{{ edit_record_url }}", "newWindow" )'> 
-			Edit Record </a>
-			{%comment%}
-			<a class="btn btn-info" role="button" href="{% url 'admin:photologue_photogroup_change' object.id%}">
-			Edit Record </a>
-			{%endcomment%}
-			<a  name="department"></a>
-			<button class="btn btn-danger" type="submit">
-			   Submit Changes / Save
-			</button>
+		<p class="muted"><small>{% trans "Published" %} {{ object.date_added }}</small></p>
 		</div>
 	</form>
 	 {% else %}

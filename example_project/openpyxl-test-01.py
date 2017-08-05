@@ -46,8 +46,6 @@ for row in ws.rows:
     print(cell.column+ str(cell.row) + ":" + cell.value)
     i = i + 1
 	
-ws['e2'] = u'屌你老母食屎狗'
-
 fn_out_path, filename = os.path.split(fn_out)
 print( "fn_out_path={}, filename={}".format( fn_out_path, filename ) )
 if not os.path.exists( fn_out_path ): 
