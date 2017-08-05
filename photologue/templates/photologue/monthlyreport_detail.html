@@ -20,6 +20,7 @@
 			{% for photo in object.photo_records.all %}
 			<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" >
 				<img class="thumbnail img-responsive" src="{{photo.photo.get_thumbnail_url}}"/>
+				<small>{{photo.photo.pk}}_{{photo.photo_class}}</small>
 			   <div class="checkbox">
 			   <input  type="checkbox" data-toggle="toggle"
 					data-on="Remove" data-off="Remove"

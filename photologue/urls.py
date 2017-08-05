@@ -26,7 +26,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	Update_DailyReportItem, Update_PhotoGroup, \
         PhotoUploadView, PhotoCatagorize, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
-	MonthlyReportDetailView, SortableSubmitTest
+	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -146,7 +146,8 @@ urlpatterns = [
 	# -testes-
 	# Sortable.js 
 	url(r'^sortable/(?P<pk>\d+)/$',
-			DetailView.as_view( model=PhotoGroup, template_name='photologue/test-sortable.html'),
+			MonthlyReportPhotoReorder.as_view(), 
+		#	DetailView.as_view( model=PhotoGroup, template_name='photologue/test-sortable.html'),
 		   # TemplateView.as_view(template_name='photologue/test-sortable.html'), 
 			name='test-sortable' ),
 	url(r'^sortable/submit/(?P<photo_group_pk>\d+)/$',

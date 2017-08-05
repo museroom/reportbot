@@ -242,6 +242,7 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 			  'place_or_system', 'department_item', 'problem_description', 
 			  'service_provided', 'parts_replaced', 'remark', 'conclusion', 
 			  'serviced_by', 'serviced_date', 'inspected_by', 'inspection_date',
+			  'photo_records',
 			  )
 
 	def get_form( self, request, obj=None, **kwargs):
@@ -542,12 +543,17 @@ class PhotoAdmin(admin.ModelAdmin):
 											q_photo.department_item.department.company.name )
 		new_photo_group = PhotoGroup( name=groupname, date_added=photo_date_time )
 		new_photo_group.department_item = q_photo.department_item
-		new_photo_group.date_of_service =  photo_date_time
+		new_photo_group.date_of_service = photo_date_time
 		new_photo_group.serviced_date = photo_date_time
 		new_photo_group.inspection_date = photo_date_time
 		new_photo_group.save()
+		photogroup_image_class_center = PhotoGroupImageClass.objects.get( name="Center" )
 		for q_photo in queryset:
-			new_photo_group.photos.add( q_photo )
+			photogroup_image = PhotoGroupImage(  
+			                       photo = q_photo,
+								   photo_class = photogroup_image_class_center )
+			photogroup_image.save() 
+			new_photo_group.photo_records.add( photogroup_image )
 
 		msg = ungettext(
 			'The photo has been successfully added to new group',

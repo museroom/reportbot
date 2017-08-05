@@ -36,6 +36,7 @@
 				{% for photo_sample in photogroup.sample %}
 				<div class="col-xs-3 nopadding">
 					<img class="thumbnail img-responsive" src="{{photo_sample.photo.get_thumbnail_url}}">
+					<small>{{photo_sample.photo.pk}}_{{photo_sample.photo_class}}</small>
 				</div>
 				{% endfor %}
 			</div>

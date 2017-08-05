@@ -11,6 +11,9 @@
 </div>
 
 <div class="row col-xs-12">
+	<code>before:{{ qset_before|length }}
+	center:{{ qset_center|length }}
+	after :{{ qset_after|length }}</code>
 	{% if object %}
 	<form action="{% url 'photologue:test-submit-sortable' object.pk %}"
 		  method="post" id="dj_form"> {% csrf_token %}
@@ -18,16 +21,18 @@
 			<div class="layer tile row col-lg-12"  >
 				<div class="tile__name h4">
 					Before</div>
-				<div class="tile__list" name="grp_before" style="min-height:50px;min-width:80%;">
-					{% for photo in object.photo_records.all %}
+				<div class="tile__list" name="Before" style="min-height:50px;min-width:80%;">
+					{% if qset_before %}
+					{% for photo in qset_before %}
 					<div class="col-xs-3 col-sm-2 col-lg-1 nopadding" >
 						<img class="thumbnail img-responsive" src="{{photo.photo.get_thumbnail_url}}">
-						{{photo.pk}}
-						<input type="hidden" id="imgorder{{photo.pk}}" name="imgorder" value="{{photo.pk}}">
+						<small>{{photo.photo.pk}}_{{photo.photo_class}}</small>
+						<input type="hidden" id="imgorder{{photo.photo.pk}}" 
+							   name="photo_order" value="{{photo.photo.pk}}">
 						{%comment%}
 						<div class="checkbox">
 							<font size="-2">
-							<input  type="checkbox" data-toggle="toggle"
+							<input	type="checkbox" data-toggle="toggle"
 								data-on="Remove" data-off="Remove"
 								data-onstyle="primary" data-size="mini"
 								value="{{ photo.pk }}" name="photo_remove" >
@@ -37,18 +42,39 @@
 						{%endcomment%}
 					</div>
 					{% endfor %}
+					{% endif %}
 				</div>
 			</div>
 			<div class="layer tile row col-lg-12" >
 				<div class="tile__name h4" >
 					Page Center</div>
-				<div class="tile__list" name="grp_no" style="min-height:50px;min-width:80%;">
+				<div class="tile__list" name="Center" style="min-height:50px;min-width:80%;">
+					{% if qset_center %}
+					{% for photo in qset_center %}
+					<div class="col-xs-3 col-sm-2 col-lg-1 nopadding" >
+						<img class="thumbnail img-responsive" src="{{photo.photo.get_thumbnail_url}}">
+						<small>{{photo.photo.pk}}_{{photo.photo_class}}</small>
+						<input type="hidden" id="imgorder{{photo.photo.pk}}" 
+							   name="photo_order" value="{{photo.photo.pk}}">
+					</div>
+					{% endfor %}
+					{% endif %}
 				</div>
 			</div>
 			<div class="layer tile row col-lg-12" >
 				<div class="tile__name h4" >
 					After</div>
-				<div class="tile__list" name="grp_after" style="min-height:50px;min-width:80%;">
+				<div class="tile__list" name="After" style="min-height:50px;min-width:80%;">
+					{% if qset_after %}
+					{% for photo in qset_after %}
+					<div class="col-xs-3 col-sm-2 col-lg-1 nopadding" >
+						<img class="thumbnail img-responsive" src="{{photo.photo.get_thumbnail_url}}">
+						<small>{{photo.photo.pk}}_{{photo.photo_class}}</small>
+						<input type="hidden" id="imgorder{{photo.photo.pk}}" 
+							   name="photo_order" value="{{photo.photo.pk}}">
+					</div>
+					{% endfor %}
+					{% endif %}
 				</div>
 			</div>
 		</div>

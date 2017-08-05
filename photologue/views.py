@@ -278,7 +278,6 @@ class MonthlyReportListView( LoginRequiredMixin, ListView ):
 		return qset
 
 
-
 class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 	login_url = '/login' 
 	model = PhotoGroup
@@ -402,14 +401,20 @@ def Update_PhotoGroup( request, photo_group_pk ):
 	print( u"DEBUG: photo_group_pk = {}".format( photo_group_pk ) )
 	print( u"DEBUG: active_photogroup = {}".format( request.user.profile.active_photogroup ) )
 	q_photogroup = request.user.profile.active_photogroup
+	photogroup_image_class_center = PhotoGroupImageClass.objects.get( name = "Center" )
 	for q_photo_pk in request.POST.getlist('add_photo'):
 		print( u"adding q_photo_pk={}".format( q_photo_pk ) )
 		q_photo = Photo.objects.get( pk = q_photo_pk )
-		q_photogroup.photos.add( q_photo )
+		photogroup_image = PhotoGroupImage( 
+		                       photo = q_photo,
+							   photo_class = photogroup_image_class_center )
+		photogroup_image.save()
+		q_photogroup.photo_records.add( photogroup_image )
 	for q_photo_pk in request.POST.getlist('delete_photo'):
 		print( u"deleting q_photo_pk={}".format( q_photo_pk))
-		q_photo = Photo.objects.get( pk = q_photo_pk )
-		q_photogroup.photos.remove( q_photo )
+		#q_photo = Photo.objects.get( pk = q_photo_pk )
+		q_photogroup_image = PhotoGroupImage.objects.get( pk = q_photo_pk )
+		q_photogroup.photo_records.remove( q_photogroup_image )
 	
 	if request.POST.has_key('delete_photo'):
 		return HttpResponseRedirect( reverse(
@@ -417,12 +422,11 @@ def Update_PhotoGroup( request, photo_group_pk ):
 	else:
 		return HttpResponseRedirect( reverse( 'photologue:message-success' ) )
 	
-
+#FIXIT
 def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=None ):
 	print( u"DEBUG: daily_report_pk = {} daily_report_item_pk = {} // request.POST= {}".format (
 			 daily_report_pk, daily_report_item_pk, request.POST.getlist('report_photo'))) 
-	print( u"DEBUG: submit department_item_pk = {}".format(
-			 request.POST.getlist('department_pk')))
+#			 request.POST.getlist('department_pk')))
 	redirect_url = reverse( 'photologue:report_item_list_view' )
 	if '2017' not in daily_report_item_pk:
 	#if not isinstance(daily_report_item_pk, basestring):
@@ -557,14 +561,47 @@ def PhotoUploadView( request ):
 		})
 	#return HttpResponse( "Success" )
 
+class MonthlyReportPhotoReorder( DetailView ):
+	model = PhotoGroup
+	template_name='photologue/test-sortable.html'
+	
+	def get_context_data( self, **kwargs ):
+		context = super( MonthlyReportPhotoReorder, self).get_context_data(**kwargs)
+		qset_before = self.object.photo_records.filter( 
+		                  photo_class__name = "Before" )
+		qset_center = self.object.photo_records.filter( 
+		                  photo_class__name = "Center" )
+		qset_after = self.object.photo_records.filter( 
+		                  photo_class__name = "After" )
+		print( "{} {} {}".format( len(qset_before), len(qset_center), len(qset_after) ) )
+		context['qset_before'] = qset_before
+		context['qset_center'] = qset_center
+		context['qset_after']  = qset_after 
+
+		return context
+
 def SortableSubmitTest( request, photo_group_pk ):
-	print('debug: SortableSubmitTest {}'.format( request.POST ) )
+	q_photo_group = PhotoGroup.objects.get( pk = photo_group_pk )
+#	q_photo_group.photo_records.clear()
+	for q_photogroup_img in q_photo_group.photo_records.all():
+		print( "debug: delete {} from {}".format( 
+		       q_photogroup_img, q_photo_group ) )
+		q_photogroup_img.delete()
+	i = 0
 	for q_photo_pk in request.POST.getlist('photo_order'):
-			print( "order:{}".format( q_photo_pk  ) ) 
+		if '/' in q_photo_pk:
+			i = i + 1
+			pg_class_name, pg_style, p_pk = q_photo_pk.split('/')
+			print( "{}_{}_{}".format( pg_class_name, pg_style, p_pk ) )
+			pg_class = PhotoGroupImageClass.objects.get( name = pg_class_name )
+			q_photo = Photo.objects.get( pk = p_pk )
+			pg_img = PhotoGroupImage( photo = q_photo, photo_class = pg_class )
+			pg_img.save()
+			q_photo_group.photo_records.add( pg_img )
 
 	return HttpResponseRedirect( 
-			reverse( 'photologue:test-sortable', args=[photo_group_pk]
-				) )
+			  reverse( 'photologue:test-sortable', 
+			  args=[photo_group_pk]) )
 	
 
 # Gallery views.

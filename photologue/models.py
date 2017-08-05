@@ -634,7 +634,7 @@ class PhotoGroupImage(models.Model):
     page = models.IntegerField(default=1)
 
     def __str__(self):
-        return u"{}_{}".format( self.photo_class.name, self.page)
+        return u"{}_{}_{}".format( self.photo.slug, self.photo_class.name, self.page)
 
 
 @python_2_unicode_compatible
@@ -642,9 +642,9 @@ class PhotoGroup(models.Model):
     date_added = models.DateTimeField(
         _('date added'), default=now)
     name = models.CharField(_('name'), max_length=250, unique=False, blank=False)
-    photos = models.ManyToManyField(
-        'photologue.Photo', blank=True,
-        verbose_name=_('photos'))
+    #photos = models.ManyToManyField(
+    #    'photologue.Photo', blank=True,
+    #    verbose_name=_('photos'))
     photo_records = models.ManyToManyField(
 		PhotoGroupImage,   verbose_name=_('photos with classes'))
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
