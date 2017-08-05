@@ -1,9 +1,19 @@
 import warnings 
 import os 
-from io import BytesIO
-from django.utils.encoding import smart_str
-import tempfile, zipfile
 
+#FIXME still need tempfile,zipfile,smart_str?
+import tempfile, zipfile
+from django.utils.encoding import smart_str
+#from django.core.servers.basehttp import FileWrapper
+
+# for handling zip file download
+from wsgiref.util import FileWrapper
+from StringIO import StringIO
+from io import BytesIO
+import mimetypes
+from django.http import StreamingHttpResponse
+
+# OpenPyXL for generating XLSX
 import re, openpyxl
 try:
     from urllib.request import urlopen
@@ -438,6 +448,7 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 			 daily_report_pk, daily_report_item_pk, request.POST.getlist('report_photo'))) 
 #			 request.POST.getlist('department_pk')))
 	redirect_url = reverse( 'photologue:report_item_list_view' )
+	#FIXME temp fix on the bus, but the problem is DEL and ADD not related to photo.pk
 	if '2017' not in daily_report_item_pk:
 	#if not isinstance(daily_report_item_pk, basestring):
 	#if daily_report_item_pk:
@@ -618,8 +629,11 @@ def GenerateXLSX( request, photo_group_pk ):
 	
 	static_root = getattr( settings, 'STATIC_ROOT', '' )
 	static_url = getattr( settings, 'STATIC_URL', '' )
-	#FIXME have site url in setting?
-	app_url = 'http://reportbot.5tring.com:4000'
+	if request.is_secure():
+		app_url_prefix = "https://"
+	else:
+		app_url_prefix = "http://"
+	app_url = app_url_prefix + request.get_host()
 	tmp_root = '/media/djmedia/mr_forgot/tmp'
 	xlsx_root = 'xlsx'
 	filename_in = 'cm-template.xlsx'
@@ -644,9 +658,12 @@ def GenerateXLSX( request, photo_group_pk ):
 	# Insert Logo on every page
 	print ('insert image {}'.format( img_url ) )
 	image_data = BytesIO(urlopen(img_url).read())
-	img_width = 151
-	img_height = 134
-	img = openpyxl.drawing.image.Image( image_data, size=[img_width,img_height] )
+	#img_width = 500
+	#img_height = 500
+	img = openpyxl.drawing.image.Image( image_data,
+	                                    nochangeaspect=True )
+	img.drawing.width = 50
+	img.drawing.height = 2000
 	print(dir(img.drawing))
 	#img.drawing.width = 152
 	#img.drawing.height = 134
@@ -674,28 +691,36 @@ def GenerateXLSX( request, photo_group_pk ):
 	print( 'saving {}'.format(fn_out))
 	wb.save( fn_out )
 
+	fn_io = StringIO( open(fn_out).read() )
+	wrapper = FileWrapper( fn_io, blksize=5 )
+	response = StreamingHttpResponse( wrapper, 
+	               content_type = mimetypes.guess_type(fn_out)[0])
+	response['Content-Disposition'] = "attachment; filename={}".format( filename_out )
+	return response
+
+
 	#response = HttpResponse( 
 	#	           content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 	#response['Content-Disposition'] = 'attachment; filename={}'.format( smart_str(filename_out) )
 	#response['X-Sendfile'] = smart_str(fn_out)
 	#return response
 	#return HttpResponse( 'GenerateXLSX photo_group_pk = {}'.format( photo_group_pk ) )
-	with tempfile.SpooledTemporaryFile() as tmp:
-		with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as archive:
-			#for photo in queryset:
-				#projectUrl = str(item.cv) + ''
-				#date_time = photo.date_added.astimezone( 
-				#				timezone.get_default_timezone( ) 
-				#				).strftime( "%y%m%d-%H%M%S" )
-				#fileNameInZip = '{2}_{1}_{0}.jpg'.format(
-				#				photo.slug, photo.department_item.name, 
-				#				date_time )
-			archive.write(fn_out,filename_out)
-			tmp.seek(0)
-			response = HttpResponse(tmp.read())
-			response.content_type = 'application/x-zip-compressed'
-			response['Content-Disposition'] = 'attachment; filename="{}"'.format( filename_out[:-5]+'.zip' )
-			return response	
+#	with tempfile.SpooledTemporaryFile() as tmp:
+#		with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as archive:
+#			#for photo in queryset:
+#				#projectUrl = str(item.cv) + ''
+#				#date_time = photo.date_added.astimezone( 
+#				#				timezone.get_default_timezone( ) 
+#				#				).strftime( "%y%m%d-%H%M%S" )
+#				#fileNameInZip = '{2}_{1}_{0}.jpg'.format(
+#				#				photo.slug, photo.department_item.name, 
+#				#				date_time )
+#			archive.write(fn_out,filename_out)
+#			tmp.seek(0)
+#			response = HttpResponse(tmp.read())
+#			response.content_type = 'application/x-zip-compressed'
+#			response['Content-Disposition'] = 'attachment; filename="{}"'.format( filename_out[:-5]+'.zip' )
+#			return response	
 
 
 # Gallery views.

@@ -23,16 +23,28 @@
 	<article>
 		{% for photogroup in object_list %}
 		<section>
-			<div class="row col-xs-12" style="background-color:{{photogroup.department_item.report_color}}" >
+			<div class="row col-lg-12" 
+				{%comment%} style="background-color:{{photogroup.department_item.report_color}}" {%endcomment%}
+				>
 				<a href="{% url 'photologue:monthly-report-detail' photogroup.pk %}" 
 				   class="btn btn-primary btn-xs" role="button" >
 				   Edit
 				</a>
-					<b>{{photogroup}}</b>
-					<small> <p class='text-warning'>
-					{{photogroup.problem_description}}</small></p>
+				<b>{{photogroup}}</b>
+				<div class="row col-lg-12 h6 ">
+					<div class="col-lg-12 info-bg-lightblue"> 
+					{{photogroup.problem_description}} </div>
+					<div class="col-lg-12 info-bg-lightgreen"> 
+					{{photogroup.service_provided}} </div>
+					<div class="col-xs-4 bg-success"> 
+					{{photogroup.contact_person}} </div>
+					<div class="col-xs-4 bg-info"> 
+					{{photogroup.contact_number}} </div>
+					<div class="col-xs-4 bg-success"> 
+					{{photogroup.date_of_service}} </div>
+				</div>
 			</div>
-			<div class="row col-xs-12 ">
+			<div class="row col-lg-12 ">
 				{% for photo_sample in photogroup.sample %}
 				<div class="col-xs-3 nopadding">
 					<img class="thumbnail img-responsive" src="{{photo_sample.photo.get_thumbnail_url}}">

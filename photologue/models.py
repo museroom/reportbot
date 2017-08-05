@@ -495,10 +495,11 @@ class ImageModel(models.Model):
 							new_dimensions[1] > cur_height:
 				if not photosize.upscale:
 					return im
+			#FIXME Pillow can't handle defect wechat jpg
 			try:
 				im = im.resize(new_dimensions, Image.ANTIALIAS)
-			except:
-				print self.slug+"not ok jpg"
+			except IOError as e:
+				print "{} not ok jpg({})".format(self.slug, e )
 		return im
 
 	def create_size(self, photosize):
