@@ -27,7 +27,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
     PhotoUploadView, PhotoCatagorize, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
 	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder, \
-	GenerateXLSX
+	GenerateXLSX, GenerateXLSXAll
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -159,6 +159,9 @@ urlpatterns = [
 	url(r'^xlsx/download/(?P<photo_group_pk>\d+)/$',
 			GenerateXLSX,
 			name='generate-xlsx' ),
+	url(r'^xlsx/download/all/$',
+			GenerateXLSXAll,
+			name='generate-xlsx-all' ),
 
 	# Deprecated URLs.
 	url(r'^gallery/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[\-\d\w]+)/$',
