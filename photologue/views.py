@@ -627,6 +627,23 @@ def SortableSubmitTest( request, photo_group_pk ):
 # XLSX output with openpyxl
 def GenerateXLSX( request, photo_group_pk ):
 	
+	def create_image( url, x, y, width=None, height=None ):
+		print( 'debug: create_image, url:{} xy:{},{}, wh:{},{}'.format(
+		    url, x, y, width, height))
+		image_data = BytesIO(urlopen(url).read())
+		image = openpyxl.drawing.image.Image( image_data )
+		image.drawing.top = y
+		image.drawing.left = x
+		if width:
+			image.drawing.width = width
+		if height:
+			org_width = image.drawing.width
+			org_height = image.drawing.height
+			image.drawing.height = height
+			image.drawing.width = org_height /org_width * height
+		return image
+
+
 	static_root = getattr( settings, 'STATIC_ROOT', '' )
 	static_url = getattr( settings, 'STATIC_URL', '' )
 	if request.is_secure():
@@ -636,6 +653,17 @@ def GenerateXLSX( request, photo_group_pk ):
 	app_url = app_url_prefix + request.get_host()
 	tmp_root = '/media/djmedia/mr_forgot/tmp'
 	xlsx_root = 'xlsx'
+
+	# hand coded template photo grid value
+	photo_cell_top = 48
+	photo_cell_page = 86
+	photo_cell_bottom = photo_cell_page - photo_cell_top
+	anchor_before_left = 50
+	anchor_center_left = 250
+	anchor_after_left  = 400
+	photo_page_height = 763
+	photo_page_width = 630
+	photo_gap = 10
 	filename_in = 'cm-template.xlsx'
 	filename_out = 'month-report-{}.xlsx'.format( photo_group_pk )
 	fn_in = os.path.join(static_root,xlsx_root,filename_in)
@@ -645,7 +673,7 @@ def GenerateXLSX( request, photo_group_pk ):
 	print( 'url_in='+url_in)
 	xlsx_data = BytesIO(urlopen(url_in).read())
 
-	img_url = "http://reportbot.5tring.com:4000/media/photologue/photos/image1.png"
+	logo_url = app_url + "/media/photologue/photos/image1.png"
 
 	wb = openpyxl.load_workbook( xlsx_data )
 	ws = wb.active
@@ -656,22 +684,15 @@ def GenerateXLSX( request, photo_group_pk ):
 		os.mkdir( fn_out_path )
 
 	# Insert Logo on every page
-	print ('insert image {}'.format( img_url ) )
-	image_data = BytesIO(urlopen(img_url).read())
-	#img_width = 500
-	#img_height = 500
-	img = openpyxl.drawing.image.Image( image_data,
-	                                    nochangeaspect=True )
-	img.drawing.width = 50
-	img.drawing.height = 2000
-	print(dir(img.drawing))
-	#img.drawing.width = 152
-	#img.drawing.height = 134
-	ws.add_image( img, 'B1' )
+	ws.add_image( create_image( 
+		logo_url, 
+		ws['A1'].anchor[0], ws['A1'].anchor[1], 
+		152, 200 ) )
 
-	q_pg = PhotoGroup.objects.get( id = 6 )
+	q_pg = PhotoGroup.objects.get( id = photo_group_pk )
 	fields_pg = q_pg._meta.get_fields()
 
+	# Replace template tag  with database value
 	pattern = r'^{{(?P<name>\w+)}}$'
 	non_db_field = ['page_num', 'page_total','serial_no']
 	for cell in ws.get_cell_collection():
@@ -685,6 +706,67 @@ def GenerateXLSX( request, photo_group_pk ):
 					db_value == 'non db_value FIXME'
 				cell.value = db_value
 
+	# get all images 
+	qset_photorecord = q_pg.photo_records.all() 
+	qset_photos_before = q_pg.photo_records.filter( photo_class__name = "Before" )
+	qset_photos_center = q_pg.photo_records.filter( photo_class__name = "Center" )
+	qset_photos_after  = q_pg.photo_records.filter( photo_class__name = "After" )
+
+	#compute max height
+	photo_height_before = 200
+	photo_height_center= 200
+	photo_height_after = 200
+	if len(qset_photos_before) > 0:
+		photo_height_before = photo_page_height / len(qset_photos_before)
+	if len(qset_photos_center) > 0:
+		photo_height_center = photo_page_height / len(qset_photos_center)
+	if len(qset_photos_after) > 0:
+		photo_height_after  = photo_page_height / len(qset_photos_after)
+	
+	# insert photos
+	counter_before = 0
+	counter_center = 0
+	counter_after = 0
+	for q_photorecord in qset_photorecord:
+		print( u"url:{}\nclass:{} page:{} {}:{}:{}".format(
+			       q_photorecord.photo.image.url,
+				   q_photorecord.photo_class,
+				   q_photorecord.page, 
+				   counter_before, counter_center, counter_after))
+	
+		page_anchor_top = ws['A{}'.format(photo_cell_top)].anchor[1] 
+
+		if q_photorecord.photo_class.name == "Before":
+			photo_left = anchor_before_left
+			photo_height = photo_height_before 
+			photo_top = counter_before * (photo_height_before+photo_gap) + \
+			            page_anchor_top
+			counter_before = counter_before + 1
+		if q_photorecord.photo_class.name == "Center":
+			photo_left = anchor_center_left
+			photo_height = photo_height_center 
+			photo_top = counter_center * (photo_height_center+photo_gap) + \
+			            page_anchor_top
+			counter_center = counter_center + 1
+		if q_photorecord.photo_class.name == "After":
+			photo_left = anchor_after_left
+			photo_height = photo_height_after 
+			photo_top = counter_after * (photo_height_after+photo_gap) + \
+			            page_anchor_top
+			counter_after = counter_after + 1
+			
+		ws.add_image( create_image(
+			app_url+q_photorecord.photo.image.url, 
+			photo_left, photo_top,
+			height=photo_height
+			#ws['A{}'.format(photo_cell_top)].anchor[0], 
+			#ws['A{}'.format(photo_cell_top)].anchor[1],
+			#height=300,
+			) )
+
+	# decide layout
+
+	# generate continues layout
 
 	# save and exit
 
@@ -697,30 +779,6 @@ def GenerateXLSX( request, photo_group_pk ):
 	               content_type = mimetypes.guess_type(fn_out)[0])
 	response['Content-Disposition'] = "attachment; filename={}".format( filename_out )
 	return response
-
-
-	#response = HttpResponse( 
-	#	           content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-	#response['Content-Disposition'] = 'attachment; filename={}'.format( smart_str(filename_out) )
-	#response['X-Sendfile'] = smart_str(fn_out)
-	#return response
-	#return HttpResponse( 'GenerateXLSX photo_group_pk = {}'.format( photo_group_pk ) )
-#	with tempfile.SpooledTemporaryFile() as tmp:
-#		with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as archive:
-#			#for photo in queryset:
-#				#projectUrl = str(item.cv) + ''
-#				#date_time = photo.date_added.astimezone( 
-#				#				timezone.get_default_timezone( ) 
-#				#				).strftime( "%y%m%d-%H%M%S" )
-#				#fileNameInZip = '{2}_{1}_{0}.jpg'.format(
-#				#				photo.slug, photo.department_item.name, 
-#				#				date_time )
-#			archive.write(fn_out,filename_out)
-#			tmp.seek(0)
-#			response = HttpResponse(tmp.read())
-#			response.content_type = 'application/x-zip-compressed'
-#			response['Content-Disposition'] = 'attachment; filename="{}"'.format( filename_out[:-5]+'.zip' )
-#			return response	
 
 
 # Gallery views.
