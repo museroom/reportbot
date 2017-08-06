@@ -14,7 +14,11 @@ import mimetypes
 from django.http import StreamingHttpResponse
 
 # OpenPyXL for generating XLSX
-import re, openpyxl
+import re
+from openpyxl.drawing.image import Image as xlsx_Image
+from openpyxl import load_workbook as xlsx_load_workbook
+from wand.image import Image as wand_Image
+import hashlib
 try:
     from urllib.request import urlopen
 except ImportError:
@@ -612,37 +616,25 @@ def SortableSubmitTest( request, photo_group_pk ):
 	for q_photo_pk in request.POST.getlist('photo_order'):
 		if '/' in q_photo_pk:
 			i = i + 1
-			pg_class_name, pg_style, p_pk = q_photo_pk.split('/')
-			print( "{}_{}_{}".format( pg_class_name, pg_style, p_pk ) )
-			pg_class = PhotoGroupImageClass.objects.get( name = pg_class_name )
-			q_photo = Photo.objects.get( pk = p_pk )
-			pg_img = PhotoGroupImage( photo = q_photo, photo_class = pg_class )
-			pg_img.save()
-			q_photo_group.photo_records.add( pg_img )
+			try:
+				pg_class_name, pg_style, p_pk = q_photo_pk.split('/')
+				print( "{}_{}_{}".format( pg_class_name, pg_style, p_pk ) )
+				pg_class = PhotoGroupImageClass.objects.get( name = pg_class_name )
+				q_photo = Photo.objects.get( pk = p_pk )
+				pg_img = PhotoGroupImage( photo = q_photo, photo_class = pg_class )
+				pg_img.save()
+				q_photo_group.photo_records.add( pg_img )
+			except:
+				print( "ERROR: dropped unsupported hidden field:"+ q_photo_pk )
 
 	return HttpResponseRedirect( 
-			  reverse( 'photologue:test-sortable', 
-			  args=[photo_group_pk]) )
+			  #reverse( 'photologue:test-sortable', 
+			  reverse( 'photologue:monthly-report-detail', 
+			  args=[photo_group_pk]) 
+			   )
 	
 # XLSX output with openpyxl
 def GenerateXLSX( request, photo_group_pk ):
-	
-	def create_image( url, x, y, width=None, height=None ):
-		print( 'debug: create_image, url:{} xy:{},{}, wh:{},{}'.format(
-		    url, x, y, width, height))
-		image_data = BytesIO(urlopen(url).read())
-		image = openpyxl.drawing.image.Image( image_data )
-		image.drawing.top = y
-		image.drawing.left = x
-		if width:
-			image.drawing.width = width
-		if height:
-			org_width = image.drawing.width
-			org_height = image.drawing.height
-			image.drawing.height = height
-			image.drawing.width = org_height /org_width * height
-		return image
-
 
 	static_root = getattr( settings, 'STATIC_ROOT', '' )
 	static_url = getattr( settings, 'STATIC_URL', '' )
@@ -653,6 +645,32 @@ def GenerateXLSX( request, photo_group_pk ):
 	app_url = app_url_prefix + request.get_host()
 	tmp_root = '/media/djmedia/mr_forgot/tmp'
 	xlsx_root = 'xlsx'
+
+	def create_image( url, x, y, width=None, height=None ):
+
+		print( 'debug: [create_image], url:{} xy:{},{}, wh:{},{}'.format(
+		    url, x, y, width, height))
+
+		#with wand_Image( filename = url ) as wandImg:
+		#	wandImg.format = 'jpg'
+		#	tmp_name = os.path.join( tmp_root,
+		#		hashlib.sha1(url).hexdigest() + '-wand.' + wandImg.format ) 
+		#	wandImg.save( filename=tmp_name ) 
+
+		image_data = BytesIO(urlopen(url).read())
+		#print( 'tmp_name='+tmp_name )
+		#image_data = BytesIO(open(tmp_name).read())
+		image = xlsx_Image( image_data )
+		image.drawing.top = y
+		image.drawing.left = x
+		if width:
+			image.drawing.width = width
+		if height:
+			org_width = image.drawing.width
+			org_height = image.drawing.height
+			image.drawing.height = height
+			image.drawing.width = float(org_height) / float(org_width) * height
+		return image
 
 	# hand coded template photo grid value
 	photo_cell_top = 48
@@ -674,8 +692,9 @@ def GenerateXLSX( request, photo_group_pk ):
 	xlsx_data = BytesIO(urlopen(url_in).read())
 
 	logo_url = app_url + "/media/photologue/photos/image1.png"
+	logo_url = 'http://reportbot.5tring.com:4000/media/photologue/photos/2017-07-19-21-50-36-4324799725067112170.jpg'
 
-	wb = openpyxl.load_workbook( xlsx_data )
+	wb = xlsx_load_workbook( xlsx_data )
 	ws = wb.active
 
 	fn_out_path, filename = os.path.split(fn_out)
@@ -687,7 +706,7 @@ def GenerateXLSX( request, photo_group_pk ):
 	ws.add_image( create_image( 
 		logo_url, 
 		ws['A1'].anchor[0], ws['A1'].anchor[1], 
-		152, 200 ) )
+		height=100 ) )
 
 	q_pg = PhotoGroup.objects.get( id = photo_group_pk )
 	fields_pg = q_pg._meta.get_fields()
