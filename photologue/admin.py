@@ -235,15 +235,19 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	list_display = ('name', 'date_added' ) 
 	#filter_horizontal = ['photos',]
 	form = PhotoGroupAdminForm
-	fields = ( #'date_added', 
-			  'name', 
-			   #'company', 'department', 
-			  'contact_person', 'contact_number', 'date_of_service',
-			  'place_or_system', 'department_item', 'problem_description', 
-			  'service_provided', 'parts_replaced', 'remark', 'conclusion', 
-			  'serviced_by', 'serviced_date', 'inspected_by', 'inspection_date',
-			  'photo_records',
-			  )
+	search_fields = ['name','place_or_system','parts_replaced','conclusion',
+	                 'serviced_by','inspected_by', 'contact_number',
+					 'contact_person', 'remark', ]
+
+	#fields = ( #'date_added', 
+	#		  'name', 
+	#		   #'company', 'department', 
+	#		  'contact_person', 'contact_number', 'date_of_service',
+	#		  'place_or_system', 'department_item', 'problem_description', 
+	#		  'service_provided', 'parts_replaced', 'remark', 'conclusion', 
+	#		  'serviced_by', 'serviced_date', 'inspected_by', 'inspection_date',
+	#		  'photo_records',
+	#		  )
 
 	def get_form( self, request, obj=None, **kwargs):
 		if( obj != None ):

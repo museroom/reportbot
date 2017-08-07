@@ -650,6 +650,7 @@ class PhotoGroup(models.Model):
 	#	 'photologue.Photo', blank=True,
 	#	 verbose_name=_('photos'))
 	serial_no = models.CharField(_('Serial No'), max_length=50, unique=True, blank=True, null=True )
+	record_type = models.CharField(_('CM/PM'), max_length=10, unique=False, blank=True, null=True )
 	photo_records = models.ManyToManyField(
 		PhotoGroupImage,   verbose_name=_('photos with classes'))
 	company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
@@ -668,6 +669,21 @@ class PhotoGroup(models.Model):
 	serviced_date = models.DateTimeField(_('service date'), default=now)
 	inspected_by = models.CharField(_('inspected by'), max_length=50, unique=False, blank=True)
 	inspection_date = models.DateTimeField(_('inspection date'), default=now)
+	pmcheck1 = models.BooleanField(default=False)
+	pmcheck2 = models.BooleanField(default=False)
+	pmcheck3 = models.BooleanField(default=False)
+	pmcheck4 = models.BooleanField(default=False)
+	pmcheck5 = models.BooleanField(default=False)
+	pmcheck6 = models.BooleanField(default=False)
+	pmcheck7 = models.BooleanField(default=False)
+	pmcheck8 = models.BooleanField(default=False)
+	pmcheck9 = models.BooleanField(default=False)
+	pmcheck10 = models.BooleanField(default=False)
+	pmcheck11 = models.BooleanField(default=False)
+	pmcheck12 = models.BooleanField(default=False)
+	pmcheck13 = models.BooleanField(default=False)
+	pmcheck14 = models.BooleanField(default=False)
+	pmcheck15 = models.BooleanField(default=False) 
 
 	sites = models.ManyToManyField(Site, verbose_name=_(u'sites'),
 								   blank=True)
