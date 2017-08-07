@@ -11,16 +11,13 @@
 </div>
 
 <div class="row col-xs-12">
-	<code>before:{{ qset_before|length }}
-	center:{{ qset_center|length }}
-	after :{{ qset_after|length }}</code>
 	{% if object %}
 	<form action="{% url 'photologue:test-submit-sortable' object.pk %}"
 		  method="post" id="dj_form"> {% csrf_token %}
 		<div id="multi">
 			<div class="layer tile row col-lg-12"  >
 				<div class="tile__name h4">
-					Before</div>
+					Left</div>
 				<div class="tile__list" name="Before" style="min-height:50px;min-width:80%;">
 					{% if qset_before %}
 					{% for photo in qset_before %}
@@ -37,7 +34,7 @@
 			</div>
 			<div class="layer tile row col-lg-12" >
 				<div class="tile__name h4" >
-					Page Center</div>
+					Center</div>
 				<div class="tile__list" name="Center" style="min-height:50px;min-width:80%;">
 					{% if qset_center %}
 					{% for photo in qset_center %}
@@ -54,7 +51,7 @@
 			</div>
 			<div class="layer tile row col-lg-12" >
 				<div class="tile__name h4" >
-					After</div>
+					Right</div>
 				<div class="tile__list" name="After" style="min-height:50px;min-width:80%;">
 					{% if qset_after %}
 					{% for photo in qset_after %}

@@ -636,6 +636,9 @@ def SortableSubmitTest( request, photo_group_pk ):
 # XLSX output with openpyxl
 def GenerateXLSX( request, photo_group_pk ):
 
+	print( "-===-===-==-" )
+	print( "GenerateXLSX {}".format( photo_group_pk ) )
+
 	static_root = getattr( settings, 'STATIC_ROOT', '' )
 	static_url = getattr( settings, 'STATIC_URL', '' )
 	if request.is_secure():
@@ -648,18 +651,15 @@ def GenerateXLSX( request, photo_group_pk ):
 
 	def create_image( url, x, y, width=None, height=None ):
 
-		print( 'debug: [create_image], url:{} xy:{},{}, wh:{},{}'.format(
-		    url, x, y, width, height))
+		with wand_Image( filename = url ) as wandImg:
+			wandImg.format = 'jpg'
+			tmp_name = os.path.join( tmp_root,
+			hashlib.sha1(url).hexdigest() + '-wand.' + wandImg.format ) 
+			wandImg.save( filename=tmp_name ) 
 
-		#with wand_Image( filename = url ) as wandImg:
-		#	wandImg.format = 'jpg'
-		#	tmp_name = os.path.join( tmp_root,
-		#		hashlib.sha1(url).hexdigest() + '-wand.' + wandImg.format ) 
-		#	wandImg.save( filename=tmp_name ) 
-
-		image_data = BytesIO(urlopen(url).read())
+		#image_data = BytesIO(urlopen(url).read())
 		#print( 'tmp_name='+tmp_name )
-		#image_data = BytesIO(open(tmp_name).read())
+		image_data = BytesIO(open(tmp_name).read())
 		image = xlsx_Image( image_data )
 		image.drawing.top = y
 		image.drawing.left = x
@@ -676,7 +676,7 @@ def GenerateXLSX( request, photo_group_pk ):
 		return image
 
 	# hand coded template photo grid value
-	photo_cell_top = 48
+	photo_cell_top = 49
 	photo_cell_page = 86
 	photo_cell_bottom = photo_cell_page - photo_cell_top
 	anchor_before_left = 50
@@ -745,10 +745,15 @@ def GenerateXLSX( request, photo_group_pk ):
 	photo_page_divider = 2.25
 	# no center
 	if (len_before > 0) & (len_center == 0) & (len_after > 0):
-		photo_page_divider = 3
+		photo_page_divider = 2
+		anchor_before_left -= 50
+		anchor_after_left -= 50
 	# have left, center and right
 	if (len_before > 0) & (len_center > 0) & (len_after > 0):
-		photo_page_divider = 2.25
+		photo_page_divider = 2.8
+		anchor_before_left -= 50
+		anchor_center_left -= 20
+		anchor_after_left  += 50
 
 	photo_width_before = photo_page_width / photo_page_divider - photo_gap_width
 	photo_width_center = photo_page_width / photo_page_divider - photo_gap_width
@@ -773,19 +778,19 @@ def GenerateXLSX( request, photo_group_pk ):
 		logo_url, 
 		ws['A'+logo_row].anchor[0], ws['A'+logo_row].anchor[1], 
 		height=170 ) )
+	photo_height_before = 0
+	photo_height_center = 0
+	photo_height_after = 0
 	for q_photorecord in qset_photorecord:
 		#compute max height
-		photo_height_before = 200
-		photo_height_center= 200
-		photo_height_after = 200
-		if len(qset_photos_before) > 0:
-			photo_height_before = photo_page_height / len(qset_photos_before)
-		if len(qset_photos_center) > 0:
-			photo_height_center = photo_page_height / len(qset_photos_center)
-		if len(qset_photos_after) > 0:
-			photo_height_after  = photo_page_height / len(qset_photos_after)
+		#if len(qset_photos_before) > 0:
+		#	photo_height_before = photo_page_height / len(qset_photos_before)
+		#if len(qset_photos_center) > 0:
+		#	photo_height_center = photo_page_height / len(qset_photos_center)
+		#if len(qset_photos_after) > 0:
+		#	photo_height_after  = photo_page_height / len(qset_photos_after)
 	
-		print( u"url:{}\nclass:{} page:{} {}:{}:{}".format(
+		print( u"\nurl:{}\nclass:{} page:{} {}:{}:{}".format(
 			       q_photorecord.photo.image.url,
 				   q_photorecord.photo_class,
 				   q_photorecord.page, 
@@ -793,27 +798,34 @@ def GenerateXLSX( request, photo_group_pk ):
 	
 		page_anchor_top = ws['A{}'.format(photo_cell_top)].anchor[1] 
 
+		# compute height from aspect ratio of photo
+		def get_height_aspect( photo, width ):
+			org_width = photo.image.width
+			org_height = photo.image.height
+			new_height = float(org_height)/float(org_width) * width
+			return new_height 
+			
 		if q_photorecord.photo_class.name == "Before":
 			photo_left = anchor_before_left
-			photo_height = photo_height_before 
 			photo_width = photo_width_before
-			photo_top = counter_before * (photo_height_before+photo_gap) + \
-			            page_anchor_top
+			photo_top = photo_height_before + page_anchor_top
 			counter_before = counter_before + 1
+			photo_height_before += get_height_aspect( q_photorecord.photo, photo_width ) + \
+			                       photo_gap
 		if q_photorecord.photo_class.name == "Center":
 			photo_left = anchor_center_left
-			photo_height = photo_height_center 
 			photo_width = photo_width_center
-			photo_top = counter_center * (photo_height_center+photo_gap) + \
-			            page_anchor_top
+			photo_top = photo_height_center + page_anchor_top
 			counter_center = counter_center + 1
+			photo_height_center += get_height_aspect( q_photorecord.photo, photo_width ) + \
+			                       photo_gap 
 		if q_photorecord.photo_class.name == "After":
 			photo_left = anchor_after_left
-			photo_height = photo_height_after 
 			photo_width = photo_width_after
-			photo_top = counter_after * (photo_height_after+photo_gap) + \
-			            page_anchor_top
+			photo_top = photo_height_after + page_anchor_top
 			counter_after = counter_after + 1
+			photo_height_after += get_height_aspect( q_photorecord.photo, photo_width ) + \
+			                       photo_gap 
 			
 		ws.add_image( create_image(
 			app_url+q_photorecord.photo.image.url, 
@@ -846,7 +858,7 @@ def GenerateXLSXAll(request):
 		print( 'response content = {}'.format(
 			response['Content-Disposition'] ) )
 
-	HttpResponse( reverse( 'photologue:monthly-report-list' ) )
+	return reverse( 'photologue:monthly-report-list' ) 
 
 # Gallery views.
 
