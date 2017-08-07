@@ -649,6 +649,7 @@ class PhotoGroup(models.Model):
 	#photos = models.ManyToManyField(
 	#	 'photologue.Photo', blank=True,
 	#	 verbose_name=_('photos'))
+	serial_no = models.CharField(_('Serial No'), max_length=50, unique=True, blank=True, null=True )
 	photo_records = models.ManyToManyField(
 		PhotoGroupImage,   verbose_name=_('photos with classes'))
 	company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)

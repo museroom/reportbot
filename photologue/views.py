@@ -17,6 +17,8 @@ from django.http import StreamingHttpResponse
 import re
 from openpyxl.drawing.image import Image as xlsx_Image
 from openpyxl import load_workbook as xlsx_load_workbook
+from openpyxl.styles.borders import Border as xlsx_Border
+from openpyxl.styles.borders import Side as xlsx_Side
 from wand.image import Image as wand_Image
 import hashlib
 try:
@@ -711,22 +713,93 @@ def GenerateXLSX( request, photo_group_pk ):
 		ws['A1'].anchor[0], ws['A1'].anchor[1], 
 		height=170 ) )
 
+	alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 	q_pg = PhotoGroup.objects.get( id = photo_group_pk )
 	fields_pg = q_pg._meta.get_fields()
 
 	# Replace template tag  with database value
-	pattern = r'^{{(?P<name>\w+)}}$'
+	def style_range(ws, cell_range, border=xlsx_Border(), fill=None, font=None, alignment=None):
+		"""
+		Apply styles to a range of cells as if they were a single cell.
+
+		:param ws:  Excel worksheet instance
+		:param range: An excel range to style (e.g. A1:F20)
+		:param border: An openpyxl xlsx_Border
+		:param fill: An openpyxl PatternFill or GradientFill
+		:param font: An openpyxl Font object
+		"""
+
+		top = xlsx_Border(top=border.top)
+		left = xlsx_Border(left=border.left)
+		right = xlsx_Border(right=border.right)
+		bottom = xlsx_Border(bottom=border.bottom)
+
+		first_cell = ws[cell_range.split(":")[0]]
+		if alignment:
+			ws.merge_cells(cell_range)
+			first_cell.alignment = alignment
+
+		rows = ws[cell_range]
+		if font:
+			first_cell.font = font
+
+		for cell in rows[0]:
+			cell.border = cell.border + top
+		for cell in rows[-1]:
+			cell.border = cell.border + bottom
+
+		for row in rows:
+			l = row[0]
+			r = row[-1]
+			l.border = l.border + left
+			r.border = r.border + right
+			if fill:
+				for c in row:
+					c.fill = fill
+
+	page_count = 1
+	pattern = r'^{{(?P<name>\w+):(?P<range>\d+)}}$'
 	non_db_field = ['page_num', 'page_total','serial_no']
+	thin_border = xlsx_Border(left=None, 
+	                          right=None, 
+							  top=None, 
+	                          bottom=xlsx_Side(style='thin'))
+
 	for cell in ws.get_cell_collection():
 		if cell.value:
 			res = re.match( pattern, cell.value )
 			if res:
 				db_field = res.group('name')
 				if db_field not in non_db_field:
-					db_value = eval( "q_pg.{}".format( db_field ) )
+					q_db_field = eval( "q_pg.{}".format( db_field ) )
+					if type(q_db_field) == timezone.datetime:
+						db_value = q_db_field.strftime( "%Y-%m-%d" )
+					elif db_field == "company":
+						db_value = q_pg.department_item.department.company.name
+					elif db_field == "department":
+						db_value = q_pg.department_item.department.name
+					else:
+						db_value = q_db_field
 				else:
-					db_value == 'non db_value FIXME'
+					if db_field == "page_num":
+						db_value = "Page : {}".format( page_count );
+						page_count += 1
+					else:
+						print( 'non db_value FIXME {}'.format( db_field ) )
+						db_value = "FIXME"
 				cell.value = db_value
+				#cell.border = thin_border
+				#for i in range(0,int(res.group('range'))):
+				#	print( u"cell offset {}:{}".format(cell.offset( row=i).column , cell.offset( row=i).row) )
+				#	cell.offset( row=i ).border = thin_border
+				cell_offset = int(res.group('range'))-1
+				if cell_offset > 0:
+					cell_range = "{}{}:{}{}".format(
+									 cell.column, cell.row,
+									 cell.offset( column=cell_offset ).column,
+									 cell.row )
+					style_range( ws, cell_range, border=thin_border )
+
 
 	# get all images 
 	qset_photorecord = q_pg.photo_records.all() 
@@ -778,9 +851,11 @@ def GenerateXLSX( request, photo_group_pk ):
 		logo_url, 
 		ws['A'+logo_row].anchor[0], ws['A'+logo_row].anchor[1], 
 		height=170 ) )
+
 	photo_height_before = 0
 	photo_height_center = 0
 	photo_height_after = 0
+
 	for q_photorecord in qset_photorecord:
 		#compute max height
 		#if len(qset_photos_before) > 0:
