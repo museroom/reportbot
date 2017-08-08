@@ -35,8 +35,7 @@
 			<a class="btn btn-primary" role="button" 
 				href="{% url 'photologue:test-sortable' object.pk %}">
 				Change Photo Order</a>
-			<a class="btn btn-info" role="button" href="#"
-				onClick='window.open( "{{ edit_record_url }}", "newWindow" )'> 
+			<a class="btn btn-info" role="button" href="{{ edit_record_url }}">
 				Edit Record </a>
 			<a class="btn btn-success" role="button" href="#"
 				onClick='window.open( "{{ generate_xlsx_url }}", "newWindow" )'> 

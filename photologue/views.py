@@ -58,7 +58,11 @@ from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
 	Department, DailyReport, PhotoGroup, Profile, Company, \
 	PhotoGroupImage, PhotoGroupImageClass
 
-from .forms import PhotoUploadForm
+from django.contrib.auth.forms import UserCreationForm
+from django.views.generic.edit import CreateView
+from django.views.generic.edit import UpdateView
+
+from .forms import PhotoUploadForm, PhotoGroupPMForm, PhotoGroupCMForm
 import time, datetime
 from HTMLParser import HTMLParser
 
@@ -319,7 +323,11 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 		context['add_photo_url'] = reverse( 'photologue:photo-select-popup-list',
 					kwargs={'year':date_time.year, 'month':date_time.month, 'day':date_time.day,
 							'target':'photogroup', 'pk':obj.pk} )
-		context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
+		#context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
+		if "PM" in str(obj.record_type).upper():
+			context['edit_record_url'] = reverse( 'photologue:photogroup-pm-edit', args=[obj.id] )
+		else:
+			context['edit_record_url'] = reverse( 'photologue:photogroup-cm-edit', args=[obj.id] )
 		context['generate_xlsx_url'] = reverse( 'photologue:generate-xlsx', args=[obj.id] )
 		q_profile = Profile.objects.get( pk = self.request.user.profile.pk )
 		q_profile.active_photogroup = obj
@@ -493,11 +501,43 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 class PhotoCatagorize(ListView):
 	template_name = "photologue/photo_catagorize.html"
 
+	def get_context_data( self, **kwargs ):
+		context = super( PhotoCatagorize, self).get_context_data(**kwargs)
+		dt_now = timezone.localtime()
+		year = self.kwargs.get( 'year', dt_now.year )
+		month = self.kwargs.get( 'month', dt_now.month )
+		day = self.kwargs.get( 'day', dt_now.day )
+		date_current = timezone.datetime.strptime(
+		                   "{}-{}-{}".format(
+						       year, month, day),
+						   "%Y-%m-%d") 
+		date_prev = date_current - timezone.timedelta(1,0,0)
+		date_next = date_current + timezone.timedelta(1,0,0)
+		url_prev = reverse( "photologue:photo_catagorize_date", kwargs={
+		                    'year': date_prev.year,
+							'month': date_prev.month,
+							'day': date_prev.day } )
+		url_next = reverse( "photologue:photo_catagorize_date", kwargs={
+		                    'year': date_next.year,
+							'month': date_next.month,
+							'day': date_next.day } ) 
+		context['url_date_prev'] = url_prev
+		context['url_date_next'] = url_next
+		context['date_prev'] = date_prev
+		context['date_next'] = date_next
+
+		return context
+		
+
 	def get_queryset(self):
-		print( "photo_catagorize queryset={0}".format( self.kwargs )  )
-		#date_and_time = timezone.datetime.strptime( "20170721", "%Y%m%d" )
-		date_and_time = timezone.localtime()#datetime.strptime( "20170722", "%Y%m%d" )
-		qset = Photo.objects.filter( date_added__date = date_and_time )
+		dt_now = timezone.localtime()
+		year = self.kwargs.get( 'year', dt_now.year )
+		month = self.kwargs.get( 'month', dt_now.month )
+		day = self.kwargs.get( 'day', dt_now.day )
+		date_photo = timezone.datetime.strptime( 
+		             "{}-{}-{}".format( year, month, day ), 
+					 "%Y-%m-%d" )
+		qset = Photo.objects.filter( date_added__date = date_photo )
 		return qset
 	
 def SetPhotoDepartmentItem( request ):
@@ -934,6 +974,17 @@ def GenerateXLSXAll(request):
 			response['Content-Disposition'] ) )
 
 	return reverse( 'photologue:monthly-report-list' ) 
+
+# AJAX form create views
+class PhotoGroupCMView( UpdateView ):
+	template_name = 'photologue/photogroup-pm-edit.html'
+	model = PhotoGroup
+	form_class = PhotoGroupCMForm
+
+class PhotoGroupPMView( UpdateView ):
+	template_name = 'photologue/photogroup-pm-edit.html' 
+	model = PhotoGroup
+	form_class = PhotoGroupPMForm 
 
 # Gallery views.
 

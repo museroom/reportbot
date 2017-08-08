@@ -649,7 +649,7 @@ class PhotoGroup(models.Model):
 	#photos = models.ManyToManyField(
 	#	 'photologue.Photo', blank=True,
 	#	 verbose_name=_('photos'))
-	serial_no = models.CharField(_('Serial No'), max_length=50, unique=True, blank=True, null=True )
+	serial_no = models.CharField(_('Serial No'), max_length=50, unique=False, blank=True, null=True )
 	record_type = models.CharField(_('CM/PM'), max_length=10, unique=False, blank=True, null=True )
 	photo_records = models.ManyToManyField(
 		PhotoGroupImage,   verbose_name=_('photos with classes'))
@@ -669,24 +669,27 @@ class PhotoGroup(models.Model):
 	serviced_date = models.DateTimeField(_('service date'), default=now)
 	inspected_by = models.CharField(_('inspected by'), max_length=50, unique=False, blank=True)
 	inspection_date = models.DateTimeField(_('inspection date'), default=now)
-	pmcheck1 = models.BooleanField(default=False)
-	pmcheck2 = models.BooleanField(default=False)
-	pmcheck3 = models.BooleanField(default=False)
-	pmcheck4 = models.BooleanField(default=False)
-	pmcheck5 = models.BooleanField(default=False)
-	pmcheck6 = models.BooleanField(default=False)
-	pmcheck7 = models.BooleanField(default=False)
-	pmcheck8 = models.BooleanField(default=False)
-	pmcheck9 = models.BooleanField(default=False)
-	pmcheck10 = models.BooleanField(default=False)
-	pmcheck11 = models.BooleanField(default=False)
-	pmcheck12 = models.BooleanField(default=False)
-	pmcheck13 = models.BooleanField(default=False)
+	pmcheck1 = models.BooleanField(_("Facilities don't have any visible damage to affect the safety"), default=False)
+	pmcheck2 = models.BooleanField(_("Facilities don't have any obvious rust (including stents)"), default=False)
+	pmcheck3 = models.BooleanField(_("Facilities is steady on brace, stand or wall"), default=False)
+	pmcheck4 = models.BooleanField(_("Facilities is waterproofing"), default=False)
+	pmcheck5 = models.BooleanField(_("Facilities wiring/cable leakage current or other malfunction"), default=False)
+	pmcheck6 = models.BooleanField(_("Facilities case have grounding"), default=False)
+	pmcheck7 = models.BooleanField(_("Wiring/Cable don't have any visible damage to affect the safety"), default=False)
+	pmcheck8 = models.BooleanField(_("Cleaning up litter and fragmentation surrounding the room"), default=False)
+	pmcheck9 = models.BooleanField(_("Lighting switch testing"), default=False)
+	pmcheck10 = models.BooleanField(_("The controller don't have any visible damage to affect the safety"),default=False)
+	pmcheck11 = models.BooleanField(_("Ther controller don't have any visible damage to affect the safety"),default=False)
+	pmcheck12 = models.BooleanField(_("The controller protection"),default=False)
+	pmcheck13 = models.BooleanField(_("The controller testing (signal output signage)"),default=False)
 	pmcheck14 = models.BooleanField(default=False)
 	pmcheck15 = models.BooleanField(default=False) 
 
 	sites = models.ManyToManyField(Site, verbose_name=_(u'sites'),
 								   blank=True)
+
+	def get_absolute_url(self):
+		return reverse( 'photologue:monthly-report-detail', args=[self.pk] )
 
 	def sample(self):
 		count = 4

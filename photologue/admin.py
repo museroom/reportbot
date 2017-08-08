@@ -232,12 +232,14 @@ class PhotoGroupAdminForm( forms.ModelForm):
 	
 class PhotoGroupAdmin( admin.ModelAdmin ):
 
-	list_display = ('name', 'date_added' ) 
-	#filter_horizontal = ['photos',]
+	list_display = ('name',  
+	                'date_of_service',) 
+	list_filter = ['date_of_service']
 	form = PhotoGroupAdminForm
 	search_fields = ['name','place_or_system','parts_replaced','conclusion',
 	                 'serviced_by','inspected_by', 'contact_number',
 					 'contact_person', 'remark', ]
+	date_hierarchy = 'date_of_service'
 
 	#fields = ( #'date_added', 
 	#		  'name', 
@@ -248,6 +250,36 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	#		  'serviced_by', 'serviced_date', 'inspected_by', 'inspection_date',
 	#		  'photo_records',
 	#		  )
+	
+	actions = [
+		'fill_cm_serial_number'
+		'fill_pm_serial_number'
+	]
+
+	def fill_pm_serial_number(modeladmin, request, queryset):
+		print( queryset )
+		counter = 0
+		pg_month = queryset[0].date_of_service.month
+		pg_year  = queryset[0].date_of_service.year
+		for q_pg in queryset:
+			#FIXME year bug?
+			q_pg.serial_no = u"PM-{2:02d}{0:02d}-{1:02d}".format(
+			                     pg_month, counter, str(pg_year)[2:] )
+			q_pg.record_type = "PM"
+			q_pg.save()
+			counter += 1
+
+	def fill_cm_serial_number(modeladmin, request, queryset):
+		print( queryset )
+		counter = 0
+		pg_month = queryset[0].date_of_service.month
+		pg_year  = queryset[0].date_of_service.year
+		for q_pg in queryset:
+			q_pg.serial_no = u"CM-{2:02d}{0:02d}-{1:02d}".format(
+			                     pg_month, counter, str(pg_year)[2:] )
+			q_pg.record_type = "CM"
+			q_pg.save()
+			counter += 1
 
 	def get_form( self, request, obj=None, **kwargs):
 		if( obj != None ):

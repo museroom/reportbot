@@ -11,6 +11,9 @@
 		<h4 class="page-header"> {% trans "Select Photo(s) and set Department Item" %}{{request.url}}</h4>
 	</div>
 
+    <a href="{{url_date_prev}}">&lt;{{date_prev.date}}</a>
+	| 
+    <a href="{{url_date_next}}">{{date_next.date}}&gt;</a>
 	{% if object_list %}
 		<form action="{% url 'photologue:set_dailyreportitem' %}"
 				method="post"> {% csrf_token %}

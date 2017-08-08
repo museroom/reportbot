@@ -7,7 +7,7 @@ except ImportError:
 
 from django.forms import ModelForm
 from django.forms.widgets import TextInput
-from .models import DepartmentItem
+from .models import DepartmentItem, PhotoGroup
 
 import logging
 import os
@@ -209,3 +209,30 @@ class PhotoUploadForm(forms.Form):
 
 	my_file = forms.FileField()
 
+class PhotoGroupCMForm( forms.ModelForm ):
+	class Meta:
+		model = PhotoGroup
+		fields = [
+			'serial_no', 'company', 'department', 'contact_person', 'contact_number',
+			'date_of_service', 'place_or_system', 'department_item', 
+			'problem_description', 'service_provided', 'parts_replaced', 'remark',
+			'conclusion', 'serviced_by', 'serviced_date', 'inspected_by',
+			'inspection_date',
+		]
+
+class PhotoGroupPMForm( forms.ModelForm ):
+	class Meta:
+		model = PhotoGroup
+		fields = [
+			'pmcheck1', 'pmcheck2', 'pmcheck3', 'pmcheck4', 'pmcheck5',
+			'pmcheck6', 'pmcheck7', 'pmcheck8', 'pmcheck9', 'pmcheck10',
+			'pmcheck11', 'pmcheck12', 'pmcheck13', 'pmcheck14',  
+			'serial_no', 
+			'date_of_service', 'place_or_system', 'department_item', 
+			'problem_description', 'remark',
+			'serviced_by',
+			  ]
+	#pmcheck1 = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class':'primary','id': 'myonoffswitch'}))
+	
+
+	

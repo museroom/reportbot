@@ -27,7 +27,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
     PhotoUploadView, PhotoCatagorize, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
 	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder, \
-	GenerateXLSX, GenerateXLSXAll
+	GenerateXLSX, GenerateXLSXAll, PhotoGroupPMView, PhotoGroupCMView \
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -129,13 +129,22 @@ urlpatterns = [
 		Update_PhotoGroup, name="update_photogroup"),
 	url(r'^testform/$',
 		PhotoUploadView, name="upload_photo"),
-	url(r'^catagorize/(?P<date_and_time>[\-\d\w|\W]+)/$',
-		PhotoCatagorize.as_view(), name="photo_catagorize"),
+#	url(r'^catagorize/(?P<date_and_time>[\-\d\w|\W]+)/$',
+	url(r'^catagorize/(?P<year>\d+)/(?P<month>\d+)/(?P<day>\d+)/$',
+		PhotoCatagorize.as_view(), name="photo_catagorize_date"),
 	url(r'^catagorize/$',
 		PhotoCatagorize.as_view(), name="photo_catagorize"),
 	url(r'^set_dailyreportitem/$',
 		SetPhotoDepartmentItem, name="set_dailyreportitem"),
 	
+	# AJAX form create views
+	url(r'^photogroup/pm/edit/(?P<pk>\d+)/$', 
+		PhotoGroupPMView.as_view(),
+	    name = 'photogroup-pm-edit' ),
+	url(r'^photogroup/cm/edit/(?P<pk>\d+)/$', 
+		PhotoGroupCMView.as_view(),
+	    name = 'photogroup-cm-edit' ), 
+
 	# Photo Selector Popup
 	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/(?P<target>[\w|\W]+)/(?P<pk>\d+)/$',
 		PhotoSelectListView.as_view(), name = 'photo-select-popup-list' ), 
