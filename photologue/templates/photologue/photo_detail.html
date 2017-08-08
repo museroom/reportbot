@@ -20,6 +20,9 @@
 			<div>
 				<a href="{% url 'admin:photologue_photo_change' object.pk %}" 
 				   class="btn btn-warning" role="button"> Admin Photo </a>
+				<a href="{% url 'photologue:create-photogroup' object.pk%}"
+				    class="btn btn-primary" role="button"> 
+				Open a New Case</a>
 			</div>
 			<small>
 				{{object.date_added}}//

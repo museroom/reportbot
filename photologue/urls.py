@@ -23,7 +23,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	PhotoMonthArchiveOldView, JsonReportItemQuery, JsonPhotoQuery, JsonTableMapQuery, \
 	DailyReportListView, DailyReportDetailView, DailyReportArchiveIndexView, \
 	DailyReportDayArchiveView, DailyReportMonthArchiveView, \
-	Update_DailyReportItem, Update_PhotoGroup, \
+	Update_DailyReportItem, Update_PhotoGroup, Create_PhotoGroup,\
     PhotoUploadView, PhotoCatagorize, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
 	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder, \
@@ -127,6 +127,8 @@ urlpatterns = [
 		Update_DailyReportItem, name="update_dailyreport"),
 	url(r'^update_photogroup/(?P<photo_group_pk>[\-\d\w|\W]+)/$',
 		Update_PhotoGroup, name="update_photogroup"),
+	url(r'^photogroup/create/(?P<photo_pk>\d+)/$',
+	    Create_PhotoGroup, name='create-photogroup'),
 	url(r'^testform/$',
 		PhotoUploadView, name="upload_photo"),
 #	url(r'^catagorize/(?P<date_and_time>[\-\d\w|\W]+)/$',

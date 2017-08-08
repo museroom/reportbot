@@ -52,7 +52,7 @@ from django.conf import settings
 
 from django.views.generic import View
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
@@ -234,6 +234,13 @@ class PhotoGroupDetailView(object):
 	queryset = PhotoGroup.objects.all()
 	date_field = 'date_added'
 	allow_empty = True
+
+# Create PhotoGroup with single image
+def Create_PhotoGroup( request, photo_pk ):
+	print( "create photogroup: request={} photo_pk={}".format(
+	       request, photo_pk ) )
+
+	return redirect( 'photologue:monthly-report-list' )
 
 
 # Photo Select Pop Views

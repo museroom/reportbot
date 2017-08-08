@@ -12,8 +12,8 @@
 	</div>
 
     <a href="{{url_date_prev}}">&lt;{{date_prev.date}}</a>
-	| 
     <a href="{{url_date_next}}">{{date_next.date}}&gt;</a>
+	
 	{% if object_list %}
 		<form action="{% url 'photologue:set_dailyreportitem' %}"
 				method="post"> {% csrf_token %}
@@ -26,14 +26,17 @@
 					<a href="{{ photo.get_absolute_url }}">
 						<img src="{{ photo.get_thumbnail_url }}" class="thumbnail img-responsive" alt="{{ photo.title }}">
 					</a>
-					<p class="small" style="white-space:nowrap;background-color:{{ photo.department_item.color }}">{{ photo.department_item.name }}({{photo.department_item.department.name}})</p>
+					<p class="small" style="white-space:nowrap;background-color:{{ photo.department_item.color }}">
+					{{ photo.department_item.name }}({{photo.department_item.department.name}})</p>
 					<div class="checkbox">
 						<input  type="checkbox" data-toggle="toggle"
 						 	 	 data-on="Select" data-off="Select"
 								 data-onstyle="warning" data-size="mini"
 								 value="{{ photo.pk }}" name="set_photo" >
-						<span class="small"><a href="#department" >[&#9660;]</a></span>
-						<span class="small"><a href="{% url 'admin:photologue_photo_change' photo.pk %}" >[admin]</a></span>
+						<span class="small"><a href="#department" >
+							[&#9660;]</a></span>
+						<span class="small"><a href="{% url 'admin:photologue_photo_change' photo.pk %}" >
+							[admin]</a></span>
 						{%comment%}
 						<input  type="checkbox" data-toggle="toggle"
 						 	 	 data-on="Drop" data-off="Drop"
@@ -43,6 +46,8 @@
 					</div>
 				</div>
 				{% endfor %}
+				<a href="{{url_date_prev}}">&lt;{{date_prev.date}}</a>
+				<a href="{{url_date_next}}">{{date_next.date}}&gt;</a>
 			</div>
 
 			<!-- Department List -->
@@ -61,6 +66,7 @@
 
 			<!-- footer -->
 			<p><hr></p>
+	
 		</form>
 	{% else %}
 		<div class="row">{% trans "No photos were found" %}.</div>
