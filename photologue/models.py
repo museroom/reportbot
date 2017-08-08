@@ -479,7 +479,10 @@ class ImageModel(models.Model):
 				box = (int(xd), int(y_diff), int(x), int(y_diff + new_height))
 			else:
 				box = (int(x_diff), int(y_diff), int(x_diff + new_width), int(y_diff + new_height))
-			im = im.resize((int(x), int(y)), Image.ANTIALIAS).crop(box)
+			try:
+				im = im.resize((int(x), int(y)), Image.ANTIALIAS).crop(box)
+			except:
+				print("error resize")
 		else:
 			if not new_width == 0 and not new_height == 0:
 				ratio = min(float(new_width) / cur_width,
@@ -782,18 +785,19 @@ class Photo(ImageModel):
 		#			self.daily_report_item.add( latest_daily_report_item )
 		super(Photo, self).save(*args, **kwargs)
 
-	def get_related_daily_report_item(self, date_time_begin=None, date_time_end=None):
-		print("get related daily report item {}".format(self))
-		try:
-			if self.department_item != None:
-				#	q_daily_report_item = DailyReportItem.objects.filter(
-				#		daily_report_item  = self.report_item )[0]
-				q_daily_report_item = DailyReportItem.objects.filter(
-					department_item=self.department_item).latest()
-			print(q_daily_report_item)
+	def get_related_daily_report_item(self, *args, **kwargs):
+		q_failover = DailyReportItem.objects.get( pk=2564 )
+		q_daily_report_item = q_failover
+		try: 
+			active_report = kwargs.get('active_report', DailyReport.objects.latest() )
+			if self.department_item:
+				q_daily_report_item = DailyReportItem.objects.filter( daily_report = active_report).get(
+				                      department_item = self.department_item )			
+			else:
+				q_daliy_report_item = q_failover
 		except ObjectDoesNotExist:
 			print("ERROR: {} does not have related report_item".format(self))
-			q_daily_report_item = None
+			q_daily_report_item = q_failover
 
 		return q_daily_report_item
 

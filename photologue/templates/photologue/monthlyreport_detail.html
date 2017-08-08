@@ -31,7 +31,9 @@
 		<div class="row col-lg-12 btn-wrapper ">
 			<a class="btn btn-warning" role="button" href="#"
 				onClick='window.open( "{{ add_photo_url }}", "newWindow" )'> 
-				Add Photo </a>
+				+Add Photo </a>
+			<a class="btn btn-warning" role="button" href="{{admin_record_url }}">
+				Admin Record </a> 
 			<a class="btn btn-primary" role="button" 
 				href="{% url 'photologue:test-sortable' object.pk %}">
 				Change Photo Order</a>

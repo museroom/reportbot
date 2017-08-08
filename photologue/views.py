@@ -1,5 +1,7 @@
 import warnings 
 import os 
+from itertools import chain
+from django.db.models import Q
 
 #FIXME still need tempfile,zipfile,smart_str?
 import tempfile, zipfile
@@ -302,7 +304,35 @@ class MonthlyReportListView( LoginRequiredMixin, ListView ):
 	template_name="photologue/monthlyreport_list.html"
 
 	def get_queryset(self):
-		qset = PhotoGroup.objects.all().order_by(
+		q_get = self.request.GET.get('q',None)
+		if q_get:
+			qset_prev = []
+			qset = []
+			qset_filter = q_get.split(' ')
+			print( 'debug: qset_filter={}'.format(qset_filter))
+			counter = 0
+			for q_filter in qset_filter: 
+				qset_rt= PhotoGroup.objects.filter( 
+			           record_type__icontains = q_filter )
+				qset_n = PhotoGroup.objects.filter (
+					   name__icontains = q_filter )
+				qset_din = PhotoGroup.objects.filter (
+					   department_item__name__icontains = q_filter )
+				qset.append( list(chain(qset_rt,qset_n,qset_din)))
+				#qset = PhotoGroup.objects.filter(
+				#       Q(record_type__icontains = q_filter) | 
+				#	   Q(name__icontains = q_filter) |
+				#	   Q(department_item__name__icontains = q_filter) ).distinct()
+				#qset = list(chain(qset,qset_prev))
+
+			qset_tmp = list(chain(qset))[0]
+			qset_tmp = qset
+			qset = qset_tmp[0]
+			for i in range(0,len(qset_tmp)):
+				qset = list(set(qset) & set(qset_tmp[i]))
+			print(qset)
+		else: 
+			qset = PhotoGroup.objects.all().order_by(
 				"date_of_service" )
 		return qset
 
@@ -323,6 +353,7 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 		context['add_photo_url'] = reverse( 'photologue:photo-select-popup-list',
 					kwargs={'year':date_time.year, 'month':date_time.month, 'day':date_time.day,
 							'target':'photogroup', 'pk':obj.pk} )
+		context['admin_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] ) 
 		#context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
 		if "PM" in str(obj.record_type).upper():
 			context['edit_record_url'] = reverse( 'photologue:photogroup-pm-edit', args=[obj.id] )
@@ -681,6 +712,8 @@ def GenerateXLSX( request, photo_group_pk ):
 	print( "-===-===-==-" )
 	print( "GenerateXLSX {}".format( photo_group_pk ) )
 
+	q_pg = PhotoGroup.objects.get( id = photo_group_pk )
+
 	static_root = getattr( settings, 'STATIC_ROOT', '' )
 	static_url = getattr( settings, 'STATIC_URL', '' )
 	if request.is_secure():
@@ -718,17 +751,34 @@ def GenerateXLSX( request, photo_group_pk ):
 		return image
 
 	# hand coded template photo grid value
-	photo_cell_top = 49
-	photo_cell_page = 86
-	photo_cell_bottom = photo_cell_page - photo_cell_top
-	anchor_before_left = 50
-	anchor_center_left = 250
-	anchor_after_left  = 400
-	photo_page_height = 747
-	photo_page_width = 630
-	photo_gap_width = 20
-	photo_gap = 10
-	filename_in = 'cm-template.xlsx'
+	if 'PM' in str(q_pg.record_type).upper():
+		photo_cell_top = 49
+		photo_cell_page = 86
+		photo_cell_bottom = photo_cell_page - photo_cell_top
+		anchor_before_left = 50
+		anchor_center_left = 250
+		anchor_after_left  = 400
+		photo_page_height = 747
+		photo_page_width = 630
+		photo_gap_width = 20
+		photo_gap = 10
+		logo_url = app_url + "/media/photologue/photos/image1_c45tjXp.jpeg"
+		sig_url  = app_url + "/media/photologue/photos/image2_ZJL3Hw2.jpeg"
+		filename_in = 'pm-template.xlsx'
+	else:
+		photo_cell_top = 49
+		photo_cell_page = 86
+		photo_cell_bottom = photo_cell_page - photo_cell_top
+		anchor_before_left = 50
+		anchor_center_left = 250
+		anchor_after_left  = 400
+		photo_page_height = 747
+		photo_page_width = 630
+		photo_gap_width = 20
+		photo_gap = 10
+		logo_url = app_url + "/media/photologue/photos/image1.png"
+		filename_in = 'cm-template.xlsx'
+
 	filename_out = 'month-report-{}.xlsx'.format( photo_group_pk )
 	fn_in = os.path.join(static_root,xlsx_root,filename_in)
 	url_in = app_url + os.path.join( static_url, xlsx_root,filename_in )
@@ -737,7 +787,6 @@ def GenerateXLSX( request, photo_group_pk ):
 	print( 'url_in='+url_in)
 	xlsx_data = BytesIO(urlopen(url_in).read())
 
-	logo_url = app_url + "/media/photologue/photos/image1.png"
 
 	wb = xlsx_load_workbook( xlsx_data )
 	ws = wb.active
@@ -753,8 +802,6 @@ def GenerateXLSX( request, photo_group_pk ):
 		ws['A1'].anchor[0], ws['A1'].anchor[1], 
 		height=170 ) )
 
-	alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-	q_pg = PhotoGroup.objects.get( id = photo_group_pk )
 	fields_pg = q_pg._meta.get_fields()
 
 	# Replace template tag  with database value
@@ -807,7 +854,7 @@ def GenerateXLSX( request, photo_group_pk ):
 
 	for cell in ws.get_cell_collection():
 		if cell.value:
-			res = re.match( pattern, cell.value )
+			res = re.match( pattern, unicode(cell.value) )
 			if res:
 				db_field = res.group('name')
 				if db_field not in non_db_field:
@@ -818,6 +865,8 @@ def GenerateXLSX( request, photo_group_pk ):
 						db_value = q_pg.department_item.department.company.name
 					elif db_field == "department":
 						db_value = q_pg.department_item.department.name
+					elif db_field == "department_item":
+						db_value = q_pg.department_item.name
 					else:
 						db_value = q_db_field
 				else:

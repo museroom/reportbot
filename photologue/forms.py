@@ -213,6 +213,7 @@ class PhotoGroupCMForm( forms.ModelForm ):
 	class Meta:
 		model = PhotoGroup
 		fields = [
+		    'name',
 			'serial_no', 'company', 'department', 'contact_person', 'contact_number',
 			'date_of_service', 'place_or_system', 'department_item', 
 			'problem_description', 'service_provided', 'parts_replaced', 'remark',
@@ -224,6 +225,7 @@ class PhotoGroupPMForm( forms.ModelForm ):
 	class Meta:
 		model = PhotoGroup
 		fields = [
+			'name',
 			'pmcheck1', 'pmcheck2', 'pmcheck3', 'pmcheck4', 'pmcheck5',
 			'pmcheck6', 'pmcheck7', 'pmcheck8', 'pmcheck9', 'pmcheck10',
 			'pmcheck11', 'pmcheck12', 'pmcheck13', 'pmcheck14',  

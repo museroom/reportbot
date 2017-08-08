@@ -492,6 +492,7 @@ class PhotoAdmin(admin.ModelAdmin):
 
 #	readonly_fields = ('admin_thumbnail',)
 	readonly_fields = ('thumbnail_admin',)
+	date_hierarchy = 'date_added'
 
 	form = PhotoAdminForm
 	
@@ -599,8 +600,12 @@ class PhotoAdmin(admin.ModelAdmin):
 		messages.success( request, msg )
 
 	def fill_related_daily_report_item( modeladmin, request, queryset ):
+		print( 'request.user={}'.format(request.user) )
+		active_report = request.user.profile.active_report
+		print( request.user.profile.active_report )
+		print( 'active_report = {}'.format(active_report))
 		for q_photo in queryset:
-			q_daily_report_item = q_photo.get_related_daily_report_item()
+			q_daily_report_item = q_photo.get_related_daily_report_item({'profile':request.user.profile})
 			if q_daily_report_item != None:
 				q_photo.daily_report_item.add( q_daily_report_item )
 				q_photo.save()
@@ -620,7 +625,6 @@ class PhotoAdmin(admin.ModelAdmin):
 			if q_daily_report_item != None:
 				q_photo.daily_report_item.add( q_daily_report_item )
 				q_photo.save()
-			
 
 	def add_photos_to_current_site(modeladmin, request, queryset):
 		current_site = Site.objects.get_current()

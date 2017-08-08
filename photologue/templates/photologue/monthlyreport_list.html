@@ -20,6 +20,15 @@
 		</h1>
 	</div>
 
+	<form action="{% url 'photologue:monthly-report-list' %}"
+	      method="get">
+		<div class="row col-lg-12">
+			Search:<input type="text" name="q">
+			<input type="submit" value="Search">
+			<div class="small text-muted" style="display-inline">example: cm cascade 1707</div>
+		</div>
+	</form>
+
 	{% if object_list %}
 	<div class="row col-lg-12">
 	<article>
@@ -51,7 +60,6 @@
 					<a href="{{photo_sample.photo.get_absolute_url}}">
 					<img class="thumbnail img-responsive" src="{{photo_sample.photo.get_thumbnail_url}}">
 					</a>
-					<small>{{photo_sample.photo.pk}}_{{photo_sample.photo_class}}</small>
 				</div>
 				{% endfor %}
 			</div>
