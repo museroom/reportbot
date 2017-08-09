@@ -170,12 +170,13 @@ class Profile(models.Model):
 @python_2_unicode_compatible
 class Company(models.Model):
 	name = models.CharField(_('Company'),
-							max_length=64,
+							max_length=256,
 							unique=True, blank=True)
-
+	name_short = models.CharField(_('Short Name'),
+	                              max_length=10,
+								  unique=False, blank=True)
 	def __str__(self):
 		return self.name
-
 
 @python_2_unicode_compatible
 class Department(models.Model):

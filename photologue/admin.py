@@ -252,10 +252,14 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	#		  )
 	
 	actions = [
-		'fill_cm_serial_number'
-		'fill_pm_serial_number'
+		'fill_cm_serial_number',
+		'fill_pm_serial_number',
+		'fill_name_auto',
 	]
 
+	def fill_name_auto( modeladmin, request, queryset):
+		print( "{}:{}".format( request.user, queryset ))
+		
 	def fill_pm_serial_number(modeladmin, request, queryset):
 		print( queryset )
 		counter = 0
@@ -263,7 +267,7 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 		pg_year  = queryset[0].date_of_service.year
 		for q_pg in queryset:
 			#FIXME year bug?
-			q_pg.serial_no = u"PM-{2:02d}{0:02d}-{1:02d}".format(
+			q_pg.serial_no = u"PM-{2}{0:02d}-{1:02d}".format(
 			                     pg_month, counter, str(pg_year)[2:] )
 			q_pg.record_type = "PM"
 			q_pg.save()
@@ -275,7 +279,7 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 		pg_month = queryset[0].date_of_service.month
 		pg_year  = queryset[0].date_of_service.year
 		for q_pg in queryset:
-			q_pg.serial_no = u"CM-{2:02d}{0:02d}-{1:02d}".format(
+			q_pg.serial_no = u"CM-{2}{0:02d}-{1:02d}".format(
 			                     pg_month, counter, str(pg_year)[2:] )
 			q_pg.record_type = "CM"
 			q_pg.save()
