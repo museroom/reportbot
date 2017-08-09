@@ -8,10 +8,10 @@
 {% block content %}
 
 <div class="row col-lg-12 h5">
-	<div class="col-xs-4 ">
+	<div class="col-xs-4 col-lg-6">
 		{% trans "Daily Report" %}{{request.url}}
 	</div>
-	<div class="col-xs-8" align="right">
+	<div class="col-xs-8 col-lg-6" align="right">
 		<form action="{{select_report_url}}" method ="get">
 			<div class="row col-lg-12">
 			<select name="select_report">
@@ -30,7 +30,7 @@
 </div>
 
 {% if photo_list and daily_report_item_list %}
-<div class="row">
+<div class="row col-lg-12 nopadding">
     <form action="{% url 'photologue:update_dailyreport' active_report %}"
           method="post"> {% csrf_token %}
 
@@ -128,14 +128,13 @@
                 </button>
             </div>
             <div class="col-lg-6">
-                <p> Tags:
+                <p> 
                     <a href="#"><span class="label label-info">Go To Top</span></a>
                     | <i class="icon-user"></i>Photo in view:
-                    {{ object_list|length }}<a href="#"></a>
+                    {{ photo_list|length }}<a href="#"></a>
                 </p>
             </div>
         </div>
-        <hr>
     </form>
 </div>
 {% else %}
@@ -143,13 +142,13 @@
 {% endif %}
 {% comment %}
 {% include "photologue/includes/paginator.html" %}
-{% endcomment %}
 <div style="float:left">
     <p> Tags:
         <a href="#"><span class="label label-info">Go To Top</span></a>
         | <i class="icon-user"></i>Photo in view: {{ photo_list|length }}<a href="#"></a>
     </p>
 </div>
+{% endcomment %}
 
 <script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js" media="screen"></script>
 

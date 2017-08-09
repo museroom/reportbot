@@ -371,8 +371,10 @@ class ImageModel(models.Model):
 	def thumbnail_admin(self):
 		if self.image:
 			return mark_safe(
-				'<a href="{}"><img src="{}" /></a>'.format(
-					self.get_absolute_url(), self.get_admin_thumbnail_url()
+				'<a href="{0}"><img src="{1}" /></a>'.format(
+				#	self.get_absolute_url(), 
+					reverse( 'admin:photologue_photo_change', args=[self.pk] ),
+					self.get_admin_thumbnail_url()
 				)
 			)
 		else:

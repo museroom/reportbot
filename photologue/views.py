@@ -240,9 +240,25 @@ class PhotoGroupDetailView(object):
 def Create_PhotoGroup( request, photo_pk ):
 	print( "create photogroup: request={} photo_pk={}".format(
 	       request, photo_pk ) )
+	q_photo = Photo.objects.get( pk = photo_pk )
+	photo_date_time = q_photo.date_added.astimezone( timezone.get_default_timezone()) 
+	groupname = u"{2}_{0}_{1}_auto".format(photo_date_time.strftime( "%y%m%d-%H%M%S" ),
+										q_photo.department_item.name,
+										q_photo.department_item.department.company.name )
+	new_photo_group = PhotoGroup( name=groupname, date_added=photo_date_time )
+	new_photo_group.department_item = q_photo.department_item
+	new_photo_group.date_of_service = photo_date_time
+	new_photo_group.serviced_date = photo_date_time
+	new_photo_group.inspection_date = photo_date_time
+	new_photo_group.save()
+	photogroup_image_class_center = PhotoGroupImageClass.objects.get( name="Center" )
+	photogroup_image = PhotoGroupImage(  
+						   photo = q_photo,
+						   photo_class = photogroup_image_class_center )
+	photogroup_image.save() 
+	new_photo_group.photo_records.add( photogroup_image )
 
 	return redirect( 'photologue:monthly-report-list' )
-
 
 # Photo Select Pop Views
 class PhotoSelectListView(ListView): 
@@ -251,6 +267,7 @@ class PhotoSelectListView(ListView):
 	
 	def get_context_data( self, **kwargs):
 		context = super( PhotoSelectListView, self).get_context_data(**kwargs)
+		profile = self.request.user.profile
 		date_time = timezone.datetime.strptime(  
 						"{}-{}-{}".format(
 							self.kwargs['year'], 

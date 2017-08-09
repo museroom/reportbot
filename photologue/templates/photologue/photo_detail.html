@@ -13,23 +13,23 @@
 			</a>
 		</div>
 		<div class="col-md-4"> 
-    <div class="row col-lg-12">
-        <h1 class="page-header h4">{{ object.title }}</h1>
-    </div>
-
-			<div>
+		    <div class="row col-lg-12 sidepadding">
+		        <h1 class="page-header h4">{{ object.title }}</h1>
 				<a href="{% url 'admin:photologue_photo_change' object.pk %}" 
-				   class="btn btn-warning" role="button"> Admin Photo </a>
+				   class="btn btn-warning" role="button"> 
+				    Admin Photo </a>
 				<a href="{% url 'photologue:create-photogroup' object.pk%}"
-				    class="btn btn-primary" role="button"> 
-				Open a New Case</a>
+				    class="btn btn-primary" role="button">
+					Open  New Case</a>
+				<p class="muted"><small>
+					{{object.date_added}} //
+					{{object.image.size}}bytes //
+					{{object.image.width}}x{{object.image.height}}
+				</small></p>
 			</div>
-			<small>
-				{{object.date_added}}//
-				{{object.image.size}}bytes//
-				{{object.image.width}}x{{object.image.height}}
-			</small>
+			{%comment%}
         	<p class="muted"><small>{% trans "Published" %} {{ object.date_added }}</small></p>
+			{%endcomment%}
 		</div>
 		{%comment%}
         <div class="col-md-6">

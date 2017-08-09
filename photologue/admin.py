@@ -451,12 +451,12 @@ class PhotoAdminForm(forms.ModelForm):
 
 
 class PhotoAdmin(admin.ModelAdmin):
-	list_display = ( 'title', 
-							'thumbnail_admin',
-							'department_item',	
-							'tags',
-							'date_added',
-									)
+	list_display = (  
+					'thumbnail_admin',
+					'department_item',	
+					'tags',
+					'date_added',
+					)
 	list_editable = ( 'department_item',
 							 'tags',
 							 #'follow_up_date_end',

@@ -10,7 +10,6 @@
         <h1 class="page-header">{% trans "Latest photos" %}</h1>
     </div>
 
-	<code>debug: photo_archive.html</code>
 	<div class="row">
 		
 		<div class="row col-lg-12">
@@ -30,7 +29,7 @@
 			
 			{% if latest %}
 			<!--div class="row"-->
-			    {% for photo in latest|slice:":500"%}
+			    {% for photo in latest %}
 				<div class="col-xs-3 col-sm-2 col-lg-1 nopadding">
 			        <a href="{{ photo.get_absolute_url }}">
 			             <img src="{{ photo.get_thumbnail_url }}" class="thumbnail img-responsive" alt="{{ photo.title }}">

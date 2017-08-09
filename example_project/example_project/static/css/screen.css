@@ -1,6 +1,42 @@
 /* Some customisation for the Photologue demo site. */
 
+.button-wrapper .btn {
+	margin-bottom:12px;
+} 
 
+article {
+	/*-moz-column-width: 19em;
+	-webkit-column-width: 19em;*/
+	-moz-column-width: 29em;
+	-webkit-column-width: 29em;
+	-moz-column-gap: 0.1em;
+	-webkit-column-gap: 0.1em; 
+} 
+
+section {
+	display: inline-block;
+	margin:  0.1rem;
+	padding:  0.1rem;
+	margin-bottom: 0.5rem;
+	width:  100%; 
+	background:  #dfdfdf;
+} 
+
+.info-bg-red {
+	background-color: #d9534f
+}
+
+.info-bg-lightblue {
+	background-color: #5bc0de
+}
+
+.info-bg-lightgreen {
+	background-color: #5cb85c
+}
+
+.info-bg-blue {
+	background-color: #428bca
+}
 
 div.row img.thumbnail {
 	margin-bottom: 5px;
@@ -25,4 +61,14 @@ a.btn.btn-default {
 .nopadding {
 	padding: 0 !important;
 	margin: 0 !important;
+}
+
+.sidepadding {
+	margin: 0px;
+}
+
+.thumbnail {
+	padding: 1px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
 }

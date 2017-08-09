@@ -3,42 +3,42 @@
 {% block title %}MeiTim ReportBot{% endblock %}
 
 {% block content %}
-	<div class="row">
-		<div class="col-lg-12">
-			<div class="page-header">
-				<h1>ReportBot</h1>
-			  <h4>Report Automation</h4>
+	<div class="row col-lg-12 sidepadding">
+		<div class="page-header">
+			<h1>ReportBot</h1>
+		  <h4>Report Automation</h4>
+		</div>
+		<p><mark>Project under early development pharse.</mark></p>
+		<p>Any photos uploaded will kept safe throughout the development. Daily backup will be performed to Google Cloud Storage </p>
+		<p>To apply for an account, please contact Ken Fung <a href="mailto:mr.forgot@gmail.com">mr.forgot@gmail.com</a>. Or contact +853-6612-1024 during normal office hour.
+		<div class="row button-wrapper" >
+			<div class="col-xs-12">
+			<a class="btn btn-warning" role="button" href= {% url "admin:login" %}> 
+				Admin </a>
+			<a class="btn btn-info" role="button" href="/login"> 
+				User Login </a>
+			<a class="btn btn-success" role="button" href="{% url 'photologue:report_item_list_view'%}">
+				Daily Report</a>
+			<a class="btn btn-success" role="button" href="{% url 'photologue:monthly-report-list'%}"> 
+				Monthly Report</a>
+			<a class="btn btn-warning" role="button" href="{% url 'admin:photologue_photo_changelist'%}"> 
+				Admin Photo </a>
+			<a class="btn btn-primary" role="button" href="{% url 'photologue:photo_catagorize'%}"> 
+				Photo Catagorize </a>
+			<a class="btn btn-primary" role="button" href="{% url 'photologue:pl-photo-archive-year' 2017 %}"> 
+				Photo List </a>
 			</div>
-			<p><mark>Project under early development pharse.</mark></p>
-			<p>Any photos uploaded will kept safe throughout the development. Daily backup will be performed to Google Cloud Storage </p>
-			<p>To apply for an account, please contact Ken Fung <a href="mailto:mr.forgot@gmail.com">mr.forgot@gmail.com</a>. Or contact +853-6612-1024 during normal office hour.
-			<div class="row button-wrapper" >
-				<div class="col-xs-12">
-				<a class="btn btn-warning" role="button" href= {% url "admin:login" %}> 
-					Admin </a>
-				<a class="btn btn-info" role="button" href="/login"> 
-					User Login </a>
-				<a class="btn btn-success" role="button" href="{% url 'photologue:report_item_list_view'%}">
-					Daily Report Preview </a>
-				<a class="btn btn-success" role="button" href="{% url 'photologue:monthly-report-list'%}"> 
-					Monthly Report Preview </a>
-				<a class="btn btn-warning" role="button" href="{% url 'admin:photologue_photo_changelist'%}"> 
-					Admin Photo </a>
-				<a class="btn btn-primary" role="button" href="{% url 'photologue:photo_catagorize'%}"> 
-					Photo Catagorize </a>
-				</div>
-			</div>
-			<div  class="row col-xs-12">
-				<p>
-				{%if user.is_authenticated%}
-				Welcome, <i><b>{{user.username}}</b></i>.
-				{%else%}
-				<i>demo account:</i><br>
-				<b>username</b>: meitim<br>
-				<b>password</b>: meitim 
-				{%endif%}
-				</p>
-			</div>
+		</div>
+		<div  class="row col-xs-12">
+			<p>
+			{%if user.is_authenticated%}
+			Welcome, <i><b>{{user.username}}</b></i>.
+			{%else%}
+			<i>demo account:</i><br>
+			<b>username</b>: meitim<br>
+			<b>password</b>: meitim 
+			{%endif%}
+			</p>
 		</div>
 	</div>
 {% endblock %}

@@ -14,7 +14,7 @@
         <aside class="col-md-2">
 
             <h4>{% trans "Filter by day" %}</h4>
-            <ul>
+            <ul class="list-inline">
             {% for date in date_list %}
                 <li><a href="{% url 'photologue:photo-archive-day' date.year date|date:"m"|lower date.day %}">{{ date|date:"d" }}</a></li>
             {% endfor %}
@@ -24,12 +24,15 @@
 
         <main class="col-md-10">
 
+			
     		{% if object_list %}
     			<div class="row col-lg-12">
     			    {% for photo in object_list %}
+						<div class="col-xs-3 col-sm-2 col-lg-1 nopadding">
     			        <a href="{{ photo.get_absolute_url }}">
-    			             <img src="{{ photo.get_thumbnail_url }}" class="thumbnail" alt="{{ photo.title }}">
+    			             <img src="{{ photo.get_thumbnail_url }}" class="thumbnail img-responsive" alt="{{ photo.title }}">
     			        </a>
+						</div>
     			    {% endfor %}
     			</div>
     		{% else %}
