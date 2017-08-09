@@ -266,6 +266,13 @@ def Create_PhotoGroup( request, photo_pk ):
 
 	return redirect( reverse('photologue:monthly-report-detail', args=[new_photo_group.pk] ))
 
+def Set_dbField_PhotoGroup( request, record_type, photogroup_id, **kwargs ):
+	print( "record_type={} photogroup_id={}".format( record_type, photogroup_id ) )
+	q_photogroup = PhotoGroup.objects.get( pk = photogroup_id )
+	q_photogroup.record_type = record_type.upper()
+	q_photogroup.save()
+	return redirect( reverse( 'photologue:monthly-report-detail', kwargs={'pk':photogroup_id} ) )
+
 # Photo Select Pop Views
 class PhotoSelectListView(ListView): 
 	model = Photo,
@@ -397,6 +404,10 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 							'target':'photogroup', 'pk':obj.pk} )
 		context['admin_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] ) 
 		#context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
+		context['set_cm_url'] = reverse( 'photologue:set-photogroup-record-type', 
+		                                    kwargs={'photogroup_id':obj.id, 'record_type':'cm' } )
+		context['set_pm_url'] = reverse( 'photologue:set-photogroup-record-type', 
+		                                    kwargs={'photogroup_id':obj.id, 'record_type':'pm' } )
 		context['set_active_photo_group_url'] = reverse( 'photologue:set-active-photogroup', 
 		                                                 args=[obj.id] )
 		if "PM" in str(obj.record_type).upper():

@@ -32,8 +32,14 @@
 			<a class="btn btn-warning" role="button" href="#"
 				onClick='window.open( "{{ add_photo_url }}", "newWindow" )'> 
 				+Add Photo </a>
-			<a class="btn btn-warning" role="button" href="{{admin_record_url }}">
-				Admin Record </a> 
+            <input type="checkbox" data-toggle="toggle"
+                                   data-on="Del" data-off="Del"
+                                   data-onstyle="danger" data-size="mini"
+                                   value="{{ photo.pk }}" name="delete_photo">
+			<a class="btn btn-info" role="button" href="{{ set_pm_url }}">
+				Set as PM</a> 
+			<a class="btn btn-info" role="button" href="{{ set_cm_url }}">
+				Set as CM</a> 
 			<a class="btn btn-primary" role="button" 
 				href="{% url 'photologue:test-sortable' object.pk %}">
 				Change Photo Order</a>
@@ -47,6 +53,8 @@
 			<button class="btn btn-danger" type="submit">
 				Submit Changes / Save
 			</button>
+			<a class="btn btn-warning" role="button" href="{{admin_record_url }}">
+				Admin Record </a> 
 	   </div>
 		{%comment%}
 		<a href="#" 

@@ -28,7 +28,8 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
 	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder, \
 	GenerateXLSX, GenerateXLSXAll, PhotoGroupPMView, PhotoGroupCMView, \
-	SetActivePhotoGroupView, AddPhotoActivePhotoGroupView 
+	SetActivePhotoGroupView, AddPhotoActivePhotoGroupView, \
+	Set_dbField_PhotoGroup
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -130,6 +131,8 @@ urlpatterns = [
 		Update_PhotoGroup, name="update_photogroup"),
 	url(r'^photogroup/create/(?P<photo_pk>\d+)/$',
 	    Create_PhotoGroup, name='create-photogroup'),
+	url(r'^photogroup/set/(?P<record_type>\w+)/(?P<photogroup_id>\d+)',
+		Set_dbField_PhotoGroup, name='set-photogroup-record-type'),
 	url(r'^testform/$',
 		PhotoUploadView, name="upload_photo"),
 #	url(r'^catagorize/(?P<date_and_time>[\-\d\w|\W]+)/$',
