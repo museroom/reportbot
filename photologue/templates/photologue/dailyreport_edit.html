@@ -3,20 +3,32 @@
 {% load photologue_tags %}
 {% load fontawesome %}
 
-{% block title %}{% trans "Photos in Daily Report" %}{% endblock %}
+{% block title %}{% trans "Daily Report" %}{% endblock %}
 
 {% block content %}
 
-<div class="row col-lg-12">
-    <h1 class="page-header"> {% trans "Photos in Daily Report" %}{{request.url}}</h1>
+<div class="row col-lg-12 h5">
+	<div class="col-xs-4 ">
+		{% trans "Daily Report" %}{{request.url}}
+	</div>
+	<div class="col-xs-8" align="right">
+		<form action="{{select_report_url}}" method ="get">
+			<div class="row col-lg-12">
+			<select name="select_report">
+			{% for report in daily_report %}
+				<option value="{{ report.get_date_for_form }}"
+				{% if report.get_date_for_form == select_date_time_current %}
+				selected
+				{% endif %}
+				>{{ report.get_date_for_form }}</option>
+			{% endfor %}
+			</select>
+			<button class="btn btn-primary btn-xs" type="submit"> Go </button>
+			</div>
+		</form>
+	</div>
 </div>
 
-<h4>{% trans "All Reports" %}</h4>
-<ul class="list-inline">
-    {% for report in daily_report %}
-    <li><a href="{{ report.get_edit_url }} ">{{ report }}</a></li>
-    {% endfor %}
-</ul>
 {% if photo_list and daily_report_item_list %}
 <div class="row">
     <form action="{% url 'photologue:update_dailyreport' active_report %}"

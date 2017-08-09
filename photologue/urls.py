@@ -109,7 +109,7 @@ urlpatterns = [
 		name = 'monthly-report-detail' ), 
 	
 	# Report Item Views
-	url(r'^reportitemlist/(?P<year>\d{4})/(?P<month>[0-9]+)/(?P<day>\w{1,2})/$', 
+	url(r'^reportitemlist/(?P<year>\d+)/(?P<month>\d+)/(?P<day>\d+)/$', 
 		DailyReportDayArchiveView.as_view(month_format='%m'), 
 		name="dailyreport-edit"),
 	url(r'^reportitemlist/(?P<year>\d{4})/(?P<month>[0-9]{2})/$', 
@@ -154,6 +154,9 @@ urlpatterns = [
     # General Message Redirect View
     url(r'^message/success/$',
             TemplateView.as_view(template_name='photologue/message_success.html'), name='message-success' ),
+	url(r'^gotoedit/$',
+			RedirectView.as_view(
+				url=reverse_lazy('photologue:dailyreport-edit', kwargs={'year':2017,'month':8,'day':7}))),
 
 	# -testes-
 	# Sortable.js 

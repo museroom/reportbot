@@ -20,14 +20,7 @@
 		</h1>
 	</div>
 
-	<form action="{% url 'photologue:monthly-report-list' %}"
-	      method="get">
-		<div class="row col-lg-12">
-			Search:<input type="text" name="q">
-			<input type="submit" value="Search">
-			<div class="small text-muted" style="display-inline">example: cm cascade 1707</div>
-		</div>
-	</form>
+	{% include "photologue/includes/search_field_form.html" %}
 
 	{% if object_list %}
 	<div class="row col-lg-12">

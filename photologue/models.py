@@ -1144,6 +1144,11 @@ class DailyReport(models.Model):
 		ordering = ['-report_date']
 		get_latest_by = "report_date"
 
+	def get_date_for_form(self):
+		date_time = self.report_date.astimezone(timezone.get_default_timezone())
+		date_time_formatted = date_time.strftime( "%y%m%d-%H%M" )
+		return date_time_formatted
+
 	def get_edit_url(self):
 		date_time = self.report_date.astimezone(timezone.get_default_timezone())
 		url = reverse('photologue:dailyreport-edit', kwargs={

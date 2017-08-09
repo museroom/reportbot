@@ -229,6 +229,7 @@ class DailyReportDateView(object):
 	date_field = 'date_added'
 	allow_empty = True
 
+
 # PhotoGroup / Monthly Report Views
 class PhotoGroupDetailView(object):
 	queryset = PhotoGroup.objects.all()
@@ -259,6 +260,12 @@ class PhotoSelectListView(ListView):
 		date_time_next = date_time + timezone.timedelta(1,0,0)
 		target = self.kwargs['target']
 		pk = self.kwargs['pk']
+		context['search_field_url'] = reverse( 'photologue:photo-select-popup-list',
+											kwargs={'year':date_time_prev.year,
+													'month':date_time_prev.month,
+													'day':date_time_prev.day,
+													'target':target,
+													'pk':pk} )
 		context['date_prev'] = date_time_prev
 		context['date_prev_url'] = reverse( 'photologue:photo-select-popup-list',
 											kwargs={'year':date_time_prev.year,
@@ -291,8 +298,8 @@ class PhotoSelectListView(ListView):
 
 		return context
 
-
 	def get_queryset(self):
+		print( "GET:{}".format(self.request.GET))
 		date_time = timezone.datetime.strptime(  
 						"{}-{}-{}".format(
 							self.kwargs['year'], 
@@ -309,6 +316,11 @@ class MonthlyReportListView( LoginRequiredMixin, ListView ):
 	login_url = '/login'
 	model = PhotoGroup
 	template_name="photologue/monthlyreport_list.html"
+
+	def get_context_data( self, **kwargs ):
+		context = super( MonthlyReportListView, self).get_context_data(**kwargs) 
+		context['search_field_url'] = reverse( 'photologue:monthly-report-list' )
+		return context
 
 	def get_queryset(self):
 		q_get = self.request.GET.get('q',None)
@@ -417,9 +429,11 @@ class DailyReportArchiveIndexView(DailyReportDateView, ArchiveIndexView):
 
 
 class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArchiveView):
+
 	login_url = '/login/'
 	template_name = "photologue/dailyreport_edit.html"
 	date_and_time = timezone.localtime()
+
 	def get_context_data( self, **kwargs):
 		print("debug: active report={}".format(self.request.user.profile.active_report))
 		context = super(DayArchiveView, self).get_context_data(**kwargs)
@@ -435,7 +449,7 @@ class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArch
 								self.kwargs['year'], self.kwargs['month'], self.kwargs['day']),
 								"%Y-%m-%d" ))
 			#context['is_active'] = True
-		else:
+		else: # Just return active report 
 			report_dt = self.request.user.profile.active_report.report_date.astimezone(
 								timezone.get_default_timezone())
 			date_and_time = report_dt.strftime( "%Y-%m-%d-%H%M" ) 
@@ -456,10 +470,29 @@ class DailyReportDayArchiveView(LoginRequiredMixin, DailyReportDateView, DayArch
 		qset = DailyReportItem.objects.filter( daily_report__report_date__date = report_dt.date()).order_by(
 					'reportOrder' )
 		context['daily_report_item_list'] = qset 
+		context['select_report_url'] = reverse( 
+		                                   'photologue:dailyreport-edit', kwargs={
+		                                   'year':report_dt.year,'month':report_dt.month,'day':report_dt.day} )
+		context['report_date_time'] = report_dt.strftime( "%Y-%m-%d" )
+		#FIXME include 1530/1930 in time please
+		context['select_date_time_current'] = report_dt.strftime( "%y%m%d-1930" )
 		return context
+	
+	def dispatch( self, request, *args, **kwargs ):
+		print( 'request.GET:{}'.format( request.GET ) )
+		select_report = self.request.GET.get('select_report', None )
+		print( 'select_report:{}'.format(select_report) )
+		if select_report:
+			date_time = timezone.datetime.strptime( select_report, "%y%m%d-%H%M" ) 
+			print( 'date_time:{}'.format(date_time))
+			return redirect( reverse('photologue:dailyreport-edit', kwargs={
+			                 'year':date_time.year,'month':date_time.month,'day':date_time.day} ))
+		return super(DailyReportDayArchiveView, self).dispatch(request, *args, **kwargs)
 
-	pass
+	#def get_queryset( self, **kwargs ):
+	#	print( 'dailyreportedit:get_queryset' )
 
+	#	return qset
 
 class DailyReportMonthArchiveView(DailyReportDateView, MonthArchiveView):
 	pass 
