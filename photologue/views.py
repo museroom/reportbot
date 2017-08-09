@@ -69,6 +69,7 @@ import time, datetime
 from HTMLParser import HTMLParser
 
 from utils.logger import logger
+from utils.failover import get_department_item_failover
 
 # Json Query.
 def JsonPhotoQuery( request, report_item, date_and_time ):
@@ -242,9 +243,14 @@ def Create_PhotoGroup( request, photo_pk ):
 	       request, photo_pk ) )
 	q_photo = Photo.objects.get( pk = photo_pk )
 	photo_date_time = q_photo.date_added.astimezone( timezone.get_default_timezone()) 
+	if q_photo.department_item:
+		q_department_item = q_photo.department_item
+	else:
+		q_department_item = get_department_item_failover() 
+	print( "q_department_item:{}".format( q_department_item))
 	groupname = u"{2}_{0}_{1}_auto".format(photo_date_time.strftime( "%y%m%d-%H%M%S" ),
-										q_photo.department_item.name,
-										q_photo.department_item.department.company.name )
+										q_department_item.name,
+										q_department_item.department.company.name )
 	new_photo_group = PhotoGroup( name=groupname, date_added=photo_date_time )
 	new_photo_group.department_item = q_photo.department_item
 	new_photo_group.date_of_service = photo_date_time
@@ -258,7 +264,7 @@ def Create_PhotoGroup( request, photo_pk ):
 	photogroup_image.save() 
 	new_photo_group.photo_records.add( photogroup_image )
 
-	return redirect( 'photologue:monthly-report-list' )
+	return redirect( reverse('photologue:monthly-report-detail', args=[new_photo_group.pk] ))
 
 # Photo Select Pop Views
 class PhotoSelectListView(ListView): 
@@ -391,6 +397,8 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 							'target':'photogroup', 'pk':obj.pk} )
 		context['admin_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] ) 
 		#context['edit_record_url'] = reverse( 'admin:photologue_photogroup_change', args=[obj.id] )
+		context['set_active_photo_group_url'] = reverse( 'photologue:set-active-photogroup', 
+		                                                 args=[obj.id] )
 		if "PM" in str(obj.record_type).upper():
 			context['edit_record_url'] = reverse( 'photologue:photogroup-pm-edit', args=[obj.id] )
 		else:
@@ -404,7 +412,6 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 		context['select_department'] = Department.objects.all()
 		context['target_photo_group'] = self
 		return context
-
 
 class DailyReportListView(DailyReportDateView, ArchiveIndexView ):
 	#date_and_time = timezone.localtime().strftime("%y%m%d-%H%M")
@@ -1091,6 +1098,24 @@ class PhotoGroupPMView( UpdateView ):
 	template_name = 'photologue/photogroup-pm-edit.html' 
 	model = PhotoGroup
 	form_class = PhotoGroupPMForm 
+
+def SetActivePhotoGroupView( request, pk ):
+	print("set active photo group")
+	profile = request.user.profile
+	profile.active_photogroup = PhotoGroup.objects.get(pk=pk)
+	profile.save()
+	return redirect( reverse( 'photologue:monthly-report-detail', args=[pk] ) )
+
+def AddPhotoActivePhotoGroupView( request, photo_pk ):
+	print("add photo to active photo group" ) 
+	profile = request.user.profile
+	active_photogroup = profile.active_photogroup
+	pg_image_class = PhotoGroupImageClass.objects.get( name = "Center" )
+	q_photo = Photo.objects.get( pk = photo_pk )
+	pg_image = PhotoGroupImage( photo = q_photo, photo_class = pg_image_class )
+	pg_image.save()
+	active_photogroup.photo_records.add( pg_image )
+	return redirect( reverse( 'photologue:monthly-report-detail', args=[active_photogroup.pk] ) )
 
 # Gallery views.
 

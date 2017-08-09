@@ -20,7 +20,11 @@
 				    Admin Photo </a>
 				<a href="{% url 'photologue:create-photogroup' object.pk%}"
 				    class="btn btn-primary" role="button">
-					Open  New Case</a>
+					Open New Case</a>
+				<a href="{% url 'photologue:add-photogroup-photo' object.pk%}"
+				    class="btn btn-success" role="button">
+					Add to Active Case</a>
+				<p class="muted"><small>
 				<p class="muted"><small>
 					{{object.date_added}} //
 					{{object.image.size}}bytes //

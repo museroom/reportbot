@@ -212,6 +212,7 @@ class DepartmentItem(models.Model):
 	class Meta:
 		ordering = ['department', 'name']
 
+
 	def get_absolute_url(self):
 		return reverse('admin:photologue_departmentitem_change', args=(self.id,))
 
@@ -666,7 +667,7 @@ class PhotoGroup(models.Model):
 	place_or_system = models.CharField(_('place/system'), max_length=250, unique=False, blank=True)
 	department_item = models.ForeignKey(DepartmentItem, on_delete=models.SET_NULL, null=True)
 	problem_description = models.CharField(_('problem description'), max_length=250, unique=False, blank=True)
-	service_provided = models.CharField(_('serviceprovided'), max_length=50, unique=False, blank=True)
+	service_provided = models.TextField(_('serviceprovided'), unique=False, blank=True)
 	parts_replaced = models.TextField(_('parts replaced'), unique=False, blank=True)
 	remark = models.TextField(_('remark'), unique=False, blank=True)
 	conclusion = models.TextField(_('conclusion/recommendation'), unique=False, blank=True)

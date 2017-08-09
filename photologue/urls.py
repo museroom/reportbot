@@ -27,7 +27,8 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
     PhotoUploadView, PhotoCatagorize, \
 	SetPhotoDepartmentItem, PhotoSelectListView, MonthlyReportListView, \
 	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder, \
-	GenerateXLSX, GenerateXLSXAll, PhotoGroupPMView, PhotoGroupCMView \
+	GenerateXLSX, GenerateXLSXAll, PhotoGroupPMView, PhotoGroupCMView, \
+	SetActivePhotoGroupView, AddPhotoActivePhotoGroupView 
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -146,6 +147,13 @@ urlpatterns = [
 	url(r'^photogroup/cm/edit/(?P<pk>\d+)/$', 
 		PhotoGroupCMView.as_view(),
 	    name = 'photogroup-cm-edit' ), 
+	url(r'^photogroup/active/set/(?P<pk>\d+)/$',
+		SetActivePhotoGroupView,
+		name = 'set-active-photogroup' ),
+	url(r'^photogroup/photo/add/(?P<photo_pk>\d+)/$',
+		AddPhotoActivePhotoGroupView,
+		name = 'add-photogroup-photo' ),
+		
 
 	# Photo Selector Popup
 	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/(?P<target>[\w|\W]+)/(?P<pk>\d+)/$',
