@@ -854,14 +854,14 @@ def GenerateXLSX( request, photo_group_pk ):
 		anchor_before_left = 50
 		anchor_center_left = 250
 		anchor_after_left  = 400
-		photo_page_height = 747
+		photo_page_height = 954
 		photo_page_width = 630
 		photo_gap_width = 20
 		photo_gap = 10
 		photo_gap = 10
 		page_anchor_increase = 99-49
 		logo_anchor_left_pm = 140
-		photo_anchors = ['A33', 'A83', 'A133', 'A183', 'A233', 'A283', 'A333']
+		photo_anchors = ['A36', 'A89', 'A143', 'A196', 'A243', 'A283', 'A333']
 	else: # FIXME assume CM 
 		photo_cell_top = 49
 		photo_cell_page = 86
@@ -875,7 +875,7 @@ def GenerateXLSX( request, photo_group_pk ):
 		photo_gap = 10
 		page_anchor_increase = 99-49
 		logo_anchors = ['A2','A38', 'A85', 'A131', 'A177', 'A223', 'A315']
-		photo_anchors = [
+		photo_anchors = ['A46', 'A92', 'A139', 'A186', 'A233', 'A280', 'A327']
 
 	fn_out_path, filename = os.path.split(fn_out)
 	print( "fn_out_path={}, filename={}".format( fn_out_path, filename ) )
@@ -1027,10 +1027,12 @@ def GenerateXLSX( request, photo_group_pk ):
 	center_page_count = 0
 	after_page_count = 0
 	page_anchor_top = []
-	for i in range(0,10):
-		page_anchor_top.append( ws['A{}'.format(
-			photo_cell_top + page_anchor_increase * i)].anchor[1]  )
-		print( page_anchor_top[i] )
+	print( 'photo_anchors:{}'.format(photo_anchors))
+	for i in range(0,len(photo_anchors)):
+		#page_anchor_top.append( ws['A{}'.format(
+	#		photo_cell_top + page_anchor_increase * i)].anchor[1]  )
+		page_anchor_top.append( ws[photo_anchors[i]].anchor[1] )
+	print( "page_anchor_top:{}".format(page_anchor_top))
 	for q_photorecord in qset_photorecord:
 		#compute max height
 		#if len(qset_photos_before) > 0:
@@ -1064,13 +1066,11 @@ def GenerateXLSX( request, photo_group_pk ):
 			photo_height_before += get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
 			if photo_height_before > photo_page_height:
-				print( "[next page]" )
+				print( "[next page:before]{}/{}".format( photo_anchors[before_page_count], page_anchor_top[before_page_count] ))
 				before_page_count += 1
 				photo_top = page_anchor_top[before_page_count]
 				photo_height_before = get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
-			print( "photo_top:{}/{}page_count:{} p_height:{}".format(
-			    photo_top, page_anchor_top[before_page_count], before_page_count, photo_height_before))
 
 		if q_photorecord.photo_class.name == "Center":
 			photo_left = anchor_center_left
@@ -1080,13 +1080,11 @@ def GenerateXLSX( request, photo_group_pk ):
 			photo_height_center += get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
 			if photo_height_center > photo_page_height:
-				print( "[next page]" )
+				print( "[next page:center]{}/{}".format( photo_anchors[center_page_count], page_anchor_top[center_page_count] ))
 				center_page_count += 1
 				photo_top = page_anchor_top[center_page_count]
 				photo_height_center = get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
-			print( "photo_top:{}/{}page_count:{} p_height:{}".format(
-			    photo_top, page_anchor_top[center_page_count], center_page_count, photo_height_center))
 		if q_photorecord.photo_class.name == "After":
 			photo_left = anchor_after_left
 			photo_width = photo_width_after
@@ -1095,13 +1093,11 @@ def GenerateXLSX( request, photo_group_pk ):
 			photo_height_after += get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
 			if photo_height_after > photo_page_height:
-				print( "[next page]" )
+				print( "[next page:after]{}/{}".format( photo_anchors[after_page_count], page_anchor_top[after_page_count] ))
 				after_page_count += 1
 				photo_top = page_anchor_top[after_page_count]
 				photo_height_after = get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
-			print( "photo_top:{}/{}page_count:{} p_height:{}".format(
-			    photo_top, page_anchor_top[after_page_count], after_page_count, photo_height_after))
 		#if q_photorecord.photo_class.name == "Center":
 		#	photo_left = anchor_center_left
 		#	photo_width = photo_width_center
@@ -1119,7 +1115,8 @@ def GenerateXLSX( request, photo_group_pk ):
 			
 
 		ws.add_image( create_image(
-			app_url+q_photorecord.photo.image.url, 
+			#app_url+q_photorecord.photo.image.url, 
+			app_url+q_photorecord.photo.get_report_url(), 
 			photo_left, photo_top,
 			width=photo_width
 			#height=photo_height
