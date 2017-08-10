@@ -269,6 +269,7 @@ def Create_PhotoGroup( request, photo_pk ):
 def Set_dbField_PhotoGroup( request, record_type, photogroup_id, **kwargs ):
 	print( "record_type={} photogroup_id={}".format( record_type, photogroup_id ) )
 	q_photogroup = PhotoGroup.objects.get( pk = photogroup_id )
+	#FIXME validation? probably an UpdateView?
 	q_photogroup.record_type = record_type.upper()
 	q_photogroup.save()
 	return redirect( reverse( 'photologue:monthly-report-detail', kwargs={'pk':photogroup_id} ) )
@@ -825,35 +826,14 @@ def GenerateXLSX( request, photo_group_pk ):
 			image.drawing.width = float(org_width) / float(org_height) * height
 		return image
 
-	# hand coded template photo grid value
+
 	if 'PM' in str(q_pg.record_type).upper():
-		photo_cell_top = 49
-		photo_cell_page = 86
-		photo_cell_bottom = photo_cell_page - photo_cell_top
-		anchor_before_left = 50
-		anchor_center_left = 250
-		anchor_after_left  = 400
-		photo_page_height = 747
-		photo_page_width = 630
-		photo_gap_width = 20
-		photo_gap = 10
-		logo_url = app_url + "/media/photologue/photos/image1_c45tjXp.jpeg"
+		logo_url = app_url + "/media/photologue/photos/logo-pm.png"
 		sig_url  = app_url + "/media/photologue/photos/image2_ZJL3Hw2.jpeg"
 		filename_in = 'pm-template.xlsx'
-	else:
-		photo_cell_top = 49
-		photo_cell_page = 86
-		photo_cell_bottom = photo_cell_page - photo_cell_top
-		anchor_before_left = 50
-		anchor_center_left = 250
-		anchor_after_left  = 400
-		photo_page_height = 747
-		photo_page_width = 630
-		photo_gap_width = 20
-		photo_gap = 10
+	else: # FIXME assume CM 
 		logo_url = app_url + "/media/photologue/photos/image1.png"
 		filename_in = 'cm-template.xlsx'
-
 	filename_out = 'month-report-{}.xlsx'.format( photo_group_pk )
 	fn_in = os.path.join(static_root,xlsx_root,filename_in)
 	url_in = app_url + os.path.join( static_url, xlsx_root,filename_in )
@@ -866,16 +846,47 @@ def GenerateXLSX( request, photo_group_pk ):
 	wb = xlsx_load_workbook( xlsx_data )
 	ws = wb.active
 
+	# hand coded template photo grid value
+	if 'PM' in str(q_pg.record_type).upper():
+		photo_cell_top = 49
+		photo_cell_page = 86
+		photo_cell_bottom = photo_cell_page - photo_cell_top
+		anchor_before_left = 50
+		anchor_center_left = 250
+		anchor_after_left  = 400
+		photo_page_height = 747
+		photo_page_width = 630
+		photo_gap_width = 20
+		photo_gap = 10
+		photo_gap = 10
+		page_anchor_increase = 99-49
+		logo_anchor_left_pm = 140
+		photo_anchors = ['A33', 'A83', 'A133', 'A183', 'A233', 'A283', 'A333']
+	else: # FIXME assume CM 
+		photo_cell_top = 49
+		photo_cell_page = 86
+		photo_cell_bottom = photo_cell_page - photo_cell_top
+		anchor_before_left = 50
+		anchor_center_left = 250
+		anchor_after_left  = 400
+		photo_page_height = int(ws['A86'].anchor[1]) - int(ws['A48'].anchor[1])
+		photo_page_width = 630
+		photo_gap_width = 20
+		photo_gap = 10
+		page_anchor_increase = 99-49
+		logo_anchors = ['A2','A38', 'A85', 'A131', 'A177', 'A223', 'A315']
+		photo_anchors = [
+
 	fn_out_path, filename = os.path.split(fn_out)
 	print( "fn_out_path={}, filename={}".format( fn_out_path, filename ) )
 	if not os.path.exists( fn_out_path ): 
 		os.mkdir( fn_out_path )
 
 	# Insert Logo on every page
-	ws.add_image( create_image( 
-		logo_url, 
-		ws['A1'].anchor[0], ws['A1'].anchor[1], 
-		height=170 ) )
+	#ws.add_image( create_image( 
+	#	logo_url, 
+	#	ws['A1'].anchor[0], ws['A1'].anchor[1], 
+	#	height=170 ) )
 
 	fields_pg = q_pg._meta.get_fields()
 
@@ -921,7 +932,7 @@ def GenerateXLSX( request, photo_group_pk ):
 
 	page_count = 1
 	pattern = r'^{{(?P<name>\w+):(?P<range>\d+)}}$'
-	non_db_field = ['page_num', 'page_total','serial_no']
+	non_db_field = ['page_num', 'page_total']
 	thin_border = xlsx_Border(left=None, 
 	                          right=None, 
 							  top=None, 
@@ -996,13 +1007,6 @@ def GenerateXLSX( request, photo_group_pk ):
 	photo_width_center = photo_page_width / photo_page_divider - photo_gap_width
 	photo_width_after  = photo_page_width / photo_page_divider - photo_gap_width
 
-	# no left
-	# no right
-	# no center
-	# no left & right
-	# no center & right
-	# no left & center
-	# nothing
 	if len_before > 0:
 		pass
 	if len_center > 0:
@@ -1011,15 +1015,22 @@ def GenerateXLSX( request, photo_group_pk ):
 		pass
 
 	logo_row = str(40)
-	ws.add_image( create_image( 
-		logo_url, 
-		ws['A'+logo_row].anchor[0], ws['A'+logo_row].anchor[1], 
-		height=170 ) )
+	#ws.add_image( create_image( 
+	#	logo_url, 
+	#	ws['A'+logo_row].anchor[0], ws['A'+logo_row].anchor[1], 
+	#	height=170 ) )
 
 	photo_height_before = 0
 	photo_height_center = 0
 	photo_height_after = 0
-
+	before_page_count = 0
+	center_page_count = 0
+	after_page_count = 0
+	page_anchor_top = []
+	for i in range(0,10):
+		page_anchor_top.append( ws['A{}'.format(
+			photo_cell_top + page_anchor_increase * i)].anchor[1]  )
+		print( page_anchor_top[i] )
 	for q_photorecord in qset_photorecord:
 		#compute max height
 		#if len(qset_photos_before) > 0:
@@ -1029,13 +1040,13 @@ def GenerateXLSX( request, photo_group_pk ):
 		#if len(qset_photos_after) > 0:
 		#	photo_height_after  = photo_page_height / len(qset_photos_after)
 	
-		print( u"\nurl:{}\nclass:{} page:{} {}:{}:{}".format(
-			       q_photorecord.photo.image.url,
-				   q_photorecord.photo_class,
-				   q_photorecord.page, 
-				   counter_before, counter_center, counter_after))
+
+		#print( u"\nurl:{}\nclass:{} page:{} {}:{}:{}".format(
+		#	       q_photorecord.photo.image.url,
+		#		   q_photorecord.photo_class,
+		#		   q_photorecord.page, 
+		#		   counter_before, counter_center, counter_after))
 	
-		page_anchor_top = ws['A{}'.format(photo_cell_top)].anchor[1] 
 
 		# compute height from aspect ratio of photo
 		def get_height_aspect( photo, width ):
@@ -1044,28 +1055,69 @@ def GenerateXLSX( request, photo_group_pk ):
 			new_height = float(org_height)/float(org_width) * width
 			return new_height 
 			
+		# FIXME convert to ENUM
 		if q_photorecord.photo_class.name == "Before":
 			photo_left = anchor_before_left
 			photo_width = photo_width_before
-			photo_top = photo_height_before + page_anchor_top
+			photo_top = photo_height_before + page_anchor_top[before_page_count]
 			counter_before = counter_before + 1
 			photo_height_before += get_height_aspect( q_photorecord.photo, photo_width ) + \
-			                       photo_gap
+			                       photo_gap 
+			if photo_height_before > photo_page_height:
+				print( "[next page]" )
+				before_page_count += 1
+				photo_top = page_anchor_top[before_page_count]
+				photo_height_before = get_height_aspect( q_photorecord.photo, photo_width ) + \
+			                       photo_gap 
+			print( "photo_top:{}/{}page_count:{} p_height:{}".format(
+			    photo_top, page_anchor_top[before_page_count], before_page_count, photo_height_before))
+
 		if q_photorecord.photo_class.name == "Center":
 			photo_left = anchor_center_left
 			photo_width = photo_width_center
-			photo_top = photo_height_center + page_anchor_top
+			photo_top = photo_height_center + page_anchor_top[center_page_count]
 			counter_center = counter_center + 1
 			photo_height_center += get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
+			if photo_height_center > photo_page_height:
+				print( "[next page]" )
+				center_page_count += 1
+				photo_top = page_anchor_top[center_page_count]
+				photo_height_center = get_height_aspect( q_photorecord.photo, photo_width ) + \
+			                       photo_gap 
+			print( "photo_top:{}/{}page_count:{} p_height:{}".format(
+			    photo_top, page_anchor_top[center_page_count], center_page_count, photo_height_center))
 		if q_photorecord.photo_class.name == "After":
 			photo_left = anchor_after_left
 			photo_width = photo_width_after
-			photo_top = photo_height_after + page_anchor_top
+			photo_top = photo_height_after + page_anchor_top[after_page_count]
 			counter_after = counter_after + 1
 			photo_height_after += get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
+			if photo_height_after > photo_page_height:
+				print( "[next page]" )
+				after_page_count += 1
+				photo_top = page_anchor_top[after_page_count]
+				photo_height_after = get_height_aspect( q_photorecord.photo, photo_width ) + \
+			                       photo_gap 
+			print( "photo_top:{}/{}page_count:{} p_height:{}".format(
+			    photo_top, page_anchor_top[after_page_count], after_page_count, photo_height_after))
+		#if q_photorecord.photo_class.name == "Center":
+		#	photo_left = anchor_center_left
+		#	photo_width = photo_width_center
+		#	photo_top = photo_height_center + page_anchor_top[0]
+		#	counter_center = counter_center + 1
+		#	photo_height_center += get_height_aspect( q_photorecord.photo, photo_width ) + \
+		#	                       photo_gap 
+		#if q_photorecord.photo_class.name == "After":
+		#	photo_left = anchor_after_left
+		#	photo_width = photo_width_after
+		#	photo_top = photo_height_after + page_anchor_top[0]
+		#	counter_after = counter_after + 1
+		#	photo_height_after += get_height_aspect( q_photorecord.photo, photo_width ) + \
+		#	                       photo_gap 
 			
+
 		ws.add_image( create_image(
 			app_url+q_photorecord.photo.image.url, 
 			photo_left, photo_top,
@@ -1075,6 +1127,27 @@ def GenerateXLSX( request, photo_group_pk ):
 			#ws['A{}'.format(photo_cell_top)].anchor[1],
 			#height=300,
 			) )
+
+	# insert new page header for CM
+	all_counts = (before_page_count, center_page_count, after_page_count)
+	max_page = max(all_counts)
+	if ('PM' in str(q_pg.record_type).upper()):
+		ws.add_image( create_image( logo_url,
+			logo_anchor_left_pm, 
+			ws['D1'].anchor[1], height=75 ))
+				
+	if ('CM' in str(q_pg.record_type).upper()) & (max_page > 2):
+		cell_increment = 90-44
+		for page in range( 2, max_page+2 ):
+			logo_cell = ws.cell( column=1, row=(cell_increment*(page)))
+			ws.add_image( create_image( logo_url, 
+				logo_cell.anchor[0], logo_cell.anchor[1], height=170))
+			for row_index in range( 1, 10):
+				for cell_index in range(40,46):
+					cell_target = cell_increment * (page-1) + cell_index 
+					ws.cell( column=row_index, row=cell_target).value = \
+						ws.cell( column=row_index, row=cell_index).value
+					
 	# save and exit
 
 	print( 'saving {}'.format(fn_out))

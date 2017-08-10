@@ -6,13 +6,47 @@
 {% block content %}
 
 	<div class="row col-lg-12">
-		<h4 class="page-header">{{ object.name }}</h4>
+		<h4 class="page-header">[{{object.record_type|upper}}]{{ object.name }}</h4>
 	</div> 
 
 	{% if object %}
 	 <form action="{% url 'photologue:update_photogroup' object.pk %}"
 			 method="post"> {% csrf_token %}
 	
+		<div class="row col-lg-12 btn-wrapper">
+			{%comment%}
+            <input type="checkbox" data-toggle="toggle"
+                                   data-on="Del" data-off="Del"
+                                   data-onstyle="danger" data-size="mini"
+                                   value="{{ photo.pk }}" name="delete_photo">
+			{%endcomment%}
+			<div class="row col-lg-12 sidepadding">
+				<a class="btn btn-info" role="button" href="{{ set_pm_url }}">
+					Set as PM</a> 
+				<a class="btn btn-info" role="button" href="{{ set_cm_url }}">
+					Set as CM</a> 
+				<a class="btn btn-primary" role="button" 
+					href="{% url 'photologue:test-sortable' object.pk %}">
+					Change Photo Order</a>
+				<a class="btn btn-primary" role="button" href="{{ set_active_photo_group_url }}">
+					Set as Active Case </a>
+				<a class="btn btn-info" role="button" href="{{ edit_record_url }}">
+					Edit Record </a>
+				<a class="btn btn-success" role="button" href="#"
+					onClick='window.open( "{{ generate_xlsx_url }}", "newWindow" )'> 
+					Download Excel </a>
+				<button class="btn btn-danger" type="submit">
+					Submit Changes / Save
+				</button>
+			</div>
+			<div class="row col-lg-12 sidepadding">
+				<a class="btn btn-warning" role="button" href="#"
+					onClick='window.open( "{{ add_photo_url }}", "newWindow" )'> 
+					+Add Photo </a>
+				<a class="btn btn-warning" role="button" href="{{admin_record_url }}">
+					Admin Record </a> 
+			</div>
+	   </div>
 		<div class="row col-lg-12"> 
 			{% for photo in object.photo_records.all %}
 			<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" >
@@ -28,34 +62,6 @@
 			</div>
 			{% endfor %}
 		</div>
-		<div class="row col-lg-12 btn-wrapper ">
-			<a class="btn btn-warning" role="button" href="#"
-				onClick='window.open( "{{ add_photo_url }}", "newWindow" )'> 
-				+Add Photo </a>
-            <input type="checkbox" data-toggle="toggle"
-                                   data-on="Del" data-off="Del"
-                                   data-onstyle="danger" data-size="mini"
-                                   value="{{ photo.pk }}" name="delete_photo">
-			<a class="btn btn-info" role="button" href="{{ set_pm_url }}">
-				Set as PM</a> 
-			<a class="btn btn-info" role="button" href="{{ set_cm_url }}">
-				Set as CM</a> 
-			<a class="btn btn-primary" role="button" 
-				href="{% url 'photologue:test-sortable' object.pk %}">
-				Change Photo Order</a>
-			<a class="btn btn-primary" role="button" href="{{ set_active_photo_group_url }}">
-				Set as Active Case </a>
-			<a class="btn btn-info" role="button" href="{{ edit_record_url }}">
-				Edit Record </a>
-			<a class="btn btn-success" role="button" href="#"
-				onClick='window.open( "{{ generate_xlsx_url }}", "newWindow" )'> 
-				Download Excel </a>
-			<button class="btn btn-danger" type="submit">
-				Submit Changes / Save
-			</button>
-			<a class="btn btn-warning" role="button" href="{{admin_record_url }}">
-				Admin Record </a> 
-	   </div>
 		{%comment%}
 		<a href="#" 
 			onClick='window.open( 
