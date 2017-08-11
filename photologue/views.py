@@ -19,6 +19,7 @@ from django.http import StreamingHttpResponse
 import re
 from openpyxl.drawing.image import Image as xlsx_Image
 from openpyxl import load_workbook as xlsx_load_workbook
+from openpyxl import Workbook as xlsx_workbook
 from openpyxl.styles.borders import Border as xlsx_Border
 from openpyxl.styles.borders import Side as xlsx_Side
 from wand.image import Image as wand_Image
@@ -834,17 +835,19 @@ def GenerateXLSX( request, photo_group_pk ):
 	else: # FIXME assume CM 
 		logo_url = app_url + "/media/photologue/photos/image1.png"
 		filename_in = 'cm-template.xlsx'
-	filename_out = 'month-report-{}.xlsx'.format( photo_group_pk )
+	filename_photo_out = 'month-report-text-{}.xlsx'.format( photo_group_pk )
+	filename_text_out = 'month-report-photo-{}.xlsx'.format( photo_group_pk )
 	fn_in = os.path.join(static_root,xlsx_root,filename_in)
 	url_in = app_url + os.path.join( static_url, xlsx_root,filename_in )
-	fn_out = os.path.join(tmp_root,xlsx_root,filename_out)
+	fn_text_out = os.path.join(tmp_root,xlsx_root,filename_text_out)
+	fn_photo_out = os.path.join(tmp_root,xlsx_root,filename_photo_out)
 
 	print( 'url_in='+url_in)
 	xlsx_data = BytesIO(urlopen(url_in).read())
 
-
-	wb = xlsx_load_workbook( xlsx_data )
-	ws = wb.active
+	wb_text = xlsx_load_workbook( xlsx_data )
+	wb_photo = xlsx_workbook()
+	ws = wb_text.active
 
 	# hand coded template photo grid value
 	if 'PM' in str(q_pg.record_type).upper():
@@ -854,14 +857,17 @@ def GenerateXLSX( request, photo_group_pk ):
 		anchor_before_left = 50
 		anchor_center_left = 250
 		anchor_after_left  = 400
-		photo_page_height = 954
+		photo_page_height = 934
 		photo_page_width = 630
 		photo_gap_width = 20
 		photo_gap = 10
 		photo_gap = 10
 		page_anchor_increase = 99-49
 		logo_anchor_left_pm = 140
-		photo_anchors = ['A36', 'A89', 'A143', 'A196', 'A243', 'A283', 'A333']
+		logo_height = 70
+		photo_anchors = ['A36', 'A89', 'A143', 'A196', 'A253', 'A305', 'A353']
+		logo_anchor_px = [5, 990, 1976, 2955, 3943, 4898, 5000]
+		photo_anchor_px = [1078, 2072, 3043, 4043, 4840, 5580, 6520]
 	else: # FIXME assume CM 
 		photo_cell_top = 49
 		photo_cell_page = 86
@@ -873,11 +879,14 @@ def GenerateXLSX( request, photo_group_pk ):
 		photo_page_width = 630
 		photo_gap_width = 20
 		photo_gap = 10
+		logo_height = 150
 		page_anchor_increase = 99-49
 		logo_anchors = ['A2','A38', 'A85', 'A131', 'A177', 'A223', 'A315']
-		photo_anchors = ['A46', 'A92', 'A139', 'A186', 'A233', 'A280', 'A327']
+		logo_anchor_px = [5, 990, 1968, 2955, 3918, 4898, 5000]
+		photo_anchors = ['A10', 'A44', 'A92', 'A186', 'A233', 'A280', 'A327']
+		photo_anchor_px = [1166, 2139, 3120, 4132, 4840, 5580, 6520]
 
-	fn_out_path, filename = os.path.split(fn_out)
+	fn_out_path, filename = os.path.split(fn_text_out)
 	print( "fn_out_path={}, filename={}".format( fn_out_path, filename ) )
 	if not os.path.exists( fn_out_path ): 
 		os.mkdir( fn_out_path )
@@ -933,9 +942,7 @@ def GenerateXLSX( request, photo_group_pk ):
 	page_count = 1
 	pattern = r'^{{(?P<name>\w+):(?P<range>\d+)}}$'
 	non_db_field = ['page_num', 'page_total']
-	thin_border = xlsx_Border(left=None, 
-	                          right=None, 
-							  top=None, 
+	thin_border = xlsx_Border(left=None, right=None, top=None, 
 	                          bottom=xlsx_Side(style='thin'))
 
 	for cell in ws.get_cell_collection():
@@ -1000,8 +1007,8 @@ def GenerateXLSX( request, photo_group_pk ):
 	if (len_before > 0) & (len_center > 0) & (len_after > 0):
 		photo_page_divider = 2.8
 		anchor_before_left -= 50
-		anchor_center_left -= 20
-		anchor_after_left  += 50
+		anchor_center_left -= 30
+		anchor_after_left  += 40
 
 	photo_width_before = photo_page_width / photo_page_divider - photo_gap_width
 	photo_width_center = photo_page_width / photo_page_divider - photo_gap_width
@@ -1031,7 +1038,8 @@ def GenerateXLSX( request, photo_group_pk ):
 	for i in range(0,len(photo_anchors)):
 		#page_anchor_top.append( ws['A{}'.format(
 	#		photo_cell_top + page_anchor_increase * i)].anchor[1]  )
-		page_anchor_top.append( ws[photo_anchors[i]].anchor[1] )
+		#page_anchor_top.append( photo_anchor_px[i] )
+		page_anchor_top.append( ws[photo_anchors[i]].anchor[1])
 	print( "page_anchor_top:{}".format(page_anchor_top))
 	for q_photorecord in qset_photorecord:
 		#compute max height
@@ -1080,7 +1088,8 @@ def GenerateXLSX( request, photo_group_pk ):
 			photo_height_center += get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
 			if photo_height_center > photo_page_height:
-				print( "[next page:center]{}/{}".format( photo_anchors[center_page_count], page_anchor_top[center_page_count] ))
+				print( "[next page:center]{}/{}".format( photo_anchors[center_page_count], 
+					page_anchor_top[center_page_count] ))
 				center_page_count += 1
 				photo_top = page_anchor_top[center_page_count]
 				photo_height_center = get_height_aspect( q_photorecord.photo, photo_width ) + \
@@ -1093,7 +1102,8 @@ def GenerateXLSX( request, photo_group_pk ):
 			photo_height_after += get_height_aspect( q_photorecord.photo, photo_width ) + \
 			                       photo_gap 
 			if photo_height_after > photo_page_height:
-				print( "[next page:after]{}/{}".format( photo_anchors[after_page_count], page_anchor_top[after_page_count] ))
+				print( "[next page:after]{}/{}".format( photo_anchors[after_page_count],
+					page_anchor_top[after_page_count] ))
 				after_page_count += 1
 				photo_top = page_anchor_top[after_page_count]
 				photo_height_after = get_height_aspect( q_photorecord.photo, photo_width ) + \
@@ -1113,6 +1123,7 @@ def GenerateXLSX( request, photo_group_pk ):
 		#	photo_height_after += get_height_aspect( q_photorecord.photo, photo_width ) + \
 		#	                       photo_gap 
 			
+		ws = wb_photo.active
 
 		ws.add_image( create_image(
 			#app_url+q_photorecord.photo.image.url, 
@@ -1125,20 +1136,27 @@ def GenerateXLSX( request, photo_group_pk ):
 			#height=300,
 			) )
 
-	# insert new page header for CM
+	# insert new page header and Logo 
+	# PM
 	all_counts = (before_page_count, center_page_count, after_page_count)
 	max_page = max(all_counts)
+	print( '[max_page]={}'.format( max_page ) )
 	if ('PM' in str(q_pg.record_type).upper()):
-		ws.add_image( create_image( logo_url,
-			logo_anchor_left_pm, 
-			ws['D1'].anchor[1], height=75 ))
+		for page in range( 1, max_page+3 ):
+			# left upper corner logo
+			ws.add_image( create_image( logo_url, 
+				225, logo_anchor_px[page-1], height=logo_height))
 				
+	# insert new page header and Logo
+	# CM
 	if ('CM' in str(q_pg.record_type).upper()) & (max_page > 2):
 		cell_increment = 90-44
-		for page in range( 2, max_page+2 ):
-			logo_cell = ws.cell( column=1, row=(cell_increment*(page)))
+		for page in range( 1, max_page+3 ):
+			# left upper corner logo
+			logo_cell = ws[logo_anchors[page-1]]
 			ws.add_image( create_image( logo_url, 
-				logo_cell.anchor[0], logo_cell.anchor[1], height=170))
+				0, logo_anchor_px[page-1], height=logo_height))
+			# page number
 			for row_index in range( 1, 10):
 				for cell_index in range(40,46):
 					cell_target = cell_increment * (page-1) + cell_index 
@@ -1147,14 +1165,15 @@ def GenerateXLSX( request, photo_group_pk ):
 					
 	# save and exit
 
-	print( 'saving {}'.format(fn_out))
-	wb.save( fn_out )
+	print( 'saving {}'.format(fn_photo_out))
+	wb_text.save( fn_text_out )
+	wb_photo.save( fn_photo_out )
 
-	fn_io = StringIO( open(fn_out).read() )
+	fn_io = StringIO( open(fn_text_out).read() )
 	wrapper = FileWrapper( fn_io, blksize=5 )
 	response = StreamingHttpResponse( wrapper, 
-	               content_type = mimetypes.guess_type(fn_out)[0])
-	response['Content-Disposition'] = "attachment; filename={}".format( filename_out )
+	               content_type = mimetypes.guess_type(fn_text_out)[0])
+	response['Content-Disposition'] = "attachment; filename={}".format( filename_text_out )
 	return response
 
 def GenerateXLSXAll(request):

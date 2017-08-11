@@ -28,10 +28,6 @@
 	{% blocktrans %}
 		<p>On this page you can upload many photos at once, as long as you have
 		put them all in a zip archive. The photos can be either:</p>
-		<ul>
-			<li>Added to an existing gallery.</li>
-			<li>Otherwise, a new gallery is created with the supplied title.</li>
-		</ul>
 	{% endblocktrans %}
 
 	{% if form.errors %}
@@ -42,7 +38,7 @@
 	{% endif %}
 
 	<form action="{% url 'admin:photologue_upload_zip' %}" method="post" id="zip_upload_form"
-          {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
         {% csrf_token %}
         <div>
             {% for fieldset in adminform %}
