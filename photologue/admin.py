@@ -238,7 +238,7 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	form = PhotoGroupAdminForm
 	search_fields = ['name','place_or_system','parts_replaced','conclusion',
 	                 'serviced_by','inspected_by', 'contact_number',
-					 'contact_person', 'remark', ]
+					 'contact_person', 'remark', 'serial_no' ]
 	date_hierarchy = 'date_of_service'
 
 	#fields = ( #'date_added', 

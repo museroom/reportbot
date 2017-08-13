@@ -18,6 +18,7 @@ from django.http import StreamingHttpResponse
 # OpenPyXL for generating XLSX
 import re
 from openpyxl.drawing.image import Image as xlsx_Image
+from openpyxl.styles.alignment import Alignment as xlsx_alignment
 from openpyxl import load_workbook as xlsx_load_workbook
 from openpyxl import Workbook as xlsx_workbook
 from openpyxl.styles.borders import Border as xlsx_Border
@@ -294,9 +295,9 @@ class PhotoSelectListView(ListView):
 		target = self.kwargs['target']
 		pk = self.kwargs['pk']
 		context['search_field_url'] = reverse( 'photologue:photo-select-popup-list',
-											kwargs={'year':date_time_prev.year,
-													'month':date_time_prev.month,
-													'day':date_time_prev.day,
+											kwargs={'year':date_time.year,
+													'month':date_time.month,
+													'day':date_time.day,
 													'target':target,
 													'pk':pk} )
 		context['date_prev'] = date_time_prev
@@ -332,18 +333,38 @@ class PhotoSelectListView(ListView):
 		return context
 
 	def get_queryset(self):
-		print( "GET:{}".format(self.request.GET))
-		date_time = timezone.datetime.strptime(  
-						"{}-{}-{}".format(
-							self.kwargs['year'], 
-							self.kwargs['month'],
-							self.kwargs['day'] ),"%Y-%m-%d")
-		qset = Photo.objects.filter( date_added__date = date_time.date() )
-		#.filter( department_item__department__company = self.request.user.profile.company )
-#		qset_nodate = Photo.objects.filter( date_added__date = date_time.date()).filter( department_item = None )
-#		qset += qset_nodate
+		q_get = self.request.GET.get('q',None)
+		if q_get:
+			qset_prev = []
+			qset = []
+			qset_filter = q_get.split(' ')
+
+			print( 'debug: qset_filter={}'.format(qset_filter))
+			counter = 0
+			for q_filter in qset_filter: 
+				qset_rt= Photo.objects.filter( 
+			           title__icontains = q_filter )
+				qset_n = Photo.objects.filter (
+					   department_item__department__company__name__icontains = q_filter )
+				qset_din = Photo.objects.filter (
+					   department_item__name__icontains = q_filter )
+				qset.append( list(chain(qset_rt,qset_n,qset_din)))
+
+			qset_tmp = list(chain(qset))[0]
+			qset_tmp = qset
+			qset = qset_tmp[0]
+			for i in range(0,len(qset_tmp)):
+				qset = list(set(qset) & set(qset_tmp[i]))
+		else: 
+			date_time = timezone.datetime.strptime(  
+							"{}-{}-{}".format(
+								self.kwargs['year'], 
+								self.kwargs['month'],
+								self.kwargs['day'] ),"%Y-%m-%d")
+			qset = Photo.objects.filter( date_added__date = date_time.date() )
 
 		return qset
+
 
 class MonthlyReportListView( LoginRequiredMixin, ListView ):
 	login_url = '/login'
@@ -371,18 +392,12 @@ class MonthlyReportListView( LoginRequiredMixin, ListView ):
 				qset_din = PhotoGroup.objects.filter (
 					   department_item__name__icontains = q_filter )
 				qset.append( list(chain(qset_rt,qset_n,qset_din)))
-				#qset = PhotoGroup.objects.filter(
-				#       Q(record_type__icontains = q_filter) | 
-				#	   Q(name__icontains = q_filter) |
-				#	   Q(department_item__name__icontains = q_filter) ).distinct()
-				#qset = list(chain(qset,qset_prev))
 
 			qset_tmp = list(chain(qset))[0]
 			qset_tmp = qset
 			qset = qset_tmp[0]
 			for i in range(0,len(qset_tmp)):
 				qset = list(set(qset) & set(qset_tmp[i]))
-			print(qset)
 		else: 
 			qset = PhotoGroup.objects.all().order_by(
 				"date_of_service" )
@@ -813,13 +828,11 @@ def GenerateXLSX( request, photo_group_pk ):
 		image_data = BytesIO(open(tmp_name).read())
 		return image_data
 
-	def create_image( url, x, y, width=None, height=None ):
+	def create_image( url, width=None, height=None ):
 
 		#image_data = BytesIO(open(tmp_name).read())
 		image_data = create_image_data( url )
 		image = xlsx_Image( image_data )
-		image.drawing.top = y
-		image.drawing.left = x
 		if width:
 			org_width = image.drawing.width
 			org_height = image.drawing.height
@@ -840,9 +853,15 @@ def GenerateXLSX( request, photo_group_pk ):
 	else: # FIXME assume CM 
 		logo_url = app_url + "/media/photologue/photos/image1.png"
 		filename_in = 'cm-template.xlsx'
-	filename_photo_out = 'month-report-text-{}.xlsx'.format( photo_group_pk )
-	filename_text_out = 'month-report-photo-{}.xlsx'.format( photo_group_pk )
-	filename_writer_out = 'month-report-writer-{}.xlsx'.format( photo_group_pk )
+	pg_serial = PhotoGroup.objects.get( pk=photo_group_pk ).serial_no 
+	if pg_serial != "":
+		filename_serial = PhotoGroup.objects.get( pk=photo_group_pk ).serial_no
+	else:
+		filename_serial = 'no_serial-{}-'.format( photo_group_pk )
+	filename_photo_out = '{}-photo.xlsx'.format( filename_serial )
+	filename_text_out = '{}-report.xlsx'.format( filename_serial )
+	filename_writer_out = '{}-photo.xlsx'.format( filename_serial )
+	filename_zip_out = '{}.zip'.format( filename_serial )
 	fn_in = os.path.join(static_root,xlsx_root,filename_in)
 	url_in = app_url + os.path.join( static_url, xlsx_root,filename_in )
 	fn_text_out = os.path.join(tmp_root,xlsx_root,filename_text_out)
@@ -861,14 +880,18 @@ def GenerateXLSX( request, photo_group_pk ):
 	if 'PM' in str(q_pg.record_type).upper():
 		# XlsxWriter
 		ws_photo = {
-			scale:0.25, gap:1, page_row: 50, page_col: 50, cell_width: 10, 
+			'scale':0.125, 'x_scale':0.125, 'y_scale':0.125, 'gap':1, 
+			'page_row': 50, 'page_col': 50, 'cell':{'width': 2, 'height':20},
+			'row_begin': 9, 'col':{ 'Before': 'B', 'Center': 'L', 'After': 'V'},
+			'logo':{'height':70,'record':'C1','photo':'A1'},
 		}
 	else: # FIXME assume CM 
 		# XlsxWriter
 		ws_photo = {
 			'scale':0.125, 'x_scale':0.125, 'y_scale':0.125, 'gap':1, 
 			'page_row': 50, 'page_col': 50, 'cell':{'width': 2, 'height':20},
-			'row_begin': 4, 'col':{ 'Before': 'B', 'Center': 'L', 'After': 'V'},
+			'row_begin': 9, 'col':{ 'Before': 'B', 'Center': 'L', 'After': 'V'},
+			'logo':{'height':150,'record':'A1','photo':'A1'},
 		}
 
 	fn_out_path, filename = os.path.split(fn_text_out)
@@ -924,9 +947,12 @@ def GenerateXLSX( request, photo_group_pk ):
 				for c in row:
 					c.fill = fill
 
+	# fill Text dbfield
+
 	page_count = 1
 	pattern = r'^{{(?P<name>\w+):(?P<range>\d+)}}$'
 	non_db_field = ['page_num', 'page_total']
+	rich_db_field = ['service_provided', 'parts_replaced', 'remark', 'conclusion']
 	thin_border = xlsx_Border(left=None, right=None, top=None, 
 	                          bottom=xlsx_Side(style='thin'))
 
@@ -945,6 +971,9 @@ def GenerateXLSX( request, photo_group_pk ):
 						db_value = q_pg.department_item.department.name
 					elif db_field == "department_item":
 						db_value = q_pg.department_item.name
+					elif db_field in rich_db_field:
+						cell.alignment = xlsx_alignment(wrapText=True, vertical='top') 
+						db_value = q_db_field
 					else:
 						db_value = q_db_field
 				else:
@@ -968,6 +997,10 @@ def GenerateXLSX( request, photo_group_pk ):
 					style_range( ws, cell_range, border=thin_border )
 
 
+	# Insert LOGO for text report xlsx
+	img_report = create_image( logo_url, height=ws_photo['logo']['height'])
+	ws.add_image( img_report, ws_photo['logo']['record'] )
+	
 	# get all images 
 	qset_photorecord = q_pg.photo_records.all() 
 	qset_photos_before = q_pg.photo_records.filter( photo_class__name = "Before" )
@@ -1009,16 +1042,13 @@ def GenerateXLSX( request, photo_group_pk ):
 		'count':{'Before':0, 'Center':0, 'After':0},
 		}
 
-	for q_photorecord in qset_photorecord:
+	# compute height from aspect ratio of photo
+	def get_height( photo, scale ):
+		org_height = float(photo.image.height)
+		new_height = org_height * scale / ws_photo['cell']['height']
+		return new_height 
 
-		# compute height from aspect ratio of photo
-		def get_height( photo, scale ):
-			org_width = float(photo.image.width)
-			org_height = float(photo.image.height)
-			#new_height = float(org_height)/float(org_width) * width
-			new_height = org_height * scale / ws_photo['cell']['height']
-			return new_height 
-			
+	for q_photorecord in qset_photorecord:
 		photo_class = q_photorecord.photo_class.name 
 		photo = q_photorecord.photo
 		url = app_url + q_photorecord.photo.image.url
@@ -1029,7 +1059,6 @@ def GenerateXLSX( request, photo_group_pk ):
 			} ) 
 		page['row'][photo_class] += get_height( photo, ws_photo['scale'] ) + ws_photo['gap']
 		print( '{}:{}'.format( photo_class, page['row'][photo_class] ) ) 
-
 
 		# Add Image
 
@@ -1046,11 +1075,26 @@ def GenerateXLSX( request, photo_group_pk ):
 	wb_photo.save( fn_photo_out )
 	wb_writer.close()
 
-	fn_io = StringIO( open(fn_writer_out).read() )
+	# create zipfile
+	fn_xlsx_zip = os.path.join( tmp_root, filename_zip_out )
+	xlsx_zip = zipfile.ZipFile( fn_xlsx_zip,'w' )
+	xlsx_zip.write( fn_text_out,  filename_text_out )
+	xlsx_zip.write( fn_writer_out,  filename_writer_out ) 
+	counter = 1
+	for q_pr in qset_photorecord:
+		fullpath = q_pr.photo.image.path
+		path, ext = os.path.splitext( fullpath )
+		filename = "{}_{:02d}.{}".format( filename_serial , counter , ext )
+		counter += 1
+		xlsx_zip.write( q_pr.photo.image.path, filename )
+	xlsx_zip.close()
+
+	# HTML response 
+	fn_io = StringIO( open(fn_xlsx_zip).read() )
 	wrapper = FileWrapper( fn_io, blksize=5 )
 	response = StreamingHttpResponse( wrapper, 
-	               content_type = mimetypes.guess_type(fn_writer_out)[0])
-	response['Content-Disposition'] = "attachment; filename={}".format( filename_writer_out )
+	               content_type = mimetypes.guess_type(fn_xlsx_zip)[0])
+	response['Content-Disposition'] = "attachment; filename={}".format( filename_zip_out )
 	return response
 
 def GenerateXLSXAll(request):
