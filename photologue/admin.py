@@ -487,7 +487,7 @@ class PhotoAdmin(admin.ModelAdmin):
 								 )
 				}),
 				(	'', {
-					'fields': ( 'caption', 'is_public',
+					'fields': ( 'tags', 'caption', 'is_public',
 									'daily_report_item'
 								 )
 				}),

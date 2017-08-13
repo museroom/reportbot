@@ -6,13 +6,22 @@
 
 	{% block content %}
 	
+	<!-- Date Selector -->
 	<div class="row col-lg-12 sidepadding">
-		<a href="{{url_date_prev}}">&lt;{{date_prev.date}}</a>
-		|
-		<a href="{{url_date_next}}">{{date_next.date}}&gt;</a>
+		<!-- search field -->
+		<div class="col-xs-8">
+			{% include "photologue/includes/search_field_form.html" %}
+		</div>
+		<div class="col-xs-4" align="right">
+			<a href="{{url_date_prev}}">&lt;{{date_prev.date}}</a>
+			|
+			<a href="{{url_date_next}}">{{date_next.date}}&gt;</a>
+		</div>
 	</div>
 	
 	{% if object_list %}
+
+		<!-- photo list -->
 		<form action="{% url 'photologue:set_dailyreportitem' %}"
 				method="post"> {% csrf_token %}
 

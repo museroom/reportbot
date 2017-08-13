@@ -787,6 +787,13 @@ class Photo(ImageModel):
 		#				daily_report_item = self.report_item).latest()
 		#			print( "DEBUG: latest_daily_report_item = {}".format( latest_daily_report_item ) )
 		#			self.daily_report_item.add( latest_daily_report_item )
+		# add date flatten for search
+		dt_tags = []
+		for date_splitter in ('-','/',''):
+			dt_tags.append( self.date_added.strftime( 
+				'%y{0}%m{0}%d'.format( date_splitter ) ) )
+		dt_join = " ".join( dt_tag for dt_tag in dt_tags )
+		self.tags = self.tags + " " + dt_join 
 		super(Photo, self).save(*args, **kwargs)
 
 	def get_related_daily_report_item(self, *args, **kwargs):
@@ -911,6 +918,7 @@ class BaseEffect(models.Model):
 			for obj in getattr(self, prop).all():
 				obj.clear_cache()
 				obj.pre_cache()
+			
 
 	def delete(self):
 		try:

@@ -345,7 +345,7 @@ class PhotoSelectListView(ListView):
 				qset_rt= Photo.objects.filter( 
 			           title__icontains = q_filter )
 				qset_n = Photo.objects.filter (
-					   department_item__department__company__name__icontains = q_filter )
+					   tags__icontains = q_filter )
 				qset_din = Photo.objects.filter (
 					   department_item__name__icontains = q_filter )
 				qset.append( list(chain(qset_rt,qset_n,qset_din)))
@@ -386,11 +386,11 @@ class MonthlyReportListView( LoginRequiredMixin, ListView ):
 			counter = 0
 			for q_filter in qset_filter: 
 				qset_rt= PhotoGroup.objects.filter( 
-			           record_type__icontains = q_filter )
+			           record_type__icontains = q_filter ).order_by( 'date_of_service' )
 				qset_n = PhotoGroup.objects.filter (
-					   name__icontains = q_filter )
+					   name__icontains = q_filter ).order_by( 'date_of_service' )
 				qset_din = PhotoGroup.objects.filter (
-					   department_item__name__icontains = q_filter )
+					   department_item__name__icontains = q_filter ).order_by( 'date_of_service' )
 				qset.append( list(chain(qset_rt,qset_n,qset_din)))
 
 			qset_tmp = list(chain(qset))[0]
@@ -649,19 +649,47 @@ class PhotoCatagorize(ListView):
 		context['url_date_next'] = url_next
 		context['date_prev'] = date_prev
 		context['date_next'] = date_next
+		url_search = reverse( "photologue:photo_catagorize_date", kwargs={
+		                    'year': date_current.year,
+							'month': date_current.month,
+							'day': date_current.day } ) 
+		context['search_field_url'] = url_search 
 
 		return context
 		
 
 	def get_queryset(self):
-		dt_now = timezone.localtime()
-		year = self.kwargs.get( 'year', dt_now.year )
-		month = self.kwargs.get( 'month', dt_now.month )
-		day = self.kwargs.get( 'day', dt_now.day )
-		date_photo = timezone.datetime.strptime( 
-		             "{}-{}-{}".format( year, month, day ), 
-					 "%Y-%m-%d" )
-		qset = Photo.objects.filter( date_added__date = date_photo )
+		q_get = self.request.GET.get('q',None)
+		if q_get:
+			qset_prev = []
+			qset = []
+			qset_filter = q_get.split(' ')
+			print( 'debug: qset_filter={}'.format(qset_filter))
+			counter = 0
+			for q_filter in qset_filter: 
+				qset_rt= Photo.objects.filter( 
+			           title__icontains = q_filter )
+				qset_n = Photo.objects.filter (
+					   tags__icontains = q_filter )
+				qset_din = Photo.objects.filter (
+					   department_item__name__icontains = q_filter )
+				qset.append( list(chain(qset_rt,qset_n,qset_din)))
+
+			qset_tmp = list(chain(qset))[0]
+			qset_tmp = qset
+			qset = qset_tmp[0]
+			for i in range(0,len(qset_tmp)):
+				qset = list(set(qset) & set(qset_tmp[i]))
+		else:
+			dt_now = timezone.localtime()
+			year = self.kwargs.get( 'year', dt_now.year )
+			month = self.kwargs.get( 'month', dt_now.month )
+			day = self.kwargs.get( 'day', dt_now.day )
+			date_photo = timezone.datetime.strptime( 
+						 "{}-{}-{}".format( year, month, day ), 
+						 "%Y-%m-%d" )
+			qset = Photo.objects.filter( date_added__date = date_photo )
+
 		return qset
 	
 def SetPhotoDepartmentItem( request ):
@@ -882,17 +910,22 @@ def GenerateXLSX( request, photo_group_pk ):
 		ws_photo = {
 			'scale':0.125, 'x_scale':0.125, 'y_scale':0.125, 'gap':1, 
 			'page_row': 50, 'page_col': 50, 'cell':{'width': 2, 'height':20},
-			'row_begin': 9, 'col':{ 'Before': 'B', 'Center': 'L', 'After': 'V'},
-			'logo':{'height':70,'record':'C1','photo':'A1'},
+			'row_begin': 5, 'col':{ 'Before': 'B', 'Center': 'D', 'After': 'F'},
+			'logo':{'height':70,'record':'C','photo':'C','x_scale':0.5,'y_scale':0.5},
 		}
 	else: # FIXME assume CM 
 		# XlsxWriter
 		ws_photo = {
 			'scale':0.125, 'x_scale':0.125, 'y_scale':0.125, 'gap':1, 
 			'page_row': 50, 'page_col': 50, 'cell':{'width': 2, 'height':20},
-			'row_begin': 9, 'col':{ 'Before': 'B', 'Center': 'L', 'After': 'V'},
-			'logo':{'height':150,'record':'A1','photo':'A1'},
+			'row_begin': 9, 'col':{ 'Before': 'B', 'Center': 'D', 'After': 'F'},
+			'logo':{'height':150,'record':'A','photo':'A','x_scale':0.1,'y_scale':0.1},
 		}
+	# command ws_photo keys and values
+	ws_photo_common = {
+			'paper':9, 'margin':{'left':0.6,'right':0.6,'top':1.9,'bottom':1.9}
+			}
+	ws_photo.update( ws_photo_common )
 
 	fn_out_path, filename = os.path.split(fn_text_out)
 	print( "fn_out_path={}, filename={}".format( fn_out_path, filename ) )
@@ -995,10 +1028,20 @@ def GenerateXLSX( request, photo_group_pk ):
 									 cell.row )
 					style_range( ws, cell_range, border=thin_border )
 
+	# PM template merged cell style fix for openpyxl
+	if 'PM' in str(q_pg.record_type).upper():
+		style_cells = { 
+			'B9:E9', 'F9:G9',
+			'B10:E10', 'B11:E11', 'B12:E12', 'B13:E13', 'B14:E14', 'B15:E15', 'B16:E16', 'B17:E17',
+			'B18:E18', 'A19:G19', 'B20:E20', 'B21:E21', 'B22:E22', 'B23:E23' 
+			}
+		for style_cell in style_cells:
+			style_range( ws, style_cell, border=thin_border )
+	               
 
 	# Insert LOGO for text report xlsx
 	img_report = create_image( logo_url, height=ws_photo['logo']['height'])
-	ws.add_image( img_report, ws_photo['logo']['record'] )
+	ws.add_image( img_report, "{}1".format(ws_photo['logo']['record']) )
 	
 	# get all images 
 	qset_photorecord = q_pg.photo_records.all() 
@@ -1020,56 +1063,91 @@ def GenerateXLSX( request, photo_group_pk ):
 		ws_photo['y_scale'] = ws_photo['scale']
 
 		ws_photo['col']['Before'] = 'B'
-		ws_photo['col']['Center'] = 'L'
-		ws_photo['col']['After'] = 'Q'
+		ws_photo['col']['Center'] = 'B'
+		ws_photo['col']['After'] = 'E'
 
 	# have left, center and right
 	if (len_before > 0) & (len_center > 0) & (len_after > 0):
 		photo_scale = 2.8
 		ws_photo['col']['Before'] = 'B'
-		ws_photo['col']['Center'] = 'L'
-		ws_photo['col']['After'] = 'V'
+		ws_photo['col']['Center'] = 'D'
+		ws_photo['col']['After'] = 'F'
 
 	# -=-==--=-=-=-=-=-=-=-==-=-
 	# XlsxWriter photo workbook
 	ws_writer = wb_writer.add_worksheet()
-#	ws_writer.set_column( 0, 100, ws_photo['cell']['width'] )
-	cell_format = wb_writer.add_format({'bold':True})
-	ws_writer.set_column( 'A:Z', ws_photo['cell']['width'], cell_format )
-
 	
+	# set print margin and paper etc
+	ws_writer.set_paper( ws_photo['paper']  ) # A4 paper http://xlsxwriter.readthedocs.io/page_setup.html 
+	ws_writer.set_margins( 
+		left = ws_photo['margin']['left'], right = ws_photo['margin']['right'], 
+		top = ws_photo['margin']['top'], bottom = ws_photo['margin']['bottom'] )
+
+	# FIXME XlsxWriter set_column does not work in google sheet, 
+	#ws_writer.set_column( 0, 100, ws_photo['cell']['width'] )
+	#cell_format = wb_writer.add_format({'bold':True})
+	#ws_writer.set_column( 'A:Z', ws_photo['cell']['width'], cell_format )
+
 	# reszie entire worksheet
 	page = {
-		'row':{'Before':1, 'Center':1, 'After':1}, 
+		'row':{'Before':ws_photo['row_begin'], 'Center':ws_photo['row_begin'], 'After':ws_photo['row_begin']}, 
 		'count':{'Before':0, 'Center':0, 'After':0},
 		}
 
 	# compute height from aspect ratio of photo
 	def get_height( photo, scale ):
 		org_height = float(photo.image.height)
-		new_height = org_height * scale / ws_photo['cell']['height']
+		org_width = float(photo.image.width)
+		display_width = 1024.0
+		display_height = org_height / org_width * 1024.0
+		new_height = display_height * scale / float(ws_photo['cell']['height'])
 		return new_height 
 
+	# Juicy Image Gallery
 	for q_photorecord in qset_photorecord:
 		photo_class = q_photorecord.photo_class.name 
 		photo = q_photorecord.photo
 		#url = app_url + q_photorecord.photo.image.url
 		url = app_url + q_photorecord.photo.get_display_url()
 		img_data = create_image_data( url )  
+		next_photo_row = page['row'][photo_class] + get_height( photo, ws_photo['scale'] ) + ws_photo['gap']
+		print( "{}:next_photo_row={}".format( photo.pk, next_photo_row ) )
+		if next_photo_row > (ws_photo['page_col'] * (page['count'][photo_class]+1)):
+			page['count'][photo_class] += 1
+			print ("[next page]:{}:{}:{}".format( page['count'][photo_class], photo_class, page['row'][photo_class] ) )
+			page['row'][photo_class] = ws_photo['page_col'] * page['count'][photo_class] + \
+			                           ws_photo['row_begin']
 		cell_name = "{}{}".format( ws_photo['col'][photo_class], page['row'][photo_class] )
 		ws_writer.insert_image(cell_name, url, {
 			'image_data':img_data, 'x_scale': ws_photo['x_scale'], 'y_scale': ws_photo['y_scale']
 			} ) 
 		page['row'][photo_class] += get_height( photo, ws_photo['scale'] ) + ws_photo['gap']
-		print( '{}:{}'.format( photo_class, page['row'][photo_class] ) ) 
+		# print( '{}:{}'.format( photo_class, page['row'][photo_class] ) ) 
 
-		# Add Image
 
+	page_max = max( list( (page['count']['Before'], 
+	                      page['count']['Center'],
+						  page['count']['After'] )) )
+	
 	# insert new page header and Logo 
 	# PM
-				
+	if 'PM' in str(q_pg.record_type).upper():
+		print( "will add logo to PM page_max={}".format(page_max) )
+		img_data = create_image_data( logo_url )
+		for page in range(0,page_max+1):
+			cell_name = '{}{}'.format( ws_photo['logo']['photo'],
+			                           page * ws_photo['page_row'] + 1 )
+			print( "page:{} cell_name:{}".format( page, cell_name ) ) 
+
+			ws_writer.insert_image( cell_name, logo_url, {
+				'image_data':img_data, 'x_scale': ws_photo['logo']['x_scale'], 
+				'y_scale': ws_photo['logo']['y_scale'] } )
+			# will insert text and page num
+		
 	# insert new page header and Logo
 	# CM
+	if 'CM' in str(q_pg.record_type).upper():
+		print( "will add logo to CM page_max={}".format(page_max) )
 					
 	# save and exit
 
