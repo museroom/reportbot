@@ -914,8 +914,7 @@ def GenerateXLSX( request, photo_group_pk ):
 
 		:param ws:  Excel worksheet instance
 		:param range: An excel range to style (e.g. A1:F20)
-		:param border: An openpyxl xlsx_Border
-		:param fill: An openpyxl PatternFill or GradientFill
+		:param border: An openpyxl xlsx_Border :param fill: An openpyxl PatternFill or GradientFill
 		:param font: An openpyxl Font object
 		"""
 
@@ -1034,7 +1033,10 @@ def GenerateXLSX( request, photo_group_pk ):
 	# -=-==--=-=-=-=-=-=-=-==-=-
 	# XlsxWriter photo workbook
 	ws_writer = wb_writer.add_worksheet()
-	ws_writer.set_column( 0, 100, ws_photo['cell']['width'] )
+#	ws_writer.set_column( 0, 100, ws_photo['cell']['width'] )
+	cell_format = wb_writer.add_format({'bold':True})
+	ws_writer.set_column( 'A:Z', ws_photo['cell']['width'], cell_format )
+
 	
 	# reszie entire worksheet
 	page = {
@@ -1051,7 +1053,8 @@ def GenerateXLSX( request, photo_group_pk ):
 	for q_photorecord in qset_photorecord:
 		photo_class = q_photorecord.photo_class.name 
 		photo = q_photorecord.photo
-		url = app_url + q_photorecord.photo.image.url
+		#url = app_url + q_photorecord.photo.image.url
+		url = app_url + q_photorecord.photo.get_display_url()
 		img_data = create_image_data( url )  
 		cell_name = "{}{}".format( ws_photo['col'][photo_class], page['row'][photo_class] )
 		ws_writer.insert_image(cell_name, url, {
