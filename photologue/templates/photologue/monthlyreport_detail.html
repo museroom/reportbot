@@ -77,6 +77,7 @@
 		{%comment%}
 		<a href="{% url 'admin:photologue_photogroup_change' object.id%}">[Edit Record]</a> 
 		{%endcomment%}
+		{%if object.record_type == "CM" %}
 		<div class="row col-lg-12"><hr></div>
 		<table style="width: 89.8752%;" border="1"> 
 			<tbody> 
@@ -180,6 +181,30 @@
 				</tr> 
 			</tbody> 
 		</table>	
+		{%endif%}
+		{%if object.record_type == "PM"%}
+		<h3>PM record:</h3>
+		<div><b>Serial No: </b>{{object.serial_no}}</div>
+		<div><b>Contact Person: </b>{{object.contact_person}}</div>
+		<div><b>Contact Number: </b>{{object.contact_number}}</div>
+		<div><b>Date OF Service: </b>{{object.date_of_service|date}}</div>
+		<div><b>Place or System: </b>{{object.place_or_system}}</div>
+		<div><b>Department Item: </b>{{object.department_item}}</div>
+		<div><b>pmcheck1: </b>{{object.pmcheck1}}</div>
+		<div><b>pmcheck2: </b>{{object.pmcheck2}}</div>
+		<div><b>pmcheck3: </b>{{object.pmcheck3}}</div>
+		<div><b>pmcheck4: </b>{{object.pmcheck4}}</div>
+		<div><b>pmcheck5: </b>{{object.pmcheck5}}</div>
+		<div><b>pmcheck6: </b>{{object.pmcheck6}}</div>
+		<div><b>pmcheck7: </b>{{object.pmcheck7}}</div>
+		<div><b>pmcheck8: </b>{{object.pmcheck8}}</div>
+		<div><b>pmcheck9: </b>{{object.pmcheck9}}</div>
+		<div><b>pmcheck10: </b>{{object.pmcheck10}}</div>
+		<div><b>pmcheck11: </b>{{object.pmcheck11}}</div>
+		<div><b>pmcheck12: </b>{{object.pmcheck12}}</div>
+		<div><b>pmcheck13: </b>{{object.pmcheck13}}</div>
+		<div><b>pmcheck14: </b>{{object.pmcheck14}}</div>
+		{%endif%}
 		 <!-- footer -->
 		 <div class="row"> <hr/> </div>
 		<div class="row col-xs-12  button-wrapper" >

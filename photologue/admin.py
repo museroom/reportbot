@@ -263,10 +263,16 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	def fill_pm_serial_number(modeladmin, request, queryset):
 		print( queryset )
 		counter = 0
-		pg_month = queryset[0].date_of_service.month
-		pg_year  = queryset[0].date_of_service.year
+		pg_month_fallback = 7
+		pg_year_fallback = 2017
 		for q_pg in queryset:
 			#FIXME year bug?
+			if q_pg.date_of_service:
+				pg_month = q_pg.date_of_service.month
+				pg_year = q_pg.date_of_service.year
+			else:
+				pg_month = pg_month_fallback
+				pg_year = pg_year_fallback
 			q_pg.serial_no = u"PM-{2}{0:02d}-{1:02d}".format(
 			                     pg_month, counter, str(pg_year)[2:] )
 			q_pg.record_type = "PM"
@@ -276,9 +282,16 @@ class PhotoGroupAdmin( admin.ModelAdmin ):
 	def fill_cm_serial_number(modeladmin, request, queryset):
 		print( queryset )
 		counter = 0
-		pg_month = queryset[0].date_of_service.month
-		pg_year  = queryset[0].date_of_service.year
+		pg_month_fallback = 7
+		pg_year_fallback = 2017
 		for q_pg in queryset:
+			#FIXME year bug?
+			if q_pg.date_of_service:
+				pg_month = q_pg.date_of_service.month
+				pg_year = q_pg.date_of_service.year
+			else:
+				pg_month = pg_month_fallback
+				pg_year = pg_year_fallback
 			q_pg.serial_no = u"CM-{2}{0:02d}-{1:02d}".format(
 			                     pg_month, counter, str(pg_year)[2:] )
 			q_pg.record_type = "CM"

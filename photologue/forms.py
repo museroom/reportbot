@@ -214,7 +214,7 @@ class PhotoGroupCMForm( forms.ModelForm ):
 		model = PhotoGroup
 		fields = [
 		    'name',
-			'serial_no', 'company', 'department', 'contact_person', 'contact_number',
+			'serial_no', 'contact_person', 'contact_number',
 			'date_of_service', 'place_or_system', 'department_item', 
 			'problem_description', 'service_provided', 'parts_replaced', 'remark',
 			'conclusion', 'serviced_by', 'serviced_date', 'inspected_by',
@@ -233,7 +233,7 @@ class PhotoGroupPMForm( forms.ModelForm ):
 			'date_of_service', 'place_or_system', 'department_item', 
 			'problem_description', 'remark',
 			'serviced_by',
-			  ]
+		  ]
 	#pmcheck1 = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class':'primary','id': 'myonoffswitch'}))
 	
 

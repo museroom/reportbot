@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import warnings 
 import os 
 from itertools import chain
@@ -909,7 +910,7 @@ def GenerateXLSX( request, photo_group_pk ):
 		# XlsxWriter
 		ws_photo = {
 			'scale':0.125, 'x_scale':0.125, 'y_scale':0.125, 'gap':1, 
-			'page_row': 50, 'page_col': 50, 'cell':{'width': 2, 'height':20},
+			'page_row': 51, 'page_col': 51, 'cell':{'width': 2, 'height':20},
 			'row_begin': 5, 'col':{ 'Before': 'B', 'Center': 'D', 'After': 'F'},
 			'logo':{'height':70,'record':'C','photo':'C','x_scale':0.5,'y_scale':0.5},
 		}
@@ -917,14 +918,15 @@ def GenerateXLSX( request, photo_group_pk ):
 		# XlsxWriter
 		ws_photo = {
 			'scale':0.125, 'x_scale':0.125, 'y_scale':0.125, 'gap':1, 
-			'page_row': 50, 'page_col': 50, 'cell':{'width': 2, 'height':20},
+			'page_row': 51, 'page_col': 51, 'cell':{'width': 2, 'height':20},
 			'row_begin': 9, 'col':{ 'Before': 'B', 'Center': 'D', 'After': 'F'},
-			'logo':{'height':150,'record':'A','photo':'A','x_scale':0.1,'y_scale':0.1},
+			'logo':{'height':150,'record':'A','photo':'A','x_scale':0.5,'y_scale':0.5},
 		}
 	# command ws_photo keys and values
 	ws_photo_common = {
-			'paper':9, 'margin':{'left':0.6,'right':0.6,'top':1.9,'bottom':1.9}
-			}
+			'paper':9, 'margin':{'left':0.6,'right':0.4,'top':0.6,'bottom':0.6},
+			'xoffset':{ 'Before': 10, 'Center': 25, 'After': 30 },
+		}
 	ws_photo.update( ws_photo_common )
 
 	fn_out_path, filename = os.path.split(fn_text_out)
@@ -985,9 +987,19 @@ def GenerateXLSX( request, photo_group_pk ):
 	pattern = r'^{{(?P<name>\w+):(?P<range>\d+)}}$'
 	non_db_field = ['page_num', 'page_total']
 	rich_db_field = ['service_provided', 'parts_replaced', 'remark', 'conclusion']
-	thin_border = xlsx_Border(left=None, right=None, top=None, 
-	                          bottom=xlsx_Side(style='thin'))
+	thin_border = xlsx_Border(
+		left=xlsx_Side(style='thin'), right=xlsx_Side(style='thin'), 
+		top=xlsx_Side(style='thin'), bottom=xlsx_Side(style='thin'))
+	bottom_border = xlsx_Border(
+		left=None, right=None, 
+		top=None, bottom=xlsx_Side(style='thin'))
 
+	# if Record not complete, redirect to Edit page
+	if ( q_pg.department_item == None ):
+		redirect_url = reverse( 'photologue:photogroup-pm-edit', args=[q_pg.pk] )
+		return redirect( redirect_url )
+
+	# Fill values from database
 	for cell in ws.get_cell_collection():
 		if cell.value:
 			res = re.match( pattern, unicode(cell.value) )
@@ -1026,17 +1038,26 @@ def GenerateXLSX( request, photo_group_pk ):
 									 cell.column, cell.row,
 									 cell.offset( column=cell_offset ).column,
 									 cell.row )
-					style_range( ws, cell_range, border=thin_border )
+					style_range( ws, cell_range, border=bottom_border )
 
 	# PM template merged cell style fix for openpyxl
 	if 'PM' in str(q_pg.record_type).upper():
-		style_cells = { 
+		style_cells_bottom = { 
+			'B5:C5', 'F5:G5', 'B6:C6', 'F6:G6', 'F7:G7',
+			'F29:G29', 
+			}
+		style_cells_square = { 
 			'B9:E9', 'F9:G9',
 			'B10:E10', 'B11:E11', 'B12:E12', 'B13:E13', 'B14:E14', 'B15:E15', 'B16:E16', 'B17:E17',
-			'B18:E18', 'A19:G19', 'B20:E20', 'B21:E21', 'B22:E22', 'B23:E23' 
+			'B18:E18', 'A19:G19', 'B20:E20', 'B21:E21', 'B22:E22', 'B23:E23',
+			'F10:G10', 'F11:G11', 'F12:G12', 'F13:G13', 'F14:G14',
+			'F15:G15', 'F16:G16', 'F17:G17', 'F18:G18', 
+			'F20:G20', 'F21:G21', 'F22:G22', 'F23:G23', 
 			}
-		for style_cell in style_cells:
+		for style_cell in style_cells_square:
 			style_range( ws, style_cell, border=thin_border )
+		for style_cell in style_cells_bottom:
+			style_range( ws, style_cell, border=bottom_border )
 	               
 
 	# Insert LOGO for text report xlsx
@@ -1058,20 +1079,24 @@ def GenerateXLSX( request, photo_group_pk ):
 
 	# no center
 	if (len_before > 0) & (len_center == 0) & (len_after > 0):
+		ws_photo['scale'] = 0.22
+		ws_photo['x_scale'] = ws_photo['scale']
+		ws_photo['y_scale'] = ws_photo['scale']
+
+		ws_photo['col']['Before'] = 'A'
+		ws_photo['col']['After'] = 'F'
+		ws_photo['xoffset']['Before']  = 10
+		ws_photo['xoffset']['After']  = 10
+
+	# have left, center and right
+	if (len_before > 0) & (len_center > 0) & (len_after > 0):
 		ws_photo['scale'] = 0.18
 		ws_photo['x_scale'] = ws_photo['scale']
 		ws_photo['y_scale'] = ws_photo['scale']
 
-		ws_photo['col']['Before'] = 'B'
-		ws_photo['col']['Center'] = 'B'
-		ws_photo['col']['After'] = 'E'
-
-	# have left, center and right
-	if (len_before > 0) & (len_center > 0) & (len_after > 0):
-		photo_scale = 2.8
-		ws_photo['col']['Before'] = 'B'
+		ws_photo['col']['Before'] = 'A'
 		ws_photo['col']['Center'] = 'D'
-		ws_photo['col']['After'] = 'F'
+		ws_photo['col']['After'] = 'G'
 
 	# -=-==--=-=-=-=-=-=-=-==-=-
 	# XlsxWriter photo workbook
@@ -1119,7 +1144,8 @@ def GenerateXLSX( request, photo_group_pk ):
 			                           ws_photo['row_begin']
 		cell_name = "{}{}".format( ws_photo['col'][photo_class], page['row'][photo_class] )
 		ws_writer.insert_image(cell_name, url, {
-			'image_data':img_data, 'x_scale': ws_photo['x_scale'], 'y_scale': ws_photo['y_scale']
+			'image_data':img_data, 'x_scale': ws_photo['x_scale'], 'y_scale': ws_photo['y_scale'],
+			'x_offset': ws_photo['xoffset'][photo_class], 'y_offset': 0,
 			} ) 
 		page['row'][photo_class] += get_height( photo, ws_photo['scale'] ) + ws_photo['gap']
 		# print( '{}:{}'.format( photo_class, page['row'][photo_class] ) ) 
@@ -1131,14 +1157,37 @@ def GenerateXLSX( request, photo_group_pk ):
 	
 	# insert new page header and Logo 
 	# PM
+	if 'CM' in str(q_pg.record_type).upper():
+		print( "will add logo to CM page_max={}".format(page_max) )
+		img_data = create_image_data( logo_url )
+		headers = (
+			{ 'cell':{'left':'C', 'right':'J', 'row':2}, 'align':'center', 'text':u'美添光管冷氣FLORESCENTE E AR-CONDICIONADO' },
+			{ 'cell':{'left':'D', 'right':'H', 'row':4}, 'align':'center', 'text':u'CM REPORT' },
+			{ 'cell':{'left':'F', 'right':'H', 'row':6}, 'align':'right', 'text':u'Report Ref報告編號 : '},
+			{ 'cell':{'left':'G', 'right':'H', 'row':7}, 'align':'right', 'text':u'Date 日期 : '}, 
+			{ 'cell':{'left':'I', 'right':'J', 'row':6}, 'align':'left', 'text':str(q_pg.serial_no) },
+			{ 'cell':{'left':'I', 'right':'J', 'row':7}, 'align':'left', 'text':str(q_pg.date_of_service.date()) },
+		)
+		for page in range(0,page_max+1):
+			cell_name = '{}{}'.format( ws_photo['logo']['photo'],
+			                           page * ws_photo['page_row'] + 1 )
+			ws_writer.insert_image( cell_name, logo_url, {
+				'image_data':img_data, 'x_scale': ws_photo['logo']['x_scale'], 
+				'y_scale': ws_photo['logo']['y_scale'] } )
+			# will insert text and page num
+			for header in headers: 
+				merge_row = page * ws_photo['page_row'] + header['cell']['row']
+				merge_format = wb_writer.add_format({ 'align':header['align'] } )
+				merge_cell = "{}{}:{}{}".format( header['cell']['left'], merge_row,
+				                                 header['cell']['right'], merge_row)
+				#ws_writer.write( header['cell'], header['text'] )	
+				ws_writer.merge_range( merge_cell, header['text'], merge_format)
+
 	if 'PM' in str(q_pg.record_type).upper():
-		print( "will add logo to PM page_max={}".format(page_max) )
 		img_data = create_image_data( logo_url )
 		for page in range(0,page_max+1):
 			cell_name = '{}{}'.format( ws_photo['logo']['photo'],
 			                           page * ws_photo['page_row'] + 1 )
-			print( "page:{} cell_name:{}".format( page, cell_name ) ) 
-
 			ws_writer.insert_image( cell_name, logo_url, {
 				'image_data':img_data, 'x_scale': ws_photo['logo']['x_scale'], 
 				'y_scale': ws_photo['logo']['y_scale'] } )
@@ -1185,10 +1234,13 @@ def GenerateXLSXAll(request):
 	for q_photogroup in qset_photogroup:
 		#reverse( 'photologue:generate-xlsx', args=[ q_photogroup.pk ] )
 		response = GenerateXLSX( request, q_photogroup.pk )
-		print( 'response content = {}'.format(
-			response['Content-Disposition'] ) )
+		try:
+			print( 'response content = {}'.format(
+				response['Content-Disposition'] ) )
+		except:
+			print( 'ERROR: {}'.format( q_photogroup.pk ) )
 
-	return reverse( 'photologue:monthly-report-list' ) 
+	return redirect( reverse( 'photologue:monthly-report-list' )  )
 
 # AJAX form create views
 class PhotoGroupCMView( UpdateView ):
