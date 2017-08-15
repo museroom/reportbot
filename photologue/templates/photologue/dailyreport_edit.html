@@ -31,11 +31,11 @@
 
 {% if photo_list and daily_report_item_list %}
 <div class="row col-lg-12 nopadding">
+
+	<!-- Photo List -->
+
     <form action="{% url 'photologue:update_dailyreport' active_report %}"
           method="post"> {% csrf_token %}
-
-        <!-- Photo List -->
-
         <article>
             {% for daily_report_item in daily_report_item_list %}
             <section>
@@ -89,12 +89,13 @@
                                     <input type="checkbox" data-toggle="toggle"
                                            data-on="Clone" data-off="Clone"
                                            data-onstyle="primary" data-size="mini"
-                                           value="{{ photo.pk }}" name="report_photo">
+                                           value="{{ daily_report_item.pk }}-{{ photo.pk }}" 
+										   name="report_photo">
                                     {% else %}
                                     <input type="checkbox" data-toggle="toggle"
                                            data-on="Del" data-off="Del"
                                            data-onstyle="danger" data-size="mini"
-                                           value="{{ photo.pk }}" name="delete_photo">
+                                           value="{{photo.pk }}" name="delete_photo">
                                     {%endif%}
                                     <span class="small"><a href="#endofpage">[&#9660;]</a></span>
                                 </font>

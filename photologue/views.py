@@ -589,12 +589,14 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 	redirect_url = reverse( 'photologue:report_item_list_view' )
 	#FIXME Daily Report temp fix on the bus, but the problem is DEL and ADD not related to photo.pk
 
+	
 	if daily_report_item_pk:
 		if '2017' not in daily_report_item_pk:
 	#if not isinstance(daily_report_item_pk, basestring):
 	#if daily_report_item_pk:
 #		date_time = timezone.datetime.strptime( 
 #				"%Y-%m-%d-%H%M", daily_report_item_pk )
+			print( 'inside 2017 FIXME' );
 			q_dri = DailyReportItem.objects.get( pk = daily_report_item_pk )
 			date_time = q_dri.daily_report.report_date
 			redirect_url = reverse( 'photologue:photo-select-popup-list',
@@ -610,19 +612,37 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 				q_photo.department_item = q_dri.department_item
 				q_photo.save()
 
-	for q_photo_pk in request.POST.getlist('report_photo'):
-		print( u"updating pk:{} related daily_report_item".format(q_photo_pk) )
-		q_photo = Photo.objects.get( pk = int(q_photo_pk) )
-		q_related_daily_report_item = q_photo.get_related_daily_report_item()
-		q_photo.daily_report_item.add( q_related_daily_report_item )
-		q_photo.save()
-	for q_photo_pk in request.POST.getlist('delete_photo'):
-		print( u"removing pk:{} related daily_report_item".format(q_photo_pk) )
-		q_photo = Photo.objects.get( pk = int(q_photo_pk) )
-		q_related_daily_report_item = q_photo.get_related_daily_report_item()
-		q_photo.daily_report_item.remove(
-								q_related_daily_report_item)
-		#q_photo.save()
+		#FIXME stupid get_related_daily_report_item()
+		for q_photo_pk in request.POST.getlist('report_photo'):
+			print( u"updating pk:{} related daily_report_item".format(q_photo_pk) )
+			q_photo = Photo.objects.get( pk = int(q_photo_pk) )
+			q_related_daily_report_item = q_photo.get_related_daily_report_item()
+			q_photo.daily_report_item.add( q_related_daily_report_item )
+			q_photo.save()
+
+		for q_photo_pk in request.POST.getlist('delete_photo'):
+			print( u"removing pk:{} related daily_report_item".format(q_photo_pk) )
+			q_photo = Photo.objects.get( pk = int(q_photo_pk) )
+			q_related_daily_report_item = q_photo.get_related_daily_report_item()
+			q_photo.daily_report_item.remove(
+									q_related_daily_report_item)
+			#q_photo.save() 
+	else:
+		print( "[clone] begin" )
+		for form_pk in request.POST.getlist('report_photo'): 
+			dri_pk, photo_pk = form_pk.split(  '-' )
+			q_photo = Photo.objects.get( pk = photo_pk )
+			q_dri = DailyReportItem.objects.get( pk=dri_pk )
+			dr_active = request.user.profile.active_report
+			qc_dri = DailyReportItem.objects.filter(
+				daily_report = dr_active).get(
+				department_item = q_dri.department_item ) 
+
+			q_photo.daily_report_item.add( qc_dri )
+			q_photo.save()
+			print( "[clone] {}>{}".format( qc_dri, q_photo ) )
+			redirect_url = reverse( 'photologue:report_item_list_view' )
+		
 	return HttpResponseRedirect( redirect_url )
 
 class PhotoCatagorize(ListView):
