@@ -47,11 +47,12 @@
                         </div>
                         <div class="col-xs-10 h4 nopadding"
                              style="background-color:{{daily_report_item.department_item.report_color}}">
-                            <a class="btn btn-warning btn-xs" role="button" href="#"
+                            <a class="btn btn-warning btn-xs" role="button" href="#anchor_{{daily_report_item}}"
                                onClick='window.open( "{{ daily_report_item.get_add_photo_url }}", "newWindow" )'>
                                 +Photo </a>
 							<a class="btn btn-info btn-xs" role="button" href="{{daily_report_item.get_admin_url}}">
 								Edit </a> 
+							<a name="anchor_{{daily_report_item}}"></a>
 							{%comment%}
                             <a class="btn btn-info btn-xs" role="button" href="#"
                                onClick='window.open( "{{ daily_report_item.get_admin_url }}", "newWindow" )'>

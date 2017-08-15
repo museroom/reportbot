@@ -21,14 +21,23 @@ from utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 		Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
-		Company, PhotoGroup, Profile, PhotoGroupImageClass, PhotoGroupImage
+		Company, PhotoGroup, Profile, PhotoGroupImageClass, PhotoGroupImage, \
+		InventoryType
 from django.forms import Textarea
 from django.db import models
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
 						 
 
-
 MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
+
+# Inventory
+
+class InventoryTypeAdmin( admin.ModelAdmin ):
+	extra = 0
+	model = InventoryType
+	#inlines = [InventoryInline]
+
+admin.site.register( InventoryType, InventoryTypeAdmin )
 
 # Daily Report Admin Items
 
@@ -473,6 +482,7 @@ class PhotoAdmin(admin.ModelAdmin):
 					'department_item',	
 					'tags',
 					'date_added',
+					'date_checkout',
 					)
 	list_editable = ( 'department_item',
 							 'tags',
@@ -497,6 +507,7 @@ class PhotoAdmin(admin.ModelAdmin):
 					'fields': ('image', 'thumbnail_admin', 'title', 
 								( 'department_item','department',),
 								('date_taken', 'date_added',), 'slug',
+								('inventory_type', 'date_checkout', 'checkout'),
 								 )
 				}),
 				(	'', {

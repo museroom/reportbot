@@ -32,7 +32,15 @@
 			  <span class="icon-bar"></span>
 			  <span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="/">ReportBot</a>
+			<div>
+				<a class="navbar-brand" href="/">ReportBot
+				</a>
+				<p class="navbar-brand" align="right">
+					{% if user.is_authenticated %}
+					{{user}}
+					{% endif %}
+				</p>
+			</div>
 		  </div>
 		
 		  <!-- Collect the nav links, forms, and other content for toggling -->
@@ -92,5 +100,6 @@
 		<script src="{{ STATIC_URL }}js/jquery.js"></script>
 		<script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
 		<script src="{{ STATIC_URL }}js/project.js"></script>
+		{% block scripts %}{% endblock %}
 	</body>
 </html>

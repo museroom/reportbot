@@ -29,7 +29,8 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	MonthlyReportDetailView, SortableSubmitTest, MonthlyReportPhotoReorder, \
 	GenerateXLSX, GenerateXLSXAll, PhotoGroupPMView, PhotoGroupCMView, \
 	SetActivePhotoGroupView, AddPhotoActivePhotoGroupView, \
-	Set_dbField_PhotoGroup
+	Set_dbField_PhotoGroup, \
+	InventoryListView, InventoryCheckout, InventorySet
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -123,7 +124,7 @@ urlpatterns = [
 			month=str(dt.month),
 			day=str(dt.day) ),
 		name="report_item_list_view"),
-	url(r'^update_dailyreportitem/(?P<daily_report_item_pk>[\-\d\w|\W]+)/$',
+	url(r'^update_dailyreportitem/(?P<daily_report_item_pk>\d+)/$',
 		Update_DailyReportItem, name="update_dailyreportitem"),
 	url(r'^update_dailyreportitem/title/(?P<daily_report_pk>[\-\d\w|\W]+)/$',
 		Update_DailyReportItem, name="update_dailyreport"),
@@ -156,7 +157,17 @@ urlpatterns = [
 	url(r'^photogroup/photo/add/(?P<photo_pk>\d+)/$',
 		AddPhotoActivePhotoGroupView,
 		name = 'add-photogroup-photo' ),
-		
+
+	# Inventory
+	url(r'^inventory/$',
+		InventoryListView.as_view(),
+		name = 'inventory-list' ),
+	url(r'^inventory/checkout/$',
+		InventoryCheckout,
+		name = 'inventory-checkout' ),
+	url(r'^inventory/set/(?P<photo_pk>\d+)/$',
+		InventorySet,
+		name = 'inventory-set' ),
 
 	# Photo Selector Popup
 	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/(?P<target>[\w|\W]+)/(?P<pk>\d+)/$',
@@ -164,7 +175,7 @@ urlpatterns = [
 
     # General Message Redirect View
     url(r'^message/success/$',
-            TemplateView.as_view(template_name='photologue/message_success.html'), name='message-success' ),
+            TemplateView.as_view( template_name='photologue/message_success.html'), name='message-success' ),
 	url(r'^gotoedit/$',
 			RedirectView.as_view(
 				url=reverse_lazy('photologue:dailyreport-edit', kwargs={'year':2017,'month':8,'day':7}))),

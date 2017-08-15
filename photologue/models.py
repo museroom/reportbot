@@ -743,6 +743,10 @@ class Photo(ImageModel):
 	#								 blank=True,
 	#								 widget=TinyMCE(attrs={'cols':80, 'rows':30})
 	#								 ),
+	inventory_type = models.ForeignKey( 'InventoryType', null=True, blank=True ) 
+	checkout = models.BooleanField( default=False )
+	date_checkout = models.DateTimeField(_('date checkout'),
+									  default=now)
 	date_added = models.DateTimeField(_('date added'),
 									  default=now)
 	is_public = models.BooleanField(_('is public'),
@@ -754,6 +758,12 @@ class Photo(ImageModel):
 								   on_delete=models.SET_NULL,
 								   null=True,
 								   blank=True)
+	
+	def is_inventory(self):
+		if self.department_item == DepartmentItem.objects.get( name = "Inventory" ):
+			return True
+		else:
+			return False
 
 	def get_hotel(self):
 		return {''}
@@ -1184,6 +1194,28 @@ class DailyReport(models.Model):
 			suffix = ""
 		return date_formatted + suffix + "_report"
 
+# Inventory
+
+@python_2_unicode_compatible
+class InventoryType( models.Model ):
+	name = models.CharField(_('name'), max_length=50, unique=True )
+	descripiton = models.TextField(_('description'), blank=True )
+	date_added = models.DateTimeField(_('date added'),
+	                                  default=now,
+									  blank=True)
+
+	def get_inventory(self):
+		qset = Photo.objects.filter( inventory_type = self )
+		return qset
+	
+	def get_checkin_count(self):
+		return len(Photo.objects.filter( inventory_type = self, checkout=True ))
+
+	def get_checkout_count(self):
+		return len(Photo.objects.filter( inventory_type = self, checkout=False ))
+
+	def __str__(self):
+		return u"{}".format( self.name )
 
 # return self.title+'_report'
 

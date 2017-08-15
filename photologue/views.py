@@ -62,7 +62,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
 	Department, DailyReport, PhotoGroup, Profile, Company, \
-	PhotoGroupImage, PhotoGroupImageClass
+	PhotoGroupImage, PhotoGroupImageClass, InventoryType
 
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic.edit import CreateView
@@ -561,6 +561,7 @@ def Update_PhotoGroup( request, photo_group_pk ):
 	print( u"DEBUG: active_photogroup = {}".format( request.user.profile.active_photogroup ) )
 	q_photogroup = request.user.profile.active_photogroup
 	photogroup_image_class_center = PhotoGroupImageClass.objects.get( name = "Center" )
+	#FIXME delete not working
 	for q_photo_pk in request.POST.getlist('add_photo'):
 		print( u"adding q_photo_pk={}".format( q_photo_pk ) )
 		q_photo = Photo.objects.get( pk = q_photo_pk )
@@ -581,32 +582,33 @@ def Update_PhotoGroup( request, photo_group_pk ):
 	else:
 		return HttpResponseRedirect( reverse( 'photologue:message-success' ) )
 	
-#FIXIT
 def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=None ):
 	print( u"DEBUG: daily_report_pk = {} daily_report_item_pk = {} // request.POST= {}".format (
 			 daily_report_pk, daily_report_item_pk, request.POST.getlist('report_photo'))) 
 #			 request.POST.getlist('department_pk')))
 	redirect_url = reverse( 'photologue:report_item_list_view' )
-	#FIXME temp fix on the bus, but the problem is DEL and ADD not related to photo.pk
-	if '2017' not in daily_report_item_pk:
+	#FIXME Daily Report temp fix on the bus, but the problem is DEL and ADD not related to photo.pk
+
+	if daily_report_item_pk:
+		if '2017' not in daily_report_item_pk:
 	#if not isinstance(daily_report_item_pk, basestring):
 	#if daily_report_item_pk:
 #		date_time = timezone.datetime.strptime( 
 #				"%Y-%m-%d-%H%M", daily_report_item_pk )
-		q_dri = DailyReportItem.objects.get( pk = daily_report_item_pk )
-		date_time = q_dri.daily_report.report_date
-		redirect_url = reverse( 'photologue:photo-select-popup-list',
-				kwargs = {'year':date_time.year,
-						  'month':date_time.month,
-						  'day':date_time.day,
-						  'target':'dailyreport',
-						  'pk':q_dri.pk }
-				)
-		for q_photo_pk in request.POST.getlist('add_photo' ):
-			q_photo = Photo.objects.get( pk = int(q_photo_pk) )
-			q_photo.daily_report_item.add( q_dri )
-			q_photo.department_item = q_dri.department_item
-			q_photo.save()
+			q_dri = DailyReportItem.objects.get( pk = daily_report_item_pk )
+			date_time = q_dri.daily_report.report_date
+			redirect_url = reverse( 'photologue:photo-select-popup-list',
+					kwargs = {'year':date_time.year,
+							  'month':date_time.month,
+							  'day':date_time.day,
+							  'target':'dailyreport',
+							  'pk':q_dri.pk }
+					)
+			for q_photo_pk in request.POST.getlist('add_photo' ):
+				q_photo = Photo.objects.get( pk = int(q_photo_pk) )
+				q_photo.daily_report_item.add( q_dri )
+				q_photo.department_item = q_dri.department_item
+				q_photo.save()
 
 	for q_photo_pk in request.POST.getlist('report_photo'):
 		print( u"updating pk:{} related daily_report_item".format(q_photo_pk) )
@@ -1242,6 +1244,30 @@ def GenerateXLSXAll(request):
 
 	return redirect( reverse( 'photologue:monthly-report-list' )  )
 
+class InventoryListView( ListView ):
+	template_name = 'photologue/inventory-list.html'
+	model = InventoryType 
+
+def InventoryCheckout( request ):
+	qset = request.POST.getlist('delete_photo')
+	print( "inventory checkout {}".format( qset ))
+	for q_pk in qset:
+		q_photo = Photo.objects.get( pk=q_pk )
+		q_photo.checkout = True
+		q_photo.date_checkout = timezone.localtime()
+		q_photo.save()
+	return redirect( reverse( 'photologue:inventory-list' ) )
+
+def InventorySet( request, photo_pk ):
+	q_photo = Photo.objects.get( pk = photo_pk )
+	print( u"{}/{}".format( request.POST, photo_pk  ) )
+	inventory_pk = request.POST['inventory']
+	q_photo.department_item = DepartmentItem.objects.get( name = "Inventory" )
+	q_photo.inventory_type = InventoryType.objects.get( pk=inventory_pk )
+	q_photo.checkout = False
+	q_photo.save()
+	return redirect( reverse( 'photologue:inventory-list') )
+
 # AJAX form create views
 class PhotoGroupCMView( UpdateView ):
 	template_name = 'photologue/photogroup-pm-edit.html'
@@ -1317,6 +1343,13 @@ class PhotoListView(ListView):
 
 class PhotoDetailView(DetailView):
 	queryset = Photo.objects.on_site().is_public()
+
+	def get_context_data( self, **kwargs):
+		context = super( PhotoDetailView, self).get_context_data(**kwargs)
+		profile = self.request.user.profile
+		context['inventory_type_list'] = InventoryType.objects.all()
+
+		return context
 
 
 class PhotoDateView(object):

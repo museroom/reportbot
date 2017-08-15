@@ -14,22 +14,48 @@
 		</div>
 		<div class="col-md-4"> 
 		    <div class="row col-lg-12 sidepadding">
+				{% if object.is_inventory %}
+				<div>
+					<h1> [{{object.inventory_type}}] </h1>
+					<p>{{object.title}}</p>
+					<p>{{object.caption}}</p>
+					<p>Checkin Date:{{object.date_added}}</p>
+					{% if object.checkout %}
+					<p>Checkout Date:{{object.date_checkout}}</p>
+					{% endif %}
+				</div>
+				{% else %}
 		        <h1 class="page-header h4">{{ object.title }}</h1>
+				{% endif %}
 				<a href="{% url 'admin:photologue_photo_change' object.pk %}" 
-				   class="btn btn-warning" role="button"> 
+				   class="btn btn-warning" role="button">
 				    Admin Photo </a>
+
 				<a href="{% url 'photologue:create-photogroup' object.pk%}"
 				    class="btn btn-primary" role="button">
 					Open New Case</a>
+
+				<form method="POST" action="{% url 'photologue:inventory-set' object.pk %}"> {% csrf_token %}
+					<select name="inventory">
+					{% for inventory_type in inventory_type_list %}
+						<option value="{{inventory_type.pk}}">
+							{{inventory_type.name}}
+						</option>
+					{% endfor %}
+					<input type="submit" class="btn btn-primary" value="Submit Changes">
+					</select>
+				</form>
+
 				<a href="{% url 'photologue:add-photogroup-photo' object.pk%}"
 				    class="btn btn-success" role="button">
 					Add to Active Case</a>
-				<p class="muted"><small>
+
 				<p class="muted"><small>
 					{{object.date_added}} //
 					{{object.image.size}}bytes //
 					{{object.image.width}}x{{object.image.height}}
 				</small></p>
+
 			</div>
 			{%comment%}
         	<p class="muted"><small>{% trans "Published" %} {{ object.date_added }}</small></p>

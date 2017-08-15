@@ -13,10 +13,12 @@
 		<p>To apply for an account, please contact Ken Fung <a href="mailto:mr.forgot@gmail.com">mr.forgot@gmail.com</a>. Or contact +853-6612-1024 during normal office hour.
 		<div class="row button-wrapper" >
 			<div class="col-xs-12">
-			<a class="btn btn-warning" role="button" href= {% url "admin:login" %}> 
-				Admin </a>
+			{% if not user.is_authenticated %}
 			<a class="btn btn-info" role="button" href="/login"> 
 				User Login </a>
+			{% else %}
+			<a class="btn btn-warning" role="button" href= {% url "admin:login" %}> 
+				Admin </a>
 			<a class="btn btn-success" role="button" href="{% url 'photologue:report_item_list_view'%}">
 				Daily Report</a>
 			<a class="btn btn-success" role="button" href="{% url 'photologue:monthly-report-list'%}">
@@ -27,6 +29,7 @@
 				Photo Catagorize </a>
 			<a class="btn btn-primary" role="button" href="{% url 'photologue:pl-photo-archive-year' 2017 %}">
 				Photo List </a>
+			{% endif %}
 			</div>
 		</div>
 		<div  class="row col-xs-12">
