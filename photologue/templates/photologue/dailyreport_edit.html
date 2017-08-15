@@ -93,9 +93,10 @@
 										   name="report_photo">
                                     {% else %}
                                     <input type="checkbox" data-toggle="toggle"
-                                           data-on="Del" data-off="Del"
-                                           data-onstyle="danger" data-size="mini"
-                                           value="{{photo.pk }}" name="delete_photo">
+										data-on="Del" data-off="Del"
+										data-onstyle="danger" data-size="mini"
+										value="{{ daily_report_item.pk}}-{{photo.pk}}" 
+										name="delete_photo">
                                     {%endif%}
                                     <span class="small"><a href="#endofpage">[&#9660;]</a></span>
                                 </font>

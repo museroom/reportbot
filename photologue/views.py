@@ -583,15 +583,21 @@ def Update_PhotoGroup( request, photo_group_pk ):
 		return HttpResponseRedirect( reverse( 'photologue:message-success' ) )
 	
 def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=None ):
+	def is_number( s ):
+		try:
+			float( s )
+			return true
+		except ValueError:
+			return false
+
 	print( u"DEBUG: daily_report_pk = {} daily_report_item_pk = {} // request.POST= {}".format (
 			 daily_report_pk, daily_report_item_pk, request.POST.getlist('report_photo'))) 
 #			 request.POST.getlist('department_pk')))
 	redirect_url = reverse( 'photologue:report_item_list_view' )
 	#FIXME Daily Report temp fix on the bus, but the problem is DEL and ADD not related to photo.pk
-
-	
 	if daily_report_item_pk:
 		if '2017' not in daily_report_item_pk:
+		#if is_number( daily_report_item_pk ):
 	#if not isinstance(daily_report_item_pk, basestring):
 	#if daily_report_item_pk:
 #		date_time = timezone.datetime.strptime( 
@@ -620,15 +626,7 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 			q_photo.daily_report_item.add( q_related_daily_report_item )
 			q_photo.save()
 
-		for q_photo_pk in request.POST.getlist('delete_photo'):
-			print( u"removing pk:{} related daily_report_item".format(q_photo_pk) )
-			q_photo = Photo.objects.get( pk = int(q_photo_pk) )
-			q_related_daily_report_item = q_photo.get_related_daily_report_item()
-			q_photo.daily_report_item.remove(
-									q_related_daily_report_item)
-			#q_photo.save() 
 	else:
-		print( "[clone] begin" )
 		for form_pk in request.POST.getlist('report_photo'): 
 			dri_pk, photo_pk = form_pk.split(  '-' )
 			q_photo = Photo.objects.get( pk = photo_pk )
@@ -637,11 +635,16 @@ def Update_DailyReportItem( request, daily_report_pk=None, daily_report_item_pk=
 			qc_dri = DailyReportItem.objects.filter(
 				daily_report = dr_active).get(
 				department_item = q_dri.department_item ) 
-
 			q_photo.daily_report_item.add( qc_dri )
-			q_photo.save()
 			print( "[clone] {}>{}".format( qc_dri, q_photo ) )
 			redirect_url = reverse( 'photologue:report_item_list_view' )
+		for form_pk in request.POST.getlist('delete_photo'):
+			dri_pk, photo_pk = form_pk.split( '-' ) 
+			q_dri = DailyReportItem.objects.get( pk=dri_pk)
+			q_photo = Photo.objects.get( pk=photo_pk )
+			q_photo.daily_report_item.remove( q_dri )
+			print( '[remove] {}:{}'.format(
+				q_dri, q_photo ) ) 
 		
 	return HttpResponseRedirect( redirect_url )
 

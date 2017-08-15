@@ -159,7 +159,7 @@ size_method_map = {}
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
 	company = models.ForeignKey('Company')
-	active_report = models.ForeignKey('DailyReport', blank=True)
+	active_report = models.ForeignKey('DailyReport', on_delete=models.SET_NULL, blank=True, null=True)
 	active_photogroup = models.ForeignKey('PhotoGroup', blank=True, on_delete=models.SET_NULL, null=True)
 
 	def __str__(self):
