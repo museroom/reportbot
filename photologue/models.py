@@ -689,8 +689,7 @@ class PhotoGroup(models.Model):
 	pmcheck11 = models.CharField(_("Ther controller don't have any visible damage to affect the safety"),max_length=10,default="")
 	pmcheck12 = models.CharField(_("The controller protection"),max_length=10,default="")
 	pmcheck13 = models.CharField(_("The controller testing (signal output signage)"),max_length=10,default="")
-	pmcheck14 = models.CharField(default="",max_length=10)
-	pmcheck15 = models.CharField(default="",max_length=10) 
+	pmcheck14 = models.CharField(_("hidden"),max_length=10,default="")
 
 	sites = models.ManyToManyField(Site, verbose_name=_(u'sites'),
 								   blank=True)
@@ -1195,6 +1194,16 @@ class DailyReport(models.Model):
 		return date_formatted + suffix + "_report"
 
 # Inventory
+
+@python_2_unicode_compatible
+class InventoryItem( models.Model ):
+	name = models.CharField(_('name'), max_length=50, unique=True )
+	description = models.TextField(_('description'), blank=True )
+	photo =  models.ForeignKey( Photo, on_delete=models.SET_DEFAULT,default=4159)
+	inventory_type = models.ForeignKey( 'InventoryType', null=True, blank=True )
+
+	def __str__(self):
+		return u"{}".format( self.name )
 
 @python_2_unicode_compatible
 class InventoryType( models.Model ):

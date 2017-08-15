@@ -22,7 +22,7 @@ from utils.logger import logger
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 		Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
 		Company, PhotoGroup, Profile, PhotoGroupImageClass, PhotoGroupImage, \
-		InventoryType
+		InventoryType, InventoryItem
 from django.forms import Textarea
 from django.db import models
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
@@ -32,10 +32,15 @@ MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
 
 # Inventory
 
+class InventoryInline( admin.StackedInline ):
+	model = InventoryItem
+	extra = 0
+	fields = ['name']
+	
 class InventoryTypeAdmin( admin.ModelAdmin ):
 	extra = 0
 	model = InventoryType
-	#inlines = [InventoryInline]
+	inlines = [InventoryInline]
 
 admin.site.register( InventoryType, InventoryTypeAdmin )
 

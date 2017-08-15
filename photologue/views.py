@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import warnings 
 import os 
 from itertools import chain
 from django.db.models import Q
+import json
 
 #FIXME still need tempfile,zipfile,smart_str?
 import tempfile, zipfile
@@ -792,9 +792,9 @@ def PhotoUploadView( request ):
 			contentfile = ContentFile(photo_data)
 			print( "photo photo image save" )
 			ph.image.save(titlefilename, contentfile)
-			print( "photo  save" )
+			print( "photo save" )
 			ph.save()
-			print( "photo  site" )
+			print( "photo site" )
 			ph.sites.add(Site.objects.get(id=settings.SITE_ID))
 			
 			print( "photo finish" )
@@ -907,6 +907,7 @@ def GenerateXLSX( request, photo_group_pk ):
 	else: # FIXME assume CM 
 		logo_url = app_url + "/media/photologue/photos/image1.png"
 		filename_in = 'cm-template.xlsx'
+	filename_config = 'sc-config.json'
 	pg_serial = PhotoGroup.objects.get( pk=photo_group_pk ).serial_no 
 	if pg_serial != "":
 		filename_serial = PhotoGroup.objects.get( pk=photo_group_pk ).serial_no
@@ -921,6 +922,7 @@ def GenerateXLSX( request, photo_group_pk ):
 	fn_text_out = os.path.join(tmp_root,xlsx_root,filename_text_out)
 	fn_photo_out = os.path.join(tmp_root,xlsx_root,filename_photo_out)
 	fn_writer_out = os.path.join(tmp_root,xlsx_root,filename_writer_out)
+	fn_config = os.path.join(static_root,xlsx_root,filename_config)
 	
 	print( 'url_in='+url_in)
 	xlsx_data = BytesIO(urlopen(url_in).read())
@@ -1175,7 +1177,6 @@ def GenerateXLSX( request, photo_group_pk ):
 		page['row'][photo_class] += get_height( photo, ws_photo['scale'] ) + ws_photo['gap']
 		# print( '{}:{}'.format( photo_class, page['row'][photo_class] ) ) 
 
-
 	page_max = max( list( (page['count']['Before'], 
 	                      page['count']['Center'],
 						  page['count']['After'] )) )
@@ -1185,14 +1186,14 @@ def GenerateXLSX( request, photo_group_pk ):
 	if 'CM' in str(q_pg.record_type).upper():
 		print( "will add logo to CM page_max={}".format(page_max) )
 		img_data = create_image_data( logo_url )
-		headers = (
-			{ 'cell':{'left':'C', 'right':'J', 'row':2}, 'align':'center', 'text':u'美添光管冷氣FLORESCENTE E AR-CONDICIONADO' },
-			{ 'cell':{'left':'D', 'right':'H', 'row':4}, 'align':'center', 'text':u'CM REPORT' },
-			{ 'cell':{'left':'F', 'right':'H', 'row':6}, 'align':'right', 'text':u'Report Ref報告編號 : '},
-			{ 'cell':{'left':'G', 'right':'H', 'row':7}, 'align':'right', 'text':u'Date 日期 : '}, 
-			{ 'cell':{'left':'I', 'right':'J', 'row':6}, 'align':'left', 'text':str(q_pg.serial_no) },
-			{ 'cell':{'left':'I', 'right':'J', 'row':7}, 'align':'left', 'text':str(q_pg.date_of_service.date()) },
-		)
+
+		# json load from cm-config.json
+		json_config = json.loads( unicode( open( fn_config, 'r').read(), 'utf8' ))
+		headers = json_config['cm_headers']
+		print( 'headers={}'.format(headers) )
+		headers[4]['text'] = str(q_pg.serial_no)
+		headers[5]['text'] = str(q_pg.date_of_service.date())
+
 		for page in range(0,page_max+1):
 			cell_name = '{}{}'.format( ws_photo['logo']['photo'],
 			                           page * ws_photo['page_row'] + 1 )
