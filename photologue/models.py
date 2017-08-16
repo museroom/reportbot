@@ -742,7 +742,7 @@ class Photo(ImageModel):
 	#								 blank=True,
 	#								 widget=TinyMCE(attrs={'cols':80, 'rows':30})
 	#								 ),
-	inventory_type = models.ForeignKey( 'InventoryType', null=True, blank=True ) 
+	inventory_type = models.ForeignKey( 'InventoryType', on_delete=models.SET_NULL, null=True, blank=True ) 
 	checkout = models.BooleanField( default=False )
 	date_checkout = models.DateTimeField(_('date checkout'),
 									  default=now)

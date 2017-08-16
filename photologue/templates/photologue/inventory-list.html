@@ -36,10 +36,10 @@
 					</a>
 					<small>
 					{% if inventory.checkout %}
-					checkout at:
-					{{inventory.date_checkout}}
+					checkout at:<br>
+					{{inventory.date_checkout.date}}
 					{% else %}
-					{{inventory.date_added}}
+					{{inventory.date_added.date}}
 					<div class="checkbox">
 					<input  type="checkbox" data-toggle="toggle"
 						data-on="Checkout" data-off="Checkout"
