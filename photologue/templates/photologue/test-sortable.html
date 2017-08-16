@@ -94,8 +94,11 @@
 </div>
 {%endcomment%}
 
-<script src="{{ STATIC_URL }}js/Sortable.js"></script>
+{% endblock %}
 
+{% block scripts %}
+
+<script src="{{ STATIC_URL }}js/Sortable.js"></script>
 <script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js" media="screen"></script>
 
 <script>

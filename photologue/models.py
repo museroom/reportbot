@@ -665,6 +665,7 @@ class PhotoGroup(models.Model):
 	contact_person = models.CharField(_('contact person'), max_length=50, unique=False, blank=True)
 	contact_number = models.CharField(_('contact number'), max_length=50, unique=False, blank=True)
 	date_of_service = models.DateTimeField(_('Date/Time of Service Provided'), default=now)
+	report_date = models.DateField(_('Date of Service Provided'), default=now) 
 	place_or_system = models.CharField(_('place/system'), max_length=250, unique=False, blank=True)
 	department_item = models.ForeignKey(DepartmentItem, on_delete=models.SET_NULL, null=True)
 	problem_description = models.CharField(_('problem description'), max_length=250, unique=False, blank=True)

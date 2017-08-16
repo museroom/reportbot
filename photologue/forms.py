@@ -181,9 +181,9 @@ class UploadZipForm(forms.Form):
 
 		if request:
 			messages.success(request,
-							 _('The photos have been added to gallery "{0}".').format(
-								 gallery.title),
-							 fail_silently=True)
+				 _('The photos have been added to gallery "{0}".').format(
+					 gallery.title),
+				 fail_silently=True)
 
 class DepartmentItemForm(ModelForm):
 	class Meta:
@@ -206,8 +206,10 @@ class PhotoUploadForm(forms.Form):
 	date = forms.CharField(max_length=50)
 	time = forms.CharField(max_length=50)
 	from_name = forms.CharField(max_length=50)
-
 	my_file = forms.FileField()
+	
+	def save(self, request=None): 
+		print( u"PhotoUploadForm.save() request={}".format(request) ) 
 
 class PhotoGroupCMForm( forms.ModelForm ):
 	class Meta:
@@ -215,11 +217,16 @@ class PhotoGroupCMForm( forms.ModelForm ):
 		fields = [
 		    'name',
 			'serial_no', 'contact_person', 'contact_number',
-			'date_of_service', 'place_or_system', 'department_item', 
+			'date_of_service', 'report_date',
+			'place_or_system', 'department_item', 
 			'problem_description', 'service_provided', 'parts_replaced', 'remark',
 			'conclusion', 'serviced_by', 'serviced_date', 'inspected_by',
 			'inspection_date',
 		]
+		widgets = {
+			'name': forms.TextInput(attrs={'class':'code'}),
+			'report_date': forms.DateInput(attrs={'class': 'datepicker'})
+			}
 
 class PhotoGroupPMForm( forms.ModelForm ):
 	class Meta:
@@ -228,13 +235,16 @@ class PhotoGroupPMForm( forms.ModelForm ):
 			'name',
 			'pmcheck1', 'pmcheck2', 'pmcheck3', 'pmcheck4', 'pmcheck5',
 			'pmcheck6', 'pmcheck7', 'pmcheck8', 'pmcheck9', 'pmcheck10',
-			'pmcheck11', 'pmcheck12', 'pmcheck13', 'pmcheck14',  
+			'pmcheck11', 'pmcheck12', 'pmcheck13',  
+			'report_date',
 			'serial_no', 
 			'date_of_service', 'place_or_system', 'department_item', 
 			'problem_description', 'remark',
 			'serviced_by',
 		  ]
+		widgets = {
+			'report_date': forms.DateInput(attrs={'class': 'datepicker'})
+			}
 	#pmcheck1 = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class':'primary','id': 'myonoffswitch'}))
 	
-
 	

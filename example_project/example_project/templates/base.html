@@ -16,7 +16,7 @@
 		<style>
 		</style> 
 		<script src="http://code.jquery.com/jquery-1.9.1.js" media="screen"></script>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" media="screen"></script> 
+		<!--script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" media="screen"></script--> 
 		<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" media="screen"></script>
 		<link href="{{ STATIC_URL }}css/bootstrap-toggle.min.css" rel="stylesheet" media="screen">
 		{% fontawesome_stylesheet %}
@@ -98,9 +98,12 @@
 		<div class="container-fluid nopadding">
 			{% block content %}{% endblock %}
 		</div>
+		{%comment%}
 		<script src="{{ STATIC_URL }}js/jquery.js"></script>
+		{%endcomment%}
 		<script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
 		<script src="{{ STATIC_URL }}js/project.js"></script>
+		{% block footer %}{% endblock %}
 		{% block scripts %}{% endblock %}
 	</body>
 </html>

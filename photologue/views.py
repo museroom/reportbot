@@ -764,6 +764,7 @@ def PhotoUploadView( request ):
 	if request.method == 'POST':
 		form = PhotoUploadForm(request.POST, request.FILES)
 		if form.is_valid():
+			form.save(request=request.POST)
 			print( "photouploadview: form.is_valid() true" )
 			handle_photo_upload( request.FILES['my_file'] ) 
 			filepath = os.path.join('/tmp',request.FILES['my_file'].name)
