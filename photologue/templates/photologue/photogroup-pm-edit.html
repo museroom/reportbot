@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load photologue_tags %}
 {% load fontawesome %}
+{% load static %}
 
 {% block title %}{% trans "Photos in Daily Report" %}{% endblock %}
 
@@ -34,11 +35,13 @@
 {% endblock %}
 
 {% block scripts %}
-
+<script src="{{STATIC_URL}}js/bootstrap-datepicker.min.js"></script>
 <script>
 $( document ).ready( function() {
 	console.log( 'ready' );
-	$( ".datepicker" ).datepicker();
+	$( ".datepicker" ).datepicker({
+		format: 'dd/mm/yyyy' 
+	});
 });
 
 </script>

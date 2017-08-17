@@ -229,6 +229,7 @@ class PhotoGroupCMForm( forms.ModelForm ):
 			}
 
 class PhotoGroupPMForm( forms.ModelForm ):
+	auto_id = True
 	class Meta:
 		model = PhotoGroup
 		fields = [
@@ -243,7 +244,8 @@ class PhotoGroupPMForm( forms.ModelForm ):
 			'serviced_by',
 		  ]
 		widgets = {
-			'report_date': forms.DateInput(attrs={'class': 'datepicker'})
+			'report_date': forms.DateInput(attrs={'class': 'datepicker'}),
+			'date_of_service': forms.DateInput(attrs={'class': 'datepicker'})
 			}
 	#pmcheck1 = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class':'primary','id': 'myonoffswitch'}))
 	
