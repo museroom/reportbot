@@ -1,5 +1,10 @@
-<code>success</code>
-<script>
-	window.opener.location.reload();
-	window.close();
-</script>
+{% extends "photologue/root.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<div>
+	message: {{ message }}
+</div>
+
+{% endblock %}

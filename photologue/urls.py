@@ -30,7 +30,8 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GenerateXLSX, GenerateXLSXAll, PhotoGroupPMView, PhotoGroupCMView, \
 	SetActivePhotoGroupView, AddPhotoActivePhotoGroupView, \
 	Set_dbField_PhotoGroup, \
-	InventoryListView, InventoryCheckout, InventorySet
+	InventoryListView, InventoryCheckout, InventorySet, \
+	InstanceMessageCreate
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
 prefix on all urls, and instead rely on an application namespace 'photologue'.
@@ -132,8 +133,6 @@ urlpatterns = [
 	    Create_PhotoGroup, name='create-photogroup'),
 	url(r'^photogroup/set/(?P<record_type>\w+)/(?P<photogroup_id>\d+)',
 		Set_dbField_PhotoGroup, name='set-photogroup-record-type'),
-	url(r'^testform/$',
-		PhotoUploadView, name="upload_photo"),
 #	url(r'^catagorize/(?P<date_and_time>[\-\d\w|\W]+)/$',
 	url(r'^catagorize/(?P<year>\d+)/(?P<month>\d+)/(?P<day>\d+)/$',
 		PhotoCatagorize.as_view(), name="photo_catagorize_date"),
@@ -141,7 +140,12 @@ urlpatterns = [
 		PhotoCatagorize.as_view(), name="photo_catagorize"),
 	url(r'^set_dailyreportitem/$',
 		SetPhotoDepartmentItem, name="set_dailyreportitem"),
-	
+	# IM / forum
+	url(r'^testform/$',
+		PhotoUploadView, name="upload_photo"),
+	url(r'^im/create/$',
+		InstanceMessageCreate, name="im_create"), 
+
 	# AJAX form create views
 	url(r'^photogroup/pm/edit/(?P<pk>\d+)/$', 
 		PhotoGroupPMView.as_view(),

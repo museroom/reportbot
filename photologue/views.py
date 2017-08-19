@@ -1,5 +1,5 @@
 import warnings 
-import os 
+import os
 from itertools import chain
 from django.db.models import Q
 import json
@@ -43,6 +43,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.dates import ArchiveIndexView, DateDetailView,  \
 	DayArchiveView, MonthArchiveView, \
 	YearArchiveView
+from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.base import RedirectView
@@ -62,13 +63,16 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Photo, Gallery, DailyReportItem, DepartmentItem, \
 	Department, DailyReport, PhotoGroup, Profile, Company, \
-	PhotoGroupImage, PhotoGroupImageClass, InventoryType
+	PhotoGroupImage, PhotoGroupImageClass, InventoryType, InventoryItem, \
+	InstanceMessage
 
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic.edit import CreateView
 from django.views.generic.edit import UpdateView
 
-from .forms import PhotoUploadForm, PhotoGroupPMForm, PhotoGroupCMForm
+from .forms import PhotoUploadForm, PhotoGroupPMForm, PhotoGroupCMForm, \
+	InstanceMessageForm
+
 import time, datetime
 from HTMLParser import HTMLParser
 
@@ -279,6 +283,7 @@ def Set_dbField_PhotoGroup( request, record_type, photogroup_id, **kwargs ):
 	return redirect( reverse( 'photologue:monthly-report-detail', kwargs={'pk':photogroup_id} ) )
 
 # Photo Select Pop Views
+
 class PhotoSelectListView(ListView): 
 	model = Photo,
 	template_name = "photologue/photoselect_list.html"
@@ -366,6 +371,7 @@ class PhotoSelectListView(ListView):
 
 		return qset
 
+# CM / PM monthly report
 
 class MonthlyReportListView( LoginRequiredMixin, ListView ):
 	login_url = '/login'
@@ -442,6 +448,8 @@ class MonthlyReportDetailView(LoginRequiredMixin, DetailView ):
 		context['select_department'] = Department.objects.all()
 		context['target_photo_group'] = self
 		return context
+
+# Daily Report 
 
 class DailyReportListView(DailyReportDateView, ArchiveIndexView ):
 	#date_and_time = timezone.localtime().strftime("%y%m%d-%H%M")
@@ -742,61 +750,52 @@ def SetPhotoDepartmentItem( request ):
 ##	paginate_by = 20
 #	context = {'qset_report_item': queryset}
 #	return render( request, 'photologue/reportitem_list.html',context )
-def handle_photo_upload(f):
-	filepath = os.path.join('/tmp/',f.name )
-	with open( filepath, 'wb+' ) as destination:
-		for chunk in f.chunks():
-			destination.write(chunk)
-		destination.close()
-
 def photosave( filename, content ):
 	print("photosave: photo begin")
 	p = Photo( title=filename, 
 				slug=slugify(filename) )
 	print("photosave: photo image save")
 
+# Instance Message (IM) / Forum / media files
+
+#FIXME use class instead of def
+@csrf_exempt
+def InstanceMessageCreate( request ):
+	msg = u"InstanceMessageCreate: request.POST=[{}]".format( 
+		request.POST )
+	msg_content = u""
+	try:
+		msg_content = unicode( request.POST['content'] )
+	except:
+		print( "[error] msg_content" )
+
+	print( u"{}\ncontent:{}".format(msg, msg_content  ) )
+	
+	#FIXME validate the form
+
+	# store to database
+	post = request.POST
+	try:
+		im = InstanceMessage( msg_id = post['msg_id'],
+							  content = post['content'],
+							  sender = post['sender'],
+							  receiver = post['receiver'],
+							  room = post['room'],
+							  media = post['media'], )
+		im.save() 
+	except:
+		print( "[error] im db create" )
+
+	return HttpResponse( 'success {}'.format( response ) )
+
 @csrf_exempt
 def PhotoUploadView( request ):
 
-	logger( "TestFormView request={}".format( request.POST ) ) 
-	logger( "TestFormView request={}".format( request.FILES ) ) 
 	#return HttpResponseRedirect( reverse( 'admin:login' ))
 	if request.method == 'POST':
 		form = PhotoUploadForm(request.POST, request.FILES)
 		if form.is_valid():
-			form.save(request=request.POST)
-			print( "photouploadview: form.is_valid() true" )
-			handle_photo_upload( request.FILES['my_file'] ) 
-			filepath = os.path.join('/tmp',request.FILES['my_file'].name)
-			try:
-				photo_file_handle = open( filepath, "rb" )
-				photo_data = photo_file_handle.read() 
-				photo_file_handle.close()
-			except:
-				print( "handle_photo_upload Exception {}".format( filepath ) )
-			print( "photo_data len({})".format( len(photo_data) ) ) 
-
-			try:
-				file = BytesIO(photo_data)
-				opened = Image.open(file)
-				opened.verify()
-			except Exception:
-				print( "photo uplaod {} is not valid".format(filepath) )
-
-			titlefilename = request.FILES['my_file'].name
-			print( "photo begin {}".format(titlefilename) )
-			try:
-				ph = Photo( title=titlefilename, slug=slugify(titlefilename) )
-			except:
-				print( 'photo begin error' )
-			print( "photo contentfile" )
-			contentfile = ContentFile(photo_data)
-			print( "photo photo image save" )
-			ph.image.save(titlefilename, contentfile)
-			print( "photo save" )
-			ph.save()
-			print( "photo site" )
-			ph.sites.add(Site.objects.get(id=settings.SITE_ID))
+			form.save(request=request)
 			
 			print( "photo finish" )
 		else:

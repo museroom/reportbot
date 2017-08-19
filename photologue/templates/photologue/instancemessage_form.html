@@ -1,0 +1,12 @@
+{% extends "photologue/root.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<form> {% csrf_token %}
+	<table class="table table-striped">
+	{{ form }}
+	</table>
+</form>
+
+{% endblock %}

@@ -10,26 +10,17 @@
 
 <form method="post">
 {% csrf_token %}
-	<table>
-	<ul>
-	{{ form.as_table }}
-	</ul>
+	<table class="table table-striped">
+	{{ form.as_p }}
 	</table>
-	<hr>
-	<div class="submit-row">
-	{%comment%}
-	<a class="btn btn-warning" role="button" 
-		href="{% url 'admin:photologue_photogroup_change' object.pk%}">
-		Admin Case</a>
-	{%endcomment%}
-	<input type="submit" class="btn btn-danger" value="Submit Changes">
+	<div class="panel panel-default">
+		<div class="panel-body"></div> 
+		<div class="panel-footer" align="right">
+			<input type="submit" class="btn btn-danger" value="Submit Changes">
+		</div>
 	</div>
-	<hr>
-	{%comment%}
-	<a class="btn btn-info btn-xs" role="button" href="#"
-	  onClick='window.open( "{{ daily_report_item.get_admin_url }}", "newWindow" )'>
-	   Edit </a>
-	{%endcomment%}
+	</footer>
+
 </form>
 
 {% endblock %}

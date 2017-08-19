@@ -22,7 +22,9 @@ from utils.logger import logger
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 		Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
 		Company, PhotoGroup, Profile, PhotoGroupImageClass, PhotoGroupImage, \
-		InventoryType, InventoryItem
+		InventoryType, InventoryItem, \
+		InstanceMessage
+
 from django.forms import Textarea
 from django.db import models
 from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
@@ -43,6 +45,18 @@ class InventoryTypeAdmin( admin.ModelAdmin ):
 	inlines = [InventoryInline]
 
 admin.site.register( InventoryType, InventoryTypeAdmin )
+
+# Forum / IM models
+
+class InstanceMessageAdmin( admin.ModelAdmin ):
+	model = InstanceMessage
+	list_display = ( "__str__", "date_added" )
+	search_fields = ["content", "sender",]
+	date_hierarchy = "date_added"
+	list_filter = ['date_added', 'sender']
+
+
+admin.site.register(InstanceMessage, InstanceMessageAdmin )
 
 # Daily Report Admin Items
 

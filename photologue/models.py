@@ -1148,8 +1148,43 @@ class PhotoSizeCache(object):
 		size_method_map = {}
 		self.sizes = {}
 
-	# Daily Report Models
+# Forum / IM models
 
+@python_2_unicode_compatible
+class InstanceMessage( models.Model ):
+	msg_id = models.CharField(
+		_('message id'), max_length=64, blank=True )
+	date_added = models.DateTimeField(
+		_('message datetime'), default=now, blank=True)
+	content = models.TextField(
+		_('message content'), blank=True, null=True)
+	sender = models.CharField(
+		_('message sender'), blank=True, null=True, max_length=50 )
+	receiver = models.CharField(
+		_('message receiver'), blank=True, null=True, max_length=50 )
+	room = models.CharField(
+		_('chat room'), blank=True, null=True, max_length=250 )
+	#FIXME simple filename for now, Django file field should be used
+	media = models.CharField(
+		_('media filename'), blank=True, null=True, max_length=250 )
+
+
+	class Meta:
+		get_latest_by = 'date_added'
+	
+	def __str__(self):
+		content = ""
+		if 'cdnthumbaeskey' in self.content:
+			base, content = os.path.split(self.media)
+			#q_photo = Photo.objects.get( image__icontains = content )
+			#content = q_photo.slug
+		else:
+			content = self.content[:25]
+		dt = self.date_added.astimezone( timezone.get_default_timezone() )
+		return u"[{}]{}".format(
+				self.sender, content)
+
+# Daily Report Models
 
 @python_2_unicode_compatible
 class DailyReport(models.Model):

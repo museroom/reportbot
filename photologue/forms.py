@@ -7,7 +7,7 @@ except ImportError:
 
 from django.forms import ModelForm
 from django.forms.widgets import TextInput
-from .models import DepartmentItem, PhotoGroup
+from .models import DepartmentItem, PhotoGroup, InstanceMessage
 
 import logging
 import os
@@ -209,7 +209,53 @@ class PhotoUploadForm(forms.Form):
 	my_file = forms.FileField()
 	
 	def save(self, request=None): 
-		print( u"PhotoUploadForm.save() request={}".format(request) ) 
+		def handle_photo_upload(f):
+			filepath = os.path.join('/tmp/',f.name )
+			with open( filepath, 'wb+' ) as destination:
+				for chunk in f.chunks():
+					destination.write(chunk)
+				destination.close()
+
+		if request:
+			print( u"PhotoUploadForm.save() request={}".format(request) ) 
+			print( u"PhotoUploadForm.save() request={}".format(request) ) 
+			try:
+				handle_photo_upload( request.FILES['my_file'] ) 
+			except:
+				print( "handle_photo_upload fail" )
+			try:
+				filepath = os.path.join('/tmp',request.FILES['my_file'].name)
+			except:
+				print( "os.path.join fail" )
+			try:
+				photo_file_handle = open( filepath, "rb" )
+				photo_data = photo_file_handle.read() 
+				photo_file_handle.close()
+			except:
+				print( "handle_photo_upload Exception {}".format( filepath ) )
+			print( "photo_data len({})".format( len(photo_data) ) ) 
+
+			try:
+				file = BytesIO(photo_data)
+				opened = Image.open(file)
+				opened.verify()
+			except Exception:
+				print( "photo uplaod {} is not valid".format(filepath) )
+
+			titlefilename = request.FILES['my_file'].name
+			print( "photo begin {}".format(titlefilename) )
+			try:
+				ph = Photo( title=titlefilename, slug=slugify(titlefilename) )
+			except:
+				print( 'photo begin error' )
+			print( "photo contentfile" )
+			contentfile = ContentFile(photo_data)
+			print( "photo photo image save" )
+			ph.image.save(titlefilename, contentfile)
+			print( "photo save" )
+			ph.save()
+			print( "photo site" )
+			ph.sites.add(Site.objects.get(id=settings.SITE_ID))
 
 class PhotoGroupCMForm( forms.ModelForm ):
 	class Meta:
@@ -225,7 +271,9 @@ class PhotoGroupCMForm( forms.ModelForm ):
 		]
 		widgets = {
 			'name': forms.TextInput(attrs={'class':'code'}),
-			'report_date': forms.DateInput(attrs={'class': 'datepicker'})
+			'report_date': forms.DateInput(attrs={'class': 'datepicker'}),
+			'name': forms.TextInput(attrs={'size': '90%'}),
+			'service_provided': forms.Textarea(attrs={'cols':'90%', 'rows':40}),
 			}
 
 class PhotoGroupPMForm( forms.ModelForm ):
@@ -245,8 +293,14 @@ class PhotoGroupPMForm( forms.ModelForm ):
 		  ]
 		widgets = {
 			'report_date': forms.DateInput(attrs={'class': 'datepicker'}),
-			'date_of_service': forms.DateInput(attrs={'class': 'datepicker'})
+			'date_of_service': forms.DateInput(attrs={'class': 'datepicker'}),
 			}
 	#pmcheck1 = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class':'primary','id': 'myonoffswitch'}))
 	
-	
+# Instance Message (IM) / Forum
+
+class InstanceMessageForm( forms.ModelForm ):
+	class Meta:
+		model = InstanceMessage
+		exclude = [ 'media' ]
+		
