@@ -1259,6 +1259,9 @@ class InventoryType( models.Model ):
 	                                  default=now,
 									  blank=True)
 
+	def get_absolute_url(self):
+		return reverse( 'photologue:inventory-list' )
+		
 	def get_inventory(self):
 		# old view for demo to SC Philip
 		#qset = Photo.objects.filter( inventory_type = self )

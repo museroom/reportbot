@@ -35,12 +35,12 @@
 			</button>
 			<div>
 				<a class="navbar-brand" href="/">ReportBot
-				</a>
-				<p class="navbar-brand" align="right">
+					</a>
+				<div class="navbar-brand" style="float:right;font-size:14px" >
 					{% if user.is_authenticated %}
-					{{user}}
+					[{{user}}] 
 					{% endif %}
-				</p>
+				</div>
 			</div>
 		  </div>
 		

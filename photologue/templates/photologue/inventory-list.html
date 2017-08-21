@@ -30,7 +30,7 @@
 			<div class="row col-lg-12">
 			{% for inventory in object.get_inventory %}
 				<div class="col-xs-3 nopadding">
-					<small>{{ inventory.serial_no }}</small>
+					<small>#{{ inventory.serial_no|slice:":12" }}</small>
 					<a href="{{inventory.get_front_photo.get_absolute_url}}">
 					<img class="thumbnail img-responsive" 
 						 src="{{inventory.get_front_photo.get_thumbnail_url}}">

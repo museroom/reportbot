@@ -1282,13 +1282,19 @@ class InventoryListView( ListView ):
 	model = InventoryType 
 
 def InventoryCheckout( request ):
-	qset = request.POST.getlist('delete_photo')
+	qset = request.POST.getlist('delete_photo') 
 	print( "inventory checkout {}".format( qset ))
+
 	for q_pk in qset:
-		q_photo = Photo.objects.get( pk=q_pk )
-		q_photo.checkout = True
-		q_photo.date_checkout = timezone.localtime()
-		q_photo.save()
+		#q_photo = Photo.objects.get( pk=q_pk )
+		#q_photo.checkout = True
+		#q_photo.date_checkout = timezone.localtime()
+		#q_photo.save()
+		q_item = InventoryItem.objects.get( pk = q_pk )
+		q_item.checked_out = True
+		q_item.checkout_datetime = timezone.localtime()
+		q_item.save() 
+
 	return redirect( reverse( 'photologue:inventory-list' ) )
 
 def InventorySet( request, photo_pk ):
