@@ -1,0 +1,33 @@
+{% extends 'photologue/root.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Inventory" %}{% endblock %}
+
+{% block content %}
+
+{% if object %}
+
+	<h4> [{{ object }}] </h4>
+	<p> photos: </p>
+	<div class="row col-lg-12">
+	{% for photo in object.photos.all %}
+		<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" 
+			 align="center" >
+			<img src="{{ photo.get_thumbnail_url }}">
+		</div>
+	{% endfor %}
+	</div>
+	<hr>
+	<div class="rol col-lg-12">
+		<a href="{% url 'photologue:inventory-list' %}" type="button" class="btn btn-primary">
+		Back </a>
+		<a href="{% url 'photologue:inventoryitem-update' object.pk %}" 
+			type="button" class="btn btn-warning">
+			Edit Record</a>
+		<a href="" type="button" class="btn btn-primary">
+		+Add Photo </a>
+	</div>
+
+{% endif %}
+
+{% endblock %}

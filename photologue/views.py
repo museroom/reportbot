@@ -71,7 +71,7 @@ from django.views.generic.edit import CreateView
 from django.views.generic.edit import UpdateView
 
 from .forms import PhotoUploadForm, PhotoGroupPMForm, PhotoGroupCMForm, \
-	InstanceMessageForm
+	InstanceMessageForm, InventoryTypeForm, InventoryItemForm
 
 import time, datetime
 from HTMLParser import HTMLParser
@@ -1280,6 +1280,22 @@ def GenerateXLSXAll(request):
 class InventoryListView( ListView ):
 	template_name = 'photologue/inventory-list.html'
 	model = InventoryType 
+
+class InventoryTypeDetail( DetailView ):
+	model = InventoryType
+	form_class = InventoryTypeForm
+
+class InventoryTypeUpdate( UpdateView ):
+	model = InventoryType
+	form_class = InventoryTypeForm
+
+class InventoryItemDetail( DetailView ):
+	model = InventoryItem
+	form_class = InventoryItemForm
+
+class InventoryItemUpdate( UpdateView ):
+	model = InventoryItem
+	form_class = InventoryItemForm
 
 def InventoryCheckout( request ):
 	qset = request.POST.getlist('delete_photo') 

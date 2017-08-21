@@ -1,0 +1,14 @@
+{% extends "photologue/root.html" %}
+{% load bootstrap %}
+{% load i18n %}
+{% block content %}
+
+<div class="row col-lg-12 sidepadding">
+	<form action="" method="post"> {% csrf_token %} 
+		{{ form|bootstrap }} 
+		<input type="submit" value="Save" /> 
+	</form>
+</div>
+
+{% endblock %}
+

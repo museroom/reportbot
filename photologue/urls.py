@@ -30,7 +30,8 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GenerateXLSX, GenerateXLSXAll, PhotoGroupPMView, PhotoGroupCMView, \
 	SetActivePhotoGroupView, AddPhotoActivePhotoGroupView, \
 	Set_dbField_PhotoGroup, \
-	InventoryListView, InventoryTypeCreate, InventoryCheckout, InventorySet, \
+	InventoryListView, InventoryTypeDetail, InventoryTypeCreate, InventoryCheckout, \
+	InventorySet, InventoryItemDetail, InventoryTypeUpdate, InventoryItemUpdate, \
 	InstanceMessageCreate
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
@@ -164,6 +165,9 @@ urlpatterns = [
 	url(r'^inventory/$',
 		InventoryListView.as_view(),
 		name = 'inventory-list' ),
+	url(r'^inventory/(?P<pk>\d+)/$',
+		InventoryTypeDetail.as_view(),
+		name = 'inventorytype-detail' ),
 	url(r'^inventory/create/$',
 		InventoryTypeCreate.as_view(),
 		name = 'inventory-create' ),
@@ -173,6 +177,15 @@ urlpatterns = [
 	url(r'^inventory/set/(?P<photo_pk>\d+)/$',
 		InventorySet,
 		name = 'inventory-set' ),
+	url(r'^inventory/item/(?P<pk>\d+)/$',
+		InventoryItemDetail.as_view(),
+		name = 'inventoryitem-detail' ),
+	url(r'^inventory/update/(?P<pk>\d+)/$',
+		InventoryTypeUpdate.as_view(),
+		name = 'inventorytype-update' ),
+	url(r'^inventory/item/update/(?P<pk>\d+)/$',
+		InventoryItemUpdate.as_view(),
+		name = 'inventoryitem-update' ),
 
 	# Photo Selector Popup
 	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/(?P<target>[\w|\W]+)/(?P<pk>\d+)/$',

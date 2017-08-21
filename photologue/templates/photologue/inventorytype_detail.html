@@ -1,0 +1,48 @@
+{% extends 'photologue/root.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Inventory" %}{% endblock %}
+
+{% block content %}
+
+{% if object %}
+
+	<h1> {{ object }} </h1>
+	<div class="row col-lg-12">
+	{% for inventory in object.get_inventory %}
+		<div class="col-xs-3 nopadding">
+			<small>#{{ inventory.serial_no|slice:":12" }}</small>
+			<a href="{% url 'photologue:inventoryitem-detail' inventory.pk %}">
+			<img class="thumbnail img-responsive" 
+				 src="{{inventory.get_front_photo.get_thumbnail_url}}">
+			</a>
+			<small>
+			{% if inventory.checked_out %}
+			checked out at:<br>
+			{{inventory.checkout_datetime.date}}
+			{% else %}
+			{{inventory.checkin_datetime.date}}
+			<div class="checkbox">
+			<input  type="checkbox" data-toggle="toggle"
+				data-on="Checkout" data-off="Checkout"
+				data-onstyle="danger" data-size="mini"
+				value="{{ inventory.pk }}" name="delete_photo" >
+			</div>
+			{% endif %}
+			</small>
+		</div>
+	{% endfor %}
+	</div>
+	<hr>
+	<div class="row col-lg-12">
+		<a href="{% url 'photologue:inventory-list' %}"
+			type="button" class="btn btn-primary">
+			Back</a>
+		<a href="{% url 'photologue:inventorytype-update' object.pk %}" 
+			type="button" class="btn btn-warning">
+			Edit Record</a>
+	</div>
+
+{% endif %}
+
+{% endblock %}

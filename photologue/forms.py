@@ -7,7 +7,8 @@ except ImportError:
 
 from django.forms import ModelForm
 from django.forms.widgets import TextInput
-from .models import DepartmentItem, PhotoGroup, InstanceMessage
+from .models import DepartmentItem, PhotoGroup, InstanceMessage, \
+				    InventoryType, InventoryItem
 
 import logging
 import os
@@ -299,6 +300,21 @@ class PhotoGroupPMForm( forms.ModelForm ):
 			}
 	#pmcheck1 = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class':'primary','id': 'myonoffswitch'}))
 	
+# Inventory
+
+
+class InventoryTypeForm( forms.ModelForm):
+	class Meta:
+		model = InventoryType
+		fields = ['name', 'description', 'date_added']
+
+class InventoryItemForm( forms.ModelForm ):
+	class Meta:
+		model = InventoryItem
+		fields = ['name', 'serial_no', 'description',
+			      'inventory_type', 'checkin_datetime',
+				  'checkout_datetime', 'checked_out']
+
 # Instance Message (IM) / Forum
 
 class InstanceMessageForm( forms.ModelForm ):

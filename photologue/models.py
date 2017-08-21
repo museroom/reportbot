@@ -1245,6 +1245,9 @@ class InventoryItem( models.Model ):
 	checkout_datetime = models.DateTimeField( null=True, blank=True )
 	checked_out = models.BooleanField( default=False )
 
+	def get_absolute_url(self):
+		return reverse( 'photologue:inventoryitem-detail', args=[self.pk] )
+
 	def get_front_photo(self):
 		return self.photos.all()[0]
 
@@ -1260,7 +1263,8 @@ class InventoryType( models.Model ):
 									  blank=True)
 
 	def get_absolute_url(self):
-		return reverse( 'photologue:inventory-list' )
+		return reverse( 'photologue:inventorytype-detail', 
+						args=[self.pk])
 		
 	def get_inventory(self):
 		# old view for demo to SC Philip
