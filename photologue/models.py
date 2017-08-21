@@ -1243,6 +1243,10 @@ class InventoryItem( models.Model ):
 	inventory_type = models.ForeignKey( 'InventoryType', null=True, blank=True )
 	checkin_datetime = models.DateTimeField( default=now, blank=False )
 	checkout_datetime = models.DateTimeField( null=True, blank=True )
+	checked_out = models.BooleanField( default=False )
+
+	def get_front_photo(self):
+		return self.photos.all()[0]
 
 	def __str__(self):
 		return u"{}".format( self.name )
@@ -1250,20 +1254,27 @@ class InventoryItem( models.Model ):
 @python_2_unicode_compatible
 class InventoryType( models.Model ):
 	name = models.CharField(_('name'), max_length=50, unique=True )
-	descripiton = models.TextField(_('description'), blank=True )
+	description = models.TextField(_('description'), blank=True )
 	date_added = models.DateTimeField(_('date added'),
 	                                  default=now,
 									  blank=True)
 
 	def get_inventory(self):
-		qset = Photo.objects.filter( inventory_type = self )
+		# old view for demo to SC Philip
+		#qset = Photo.objects.filter( inventory_type = self )
+		qset = InventoryItem.objects.filter( inventory_type = self )
 		return qset
 	
 	def get_checkin_count(self):
-		return len(Photo.objects.filter( inventory_type = self, checkout=True ))
+		return len(InventoryItem.objects.filter( 
+			inventory_type = self, checked_out = False ))
+		     
+		#return len(Photo.objects.filter( inventory_type = self, checkout=True ))
 
 	def get_checkout_count(self):
-		return len(Photo.objects.filter( inventory_type = self, checkout=False ))
+		return len(InventoryItem.objects.filter(
+			inventory_type = self, checked_out = True ))
+		#return len(Photo.objects.filter( inventory_type = self, checkout=False ))
 
 	def __str__(self):
 		return u"{}".format( self.name )

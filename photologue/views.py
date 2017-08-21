@@ -1295,11 +1295,35 @@ def InventorySet( request, photo_pk ):
 	q_photo = Photo.objects.get( pk = photo_pk )
 	print( u"{}/{}".format( request.POST, photo_pk  ) )
 	inventory_pk = request.POST['inventory']
-	q_photo.department_item = DepartmentItem.objects.get( name = "Inventory" )
-	q_photo.inventory_type = InventoryType.objects.get( pk=inventory_pk )
-	q_photo.checkout = False
-	q_photo.save()
+	#q_photo.department_item = DepartmentItem.objects.get( name = "Inventory" )
+	#q_photo.inventory_type = InventoryType.objects.get( pk=inventory_pk )
+	#q_photo.checkout = False
+	inventory_type = InventoryType.objects.get( pk = inventory_pk )
+	dt_added = timezone.localtime()
+	path, filename = os.path.split(q_photo.image.path)
+	dt, ext = os.path.splitext( filename )
+	#FIXME use regexp instead of split
+	serial_no = dt.split('-')[6] 
+	item_name = u"{}_{}".format( 
+			inventory_type.name.replace(" ","_"),
+			dt_added.strftime("%y%m%d_%H%M%S") )
+
+	print( u"serial:{} name:{} type:{}".format(
+		serial_no, item_name, inventory_type.name ) )
+
+	q_inventoryitem = InventoryItem( 
+		name = item_name, serial_no = serial_no,
+		)
+	q_inventoryitem.inventory_type = inventory_type
+	q_inventoryitem.save()
+	q_inventoryitem.photos.add( q_photo ) 
+
 	return redirect( reverse( 'photologue:inventory-list') )
+
+class InventoryTypeCreate( CreateView ):
+	model = InventoryType
+	fields = ['name', 'description']
+
 
 # AJAX form create views
 class PhotoGroupCMView( UpdateView ):

@@ -1,0 +1,32 @@
+{% extends "photologue/root.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Inventory" %}{% endblock %}
+
+{% block content %}
+
+    <div class="row col-lg-12 sidepadding">
+        <h1 class="page-header">{% trans "Inventory" %}</h1>
+    </div>
+
+	<form action=""
+	      method="post"> {% csrf_token %}
+	<div class="row col-lg-12">
+	{% for photo in object.photos %} 
+		<div class="col-xs-3 col-sm-2 col-md-2 col-lg-1 nopadding" >
+			<a href="{{photo.get_absolute_url}}">
+			<img class="thumbnail img-responsive" 
+				 src="{{photo.get_thumbnail_url}}"/> </a>
+		   <div class="checkbox">
+		   <input  type="checkbox" data-toggle="toggle"
+				data-on="Remove" data-off="Remove"
+				data-onstyle="danger" data-size="mini"
+				value="{{ photo.pk }}" name="delete_photo" >
+		   </div>
+		</div>
+	{% endfor %}
+	</div>
+	</form>
+	<script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js" media="screen"></script>
+
+{% endblock %}

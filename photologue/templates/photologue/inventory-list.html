@@ -21,7 +21,7 @@
 			</div>
 			<div class="col-xs-6" align="right">
 			<h4>in:{{object.get_checkin_count}}
-			/out:{{object.get_checkin_count}}
+			/out:{{object.get_checkout_count}}
 			/total:{{object.get_inventory|length}}</h4>
 			</div>
 
@@ -30,16 +30,17 @@
 			<div class="row col-lg-12">
 			{% for inventory in object.get_inventory %}
 				<div class="col-xs-3 nopadding">
-					{{ inventory.name }}
-					<a href="{{inventory.get_absolute_url}}">
-					<img class="thumbnail img-responsive" src="{{inventory.get_thumbnail_url}}">
+					<small>{{ inventory.serial_no }}</small>
+					<a href="{{inventory.get_front_photo.get_absolute_url}}">
+					<img class="thumbnail img-responsive" 
+						 src="{{inventory.get_front_photo.get_thumbnail_url}}">
 					</a>
 					<small>
-					{% if inventory.checkout %}
-					checkout at:<br>
-					{{inventory.date_checkout.date}}
+					{% if inventory.checked_out %}
+					checked out at:<br>
+					{{inventory.checkout_datetime.date}}
 					{% else %}
-					{{inventory.date_added.date}}
+					{{inventory.checkin_datetime.date}}
 					<div class="checkbox">
 					<input  type="checkbox" data-toggle="toggle"
 						data-on="Checkout" data-off="Checkout"
@@ -47,7 +48,7 @@
 						value="{{ inventory.pk }}" name="delete_photo" >
 					</div>
 					{% endif %}
-					</small>#
+					</small>
 				</div>
 			{% endfor %}
 			</div>
@@ -55,6 +56,8 @@
 		{% endfor %}
 	</article>
 	<div class="row col-lg-12 sidepadding">
+		<a href="{% url 'photologue:inventory-create' %}" 
+		   class='btn btn-primary'>+Add Inventory</a>
 		<button class="btn btn-danger" type="submit">
 			Checkout Selected Photo(s)
 		</button>

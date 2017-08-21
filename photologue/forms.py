@@ -263,17 +263,18 @@ class PhotoGroupCMForm( forms.ModelForm ):
 		fields = [
 		    'name',
 			'serial_no', 'contact_person', 'contact_number',
-			'date_of_service', 'report_date',
+			'date_of_service', 
 			'place_or_system', 'department_item', 
 			'problem_description', 'service_provided', 'parts_replaced', 'remark',
 			'conclusion', 'serviced_by', 'serviced_date', 'inspected_by',
 			'inspection_date',
 		]
 		widgets = {
-			'name': forms.TextInput(attrs={'class':'code'}),
-			'report_date': forms.DateInput(attrs={'class': 'datepicker'}),
-			'name': forms.TextInput(attrs={'size': '90%'}),
-			'service_provided': forms.Textarea(attrs={'cols':'90%', 'rows':40}),
+			'date_of_service': forms.DateInput(attrs={'class': 'datepicker'}),
+			'serviced_date': forms.DateInput(attrs={'class': 'datepicker'}),
+			'inspection_date': forms.DateInput(attrs={'class': 'datepicker'}),
+			#'name': forms.TextInput(attrs={'size': '90%'}),
+		#	'service_provided': forms.Textarea(attrs={'cols':'90%', 'rows':40}),
 			}
 
 class PhotoGroupPMForm( forms.ModelForm ):
@@ -293,7 +294,8 @@ class PhotoGroupPMForm( forms.ModelForm ):
 		  ]
 		widgets = {
 			'report_date': forms.DateInput(attrs={'class': 'datepicker'}),
-			'date_of_service': forms.DateInput(attrs={'class': 'datepicker'}),
+			'serviced_date': forms.DateInput(attrs={'class': 'datepicker'}),
+			'inspection_date': forms.DateInput(attrs={'class': 'datepicker'}),
 			}
 	#pmcheck1 = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class':'primary','id': 'myonoffswitch'}))
 	

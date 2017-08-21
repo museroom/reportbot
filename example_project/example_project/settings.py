@@ -22,6 +22,7 @@ LOGOUT_REDIRECT_URL = '/'
 
 INSTALLED_APPS = (
     'flat_responsive',
+	'bootstrapform',
     # 'flat',
     'django.contrib.admin',
     'django.contrib.auth',

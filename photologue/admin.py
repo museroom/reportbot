@@ -37,8 +37,8 @@ MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
 class InventoryInline( admin.StackedInline ):
 	model = InventoryItem
 	fields = ['name', 'serial_no',
-	          'description', 'checkin_datetime',
-			  'checkout_datetime' ]
+	          'description', 'checked_out', 
+			  'checkin_datetime', 'checkout_datetime' ]
 	extra = 0
 
 class InventoryItemAdmin( admin.ModelAdmin ):

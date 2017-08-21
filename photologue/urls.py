@@ -30,7 +30,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	GenerateXLSX, GenerateXLSXAll, PhotoGroupPMView, PhotoGroupCMView, \
 	SetActivePhotoGroupView, AddPhotoActivePhotoGroupView, \
 	Set_dbField_PhotoGroup, \
-	InventoryListView, InventoryCheckout, InventorySet, \
+	InventoryListView, InventoryTypeCreate, InventoryCheckout, InventorySet, \
 	InstanceMessageCreate
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
@@ -164,6 +164,9 @@ urlpatterns = [
 	url(r'^inventory/$',
 		InventoryListView.as_view(),
 		name = 'inventory-list' ),
+	url(r'^inventory/create/$',
+		InventoryTypeCreate.as_view(),
+		name = 'inventory-create' ),
 	url(r'^inventory/checkout/$',
 		InventoryCheckout,
 		name = 'inventory-checkout' ),
