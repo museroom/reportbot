@@ -251,28 +251,37 @@ def Create_PhotoGroup( request, photo_pk ):
 	       request, photo_pk ) )
 	q_photo = Photo.objects.get( pk = photo_pk )
 	photo_date_time = q_photo.date_added.astimezone( timezone.get_default_timezone()) 
-	if q_photo.department_item:
-		q_department_item = q_photo.department_item
-	else:
-		q_department_item = get_department_item_failover() 
-	print( "q_department_item:{}".format( q_department_item))
-	groupname = u"{2}_{0}_{1}_auto".format(photo_date_time.strftime( "%y%m%d-%H%M%S" ),
-										q_department_item.name,
-										q_department_item.department.company.name )
-	new_photo_group = PhotoGroup( name=groupname, date_added=photo_date_time )
-	new_photo_group.department_item = q_photo.department_item
-	new_photo_group.date_of_service = photo_date_time
-	new_photo_group.serviced_date = photo_date_time
-	new_photo_group.inspection_date = photo_date_time
-	new_photo_group.save()
-	photogroup_image_class_center = PhotoGroupImageClass.objects.get( name="Center" )
-	photogroup_image = PhotoGroupImage(  
-						   photo = q_photo,
-						   photo_class = photogroup_image_class_center )
-	photogroup_image.save() 
-	new_photo_group.photo_records.add( photogroup_image )
+	# look for duplicated photogroup before create new case
+	qset_pg = PhotoGroup.objects.filter( photo_records__photo = q_photo )
+	if qset_pg:
+		print( "duplicated PhotoGroup, return exisiting instead" )
+		pg_pk = qset_pg[0].pk 
+		pg_url = reverse( "photologue:monthly-report-detail", kwargs={'pk':pg_pk} )
+		return redirect( pg_url )
+	else: 
+		# create new case (photogroup)
+		if q_photo.department_item:
+			q_department_item = q_photo.department_item
+		else:
+			q_department_item = get_department_item_failover() 
+		print( "q_department_item:{}".format( q_department_item))
+		groupname = u"{2}_{0}_{1}_auto".format(photo_date_time.strftime( "%y%m%d-%H%M%S" ),
+											q_department_item.name,
+											q_department_item.department.company.name )
+		new_photo_group = PhotoGroup( name=groupname, date_added=photo_date_time )
+		new_photo_group.department_item = q_photo.department_item
+		new_photo_group.date_of_service = photo_date_time
+		new_photo_group.serviced_date = photo_date_time
+		new_photo_group.inspection_date = photo_date_time
+		new_photo_group.save()
+		photogroup_image_class_center = PhotoGroupImageClass.objects.get( name="Center" )
+		photogroup_image = PhotoGroupImage(  
+							   photo = q_photo,
+							   photo_class = photogroup_image_class_center )
+		photogroup_image.save() 
+		new_photo_group.photo_records.add( photogroup_image )
 
-	return redirect( reverse('photologue:monthly-report-detail', args=[new_photo_group.pk] ))
+		return redirect( reverse('photologue:monthly-report-detail', args=[new_photo_group.pk] ))
 
 def Set_dbField_PhotoGroup( request, record_type, photogroup_id, **kwargs ):
 	print( "record_type={} photogroup_id={}".format( record_type, photogroup_id ) )
@@ -1312,6 +1321,7 @@ def SetActivePhotoGroupView( request, pk ):
 
 def AddPhotoActivePhotoGroupView( request, photo_pk ):
 	print("add photo to active photo group" ) 
+
 	profile = request.user.profile
 	active_photogroup = profile.active_photogroup
 	pg_image_class = PhotoGroupImageClass.objects.get( name = "Center" )

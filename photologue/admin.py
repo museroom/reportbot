@@ -36,14 +36,21 @@ MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
 
 class InventoryInline( admin.StackedInline ):
 	model = InventoryItem
+	fields = ['name', 'serial_no',
+	          'description', 'checkin_datetime',
+			  'checkout_datetime' ]
 	extra = 0
-	fields = ['name']
+
+class InventoryItemAdmin( admin.ModelAdmin ):
+	model = InventoryItem
+	extra = 0
 	
 class InventoryTypeAdmin( admin.ModelAdmin ):
 	extra = 0
 	model = InventoryType
 	inlines = [InventoryInline]
 
+admin.site.register( InventoryItem, InventoryItemAdmin )
 admin.site.register( InventoryType, InventoryTypeAdmin )
 
 # Forum / IM models

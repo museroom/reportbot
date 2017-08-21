@@ -155,8 +155,9 @@ size_method_map = {}
 
 # report pre class
 
+
 @python_2_unicode_compatible
-class Profile(models.Model):
+class Profile(models.Model): 
 	user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
 	company = models.ForeignKey('Company')
 	active_report = models.ForeignKey('DailyReport', on_delete=models.SET_NULL, blank=True, null=True)
@@ -704,7 +705,7 @@ class PhotoGroup(models.Model):
 		return qset
 
 	def __str__(self):
-		return self.name.replace("_", " ")
+		return self.name.replace("_", " ") 
 
 
 @python_2_unicode_compatible
@@ -1234,9 +1235,14 @@ class DailyReport(models.Model):
 @python_2_unicode_compatible
 class InventoryItem( models.Model ):
 	name = models.CharField(_('name'), max_length=50, unique=True )
+	serial_no = models.CharField(_('serial number'), max_length=256, 
+	                             unique=True, blank=True )
 	description = models.TextField(_('description'), blank=True )
-	photo =  models.ForeignKey( Photo, on_delete=models.SET_DEFAULT,default=4159)
+	#photo =  models.ForeignKey( Photo, on_delete=models.SET_DEFAULT,default=4159)
+	photos = models.ManyToManyField( Photo ) 
 	inventory_type = models.ForeignKey( 'InventoryType', null=True, blank=True )
+	checkin_datetime = models.DateTimeField( default=now, blank=False )
+	checkout_datetime = models.DateTimeField( null=True, blank=True )
 
 	def __str__(self):
 		return u"{}".format( self.name )
