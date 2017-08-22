@@ -32,6 +32,7 @@ from .views import PhotoListView, PhotoDetailView, GalleryListView, \
 	Set_dbField_PhotoGroup, \
 	InventoryListView, InventoryTypeDetail, InventoryTypeCreate, InventoryCheckout, \
 	InventorySet, InventoryItemDetail, InventoryTypeUpdate, InventoryItemUpdate, \
+	InventoryItemAddPhoto, InventoryItemRemovePhoto, \
 	InstanceMessageCreate
 
 """NOTE: the url names are changing. In the long term, I want to remove the 'pl-'
@@ -186,6 +187,13 @@ urlpatterns = [
 	url(r'^inventory/item/update/(?P<pk>\d+)/$',
 		InventoryItemUpdate.as_view(),
 		name = 'inventoryitem-update' ),
+	url(r'^inventory/item/photo/update/(?P<pk>\d+)/$',
+		InventoryItemAddPhoto,
+		name = 'inventoryitem-photo-update' ),
+	url(r'^inventory/item/photo/remove/(?P<pk>\d+)/$',
+		InventoryItemRemovePhoto,
+		name = 'inventoryitem-photo-remove' ),
+	
 
 	# Photo Selector Popup
 	url(r'^photoselect/(?P<year>\d{4})/(?P<month>\w{1,2})/(?P<day>\w{1,2})/(?P<target>[\w|\W]+)/(?P<pk>\d+)/$',

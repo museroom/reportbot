@@ -336,6 +336,8 @@ class PhotoSelectListView(ListView):
 			context['target_photo_group'] = target
 		elif target == 'dailyreport':
 			context['target_daily_report'] = target
+		elif target == 'inventoryitem':
+			context['target_inventory_item'] = target
 		context['pk'] = pk
 		user_profile = self.request.user.profile
 		context['department_item_list'] = DepartmentItem.objects.filter(
@@ -1277,25 +1279,63 @@ def GenerateXLSXAll(request):
 
 	return redirect( reverse( 'photologue:monthly-report-list' )  )
 
+# Inventory
+
+
 class InventoryListView( ListView ):
 	template_name = 'photologue/inventory-list.html'
 	model = InventoryType 
+
 
 class InventoryTypeDetail( DetailView ):
 	model = InventoryType
 	form_class = InventoryTypeForm
 
+
 class InventoryTypeUpdate( UpdateView ):
 	model = InventoryType
 	form_class = InventoryTypeForm
+
 
 class InventoryItemDetail( DetailView ):
 	model = InventoryItem
 	form_class = InventoryItemForm
 
+	def get_context_data( self, **kwargs ):
+		context = super(InventoryItemDetail,self).get_context_data(**kwargs)
+		print( "[get_context_data]InventoryItemDetail content:{} self.request.POST:{} kwargs:{}".format( 
+			context, self.request.POST, kwargs ) )
+		return context
+	
+	def dispatch( self, request, *args, **kwargs ):
+		return super(InventoryItemDetail, self).dispatch(request, *args, **kwargs)
+
+
 class InventoryItemUpdate( UpdateView ):
 	model = InventoryItem
 	form_class = InventoryItemForm
+
+def InventoryItemAddPhoto( request, pk ):
+	qset_pk = request.POST.getlist('add_photo')
+	print( "[update] inventory item:{}[{}]".format( pk, qset_pk ) )
+	q_item = InventoryItem.objects.get( pk = pk )
+	for q_pk in qset_pk:
+		q_item.photos.add( Photo.objects.get( pk = q_pk ) )
+		
+	redirect_url = reverse( 'photologue:inventoryitem-detail', args=[pk] )
+	return redirect( redirect_url )
+
+def InventoryItemRemovePhoto( request, pk ):
+	qset_pk = request.POST.getlist('delete_photo')
+	print(u"[InventoryItemRemovePhoto] qset_pk = {}".format( 
+		qset_pk ))
+	q_item = InventoryItem.objects.get( pk = pk )
+	for q_pk in qset_pk:
+		item_pk, photo_pk = q_pk.split('-')
+		q_photo = Photo.objects.get( pk = photo_pk )
+		q_item.photos.remove( q_photo )
+	redirect_url = reverse( 'photologue:inventoryitem-detail', args=[pk] )
+	return redirect( redirect_url )
 
 def InventoryCheckout( request ):
 	qset = request.POST.getlist('delete_photo') 

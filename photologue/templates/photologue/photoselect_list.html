@@ -33,6 +33,10 @@
 		<form action="{% url 'photologue:update_dailyreportitem' pk %}"
 			method="post" id="frm1"
 			> {% csrf_token %}
+		{% elif target_inventory_item %}
+		<form action="{% url 'photologue:inventoryitem-photo-update' pk %}"
+			method="post" id="frm1"
+			> {% csrf_token %}
 		{% endif %}
 			<div class="row col-lg-12">
 			{% for photo in object_list %}
@@ -67,15 +71,15 @@
 				<button class="btn btn-danger"  
 						id="submit1">
 					{%if target_photo_group%}
-					add to active photo group
+					Add to Active Photo Group
 					{%elif target_daily_report %}
-					add to active daily report item
+					Add to Active Daily Report Item
+					{%elif target_inventory_item %}
+					Add to Active Inventory Item
 					{%endif%} 
 				</button>
 				<div>
-				<code>debug:[{{pk}}]{{target_daily_report}}/{{target_photo_group}}
-				</code>
-				<code>{%if pk == '2169' %}ok{%endif%}</code>
+				{%comment%}
 					<select>
 						{% for daily_report_item in daily_report_item_list %}
 						<option value = "{{daily_report_item}}" name="select_dri"
@@ -87,6 +91,7 @@
 						</option>
 						{%endfor%}
 					</select>
+				{%endcomment%}
 				</div>
 			 <p><hr></p>
 		 </div>

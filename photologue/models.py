@@ -1248,6 +1248,22 @@ class InventoryItem( models.Model ):
 	def get_absolute_url(self):
 		return reverse( 'photologue:inventoryitem-detail', args=[self.pk] )
 
+	def get_add_photo_url(self):
+		#if len(photos.all()) > 0 :
+		#	date_time = photos.all()[0].astimezone(
+		#					timezone.get_default_timezone())
+		#else
+		date_time = timezone.localtime()
+		target = 'inventoryitem'
+		pk = self.pk
+		url = reverse('photologue:photo-select-popup-list',
+					  kwargs={'year': date_time.year,
+					          'month': date_time.month,
+							  'day': date_time.day,
+							  'target': target,
+							  'pk': pk } )
+		return url
+
 	def get_front_photo(self):
 		return self.photos.all()[0]
 
