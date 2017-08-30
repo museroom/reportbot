@@ -3,6 +3,7 @@ import os
 from itertools import chain
 from django.db.models import Q
 import json
+import hashlib
 
 #FIXME still need tempfile,zipfile,smart_str?
 import tempfile, zipfile
@@ -1365,7 +1366,12 @@ def InventorySet( request, photo_pk ):
 	path, filename = os.path.split(q_photo.image.path)
 	dt, ext = os.path.splitext( filename )
 	#FIXME use regexp instead of split
-	serial_no = dt.split('-')[6] 
+	try:
+		serial_no = dt.split('-')[6] 
+	except:
+		hashstr = u"{}{}".format( 
+			dt_added.strftime("%y%m%d%H%M%S"), filename) 
+		serial_no = int( hashlib.sha1(hashstr).hexdigest(), 16)
 	item_name = u"{}_{}".format( 
 			inventory_type.name.replace(" ","_"),
 			dt_added.strftime("%y%m%d_%H%M%S") )

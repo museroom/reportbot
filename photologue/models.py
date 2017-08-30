@@ -1265,7 +1265,10 @@ class InventoryItem( models.Model ):
 		return url
 
 	def get_front_photo(self):
-		return self.photos.all()[0]
+		if len(self.photos.all()) > 0:
+			return self.photos.all()[0]
+		else:
+			return None
 
 	def __str__(self):
 		return u"{}".format( self.name )
