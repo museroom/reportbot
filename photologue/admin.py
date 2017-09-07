@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.contrib.sites.models import Site
 from django.contrib import messages
 from django.utils.translation import ungettext, ugettext_lazy as _
-from django.utils.encoding import force_unicode
+#from django.utils.encoding import force_unicode
 from django.shortcuts import render
 from django.contrib.admin import helpers
 from django.http import HttpResponseRedirect
@@ -17,7 +17,7 @@ from django.http import HttpResponse
 
 import tempfile, zipfile
 from datetime import datetime, timedelta
-from utils.logger import logger
+from .utils.logger import logger
 
 from .models import Gallery, Photo, PhotoEffect, PhotoSize, \
 		Watermark, Department, DepartmentItem, DailyReportItem, DailyReport, \
@@ -31,6 +31,9 @@ from .forms import UploadZipForm, DepartmentItemForm, DailyReportItemForm
 						 
 
 MULTISITE = getattr(settings, 'PHOTOLOGUE_MULTISITE', False)
+
+def force_unicode( *args ):
+	return args
 
 # Inventory
 

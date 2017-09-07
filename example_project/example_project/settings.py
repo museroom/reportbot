@@ -13,7 +13,7 @@ SECRET_KEY = '=_v6sfp8u2uuhdncdz9t1_nu8(#8q4=40$f$4rorj4q3)f-nlc'
 DEBUG = True
 
 ALLOWED_HOSTS = ['meitim.ddns.net', 'report.5tring.com',
-                 'reportbot.5tring.com'
+                 'reportbot.5tring.com', 'localhost'
                  ]
 CSRF_TRUSTED_ORIGINS = ['www.5tring.com', '.5tring.com', '5tring.com']
 
@@ -22,7 +22,7 @@ LOGOUT_REDIRECT_URL = '/'
 
 INSTALLED_APPS = (
     'flat_responsive',
-	'bootstrapform',
+    'bootstrapform',
     # 'flat',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -180,12 +180,6 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 
 # Uncomment this for Amazon S3 file storage
 # from example_storages.settings_s3boto import *
-
-# tinymce sessions
-# TINYMCE_DEFAULT_CONFIG = {
-#	"width" : "100%",
-#	"height" : "300",
-# }
 
 # CKEditor
 CKEDITOR_CONFIGS = {

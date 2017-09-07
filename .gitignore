@@ -12,3 +12,5 @@ example_project/db*back*
 example_project/public
 example_project/tmp
 example_project/backup
+node_modules
+

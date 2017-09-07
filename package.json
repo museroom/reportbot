@@ -1,0 +1,32 @@
+{
+  "name": "reportbot",
+  "version": "0.0.1",
+  "description": "Thumb Report",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "bower": "^1.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/museroom/reportbot.git"
+  },
+  "keywords": [
+    "report",
+    "reportbot",
+    "thumbreport",
+    "ken"
+  ],
+  "author": "ken",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/museroom/reportbot/issues"
+  },
+  "homepage": "https://github.com/museroom/reportbot#readme"
+}

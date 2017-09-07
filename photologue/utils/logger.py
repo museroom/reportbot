@@ -1,4 +1,4 @@
-from google.cloud import logging
+#from google.cloud import logging
 from django.utils.safestring import SafeString
 
 def logger( log_text, level='', is_json=False,
